@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.store.entity;
+package com.example.cloudfour.peopleofdelivery.domain.stores.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class Store {
+public class Stores {
 
     @Id
     @GeneratedValue
@@ -58,10 +58,10 @@ public class Store {
     private String closedDays;
 
     @Builder
-    public Store(UUID userId, UUID regionID, UUID storeCategoriesId, String name, String address,
-                 String storePicture, String phone, String content, Integer minPrice, Integer deliveryTip,
-                 Float rating, Integer likeCount, Integer reviewCount, String operationHours,
-                 String closedDays) {
+    public Stores(UUID userId, UUID regionID, UUID storeCategoriesId, String name, String address,
+                  String storePicture, String phone, String content, Integer minPrice, Integer deliveryTip,
+                  Float rating, Integer likeCount, Integer reviewCount, String operationHours,
+                  String closedDays) {
         this.userId = userId;
         this.regionID = regionID;
         this.storeCategoriesId = storeCategoriesId;
