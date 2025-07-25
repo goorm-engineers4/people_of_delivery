@@ -23,8 +23,9 @@ public class Menu {
     @Column(name = "storeId", nullable = false)
     private String storeId;  // UUID를 String으로 처리
 
-    @Column(name = "menuCategories", nullable = false)
-    private String menuCategories;  // UUID를 String으로 처리
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menuCategories", nullable = false)
+    private MenuCategory menuCategory;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -50,6 +51,9 @@ public class Menu {
     @Column(name = "updatedAt")
     private LocalDateTime updatedAt;  // TIMESTAMP 타입
 
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<MenuOption> menuOptions = new java.util.ArrayList<>();
+
     // ID 제외한 필드들만 받는 정적 팩토리 메소드
     public static Menu createMenu(String storeId, String menuCategories, String name,
                                  String content, Integer price, MenuStatus status) {
@@ -74,7 +78,6 @@ public class Menu {
 
         return Menu.builder()
             .storeId(storeId)
-            .menuCategories(menuCategories)
             .name(name)
             .content(content)
             .price(price)
