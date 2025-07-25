@@ -8,7 +8,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
+@ToString(exclude = "storeCategory")
 public class Store {
 
     @Id
@@ -22,8 +22,9 @@ public class Store {
     @Column(nullable = false)
     private UUID regionID;
 
-    @Column(nullable = false)
-    private UUID storeCategoriesId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storeCategoriesId", nullable = false)
+    private StoreCategory storeCategory;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -58,13 +59,13 @@ public class Store {
     private String closedDays;
 
     @Builder
-    public Store(UUID userId, UUID regionID, UUID storeCategoriesId, String name, String address,
+    public Store(UUID userId, UUID regionID, StoreCategory  storeCategory , String name, String address,
                  String storePicture, String phone, String content, Integer minPrice, Integer deliveryTip,
                  Float rating, Integer likeCount, Integer reviewCount, String operationHours,
                  String closedDays) {
         this.userId = userId;
         this.regionID = regionID;
-        this.storeCategoriesId = storeCategoriesId;
+        this.storeCategory  = storeCategory ;
         this.name = name;
         this.address = address;
         this.storePicture = storePicture;
