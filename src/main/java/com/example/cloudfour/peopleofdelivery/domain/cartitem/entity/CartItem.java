@@ -3,6 +3,7 @@ package com.example.cloudfour.peopleofdelivery.domain.cartitem.entity;
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
@@ -11,9 +12,14 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
+@Table(name = "p_cartitem")
 public class CartItem {
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
     private UUID id;
 
     @Column(nullable = false)
