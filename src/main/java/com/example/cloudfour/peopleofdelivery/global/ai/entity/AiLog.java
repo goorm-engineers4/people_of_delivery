@@ -1,8 +1,9 @@
 package com.example.cloudfour.peopleofdelivery.global.ai.entity;
 
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
@@ -10,15 +11,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
+@SuperBuilder
 @Table(name = "p_ailog")
-public class AiLog {
+public class AiLog extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Lob

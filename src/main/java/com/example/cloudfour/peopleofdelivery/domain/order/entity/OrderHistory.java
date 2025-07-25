@@ -1,9 +1,10 @@
 package com.example.cloudfour.peopleofdelivery.domain.order.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
@@ -11,15 +12,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
+@SuperBuilder
 @Table(name = "p_orderhistory")
-public class OrderHistory {
+public class OrderHistory extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Enumerated(EnumType.STRING)
@@ -27,6 +24,6 @@ public class OrderHistory {
     private OrderStatus orderStatus;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "orderId" ,nullable = false)
     private Order order;
 }

@@ -5,9 +5,10 @@ import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.domain.useraddress.entity.UserAddress;
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +18,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
+@SuperBuilder
 @Table(name = "p_user")
-public class User {
+public class User extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
