@@ -1,31 +1,29 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
 
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
+import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
+import com.example.cloudfour.peopleofdelivery.domain.orderitem.entity.OrderItem;
+import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
+import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.UuidGenerator;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "p_menus")
+@Table(name = "p_menu")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)  // Builder만 사용하도록 제한
 public class Menu {
     @Id
-    @UuidGenerator
-    @Column(name = "menuId")
-    private String menuId;  // 자동 생성되는 UUID
-
-    @Column(name = "storeId", nullable = false)
-    private String storeId;  // UUID를 String으로 처리
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menuCategories", nullable = false)
-    private MenuCategory menuCategory;
+    @GeneratedValue
+    private UUID id;  // 자동 생성되는 UUID
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -51,66 +49,43 @@ public class Menu {
     @Column(name = "updatedAt")
     private LocalDateTime updatedAt;  // TIMESTAMP 타입
 
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
-    private java.util.List<MenuOption> menuOptions = new java.util.ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menuCategoryId", nullable = false)
+    private MenuCategory menuCategory;
 
-    // ID 제외한 필드들만 받는 정적 팩토리 메소드
-    public static Menu createMenu(String storeId, String menuCategories, String name,
-                                 String content, Integer price, MenuStatus status) {
-        if (storeId == null || storeId.trim().isEmpty()) {
-            throw new IllegalArgumentException("가게ID는 필수입니다.");
-        }
-        if (menuCategories == null || menuCategories.trim().isEmpty()) {
-            throw new IllegalArgumentException("메뉴카테고리ID는 필수입니다.");
-        }
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("메뉴명은 필수입니다.");
-        }
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("메뉴 설명은 필수입니다.");
-        }
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("가격은 0보다 커야 합니다.");
-        }
-        if (status == null) {
-            throw new IllegalArgumentException("메뉴 상태는 필수입니다.");
-        }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storeId", nullable = false)
+    private Store store;
 
-        return Menu.builder()
-            .storeId(storeId)
-            .name(name)
-            .content(content)
-            .price(price)
-            .status(status)
-            // menuId, createdAt, updatedAt은 자동 생성됨
-            .build();
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<MenuOption> menuOptions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    public static class MenuBuilder {
+        private MenuBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수정 불가");
+        }
     }
 
-    // 비즈니스 로직을 통한 안전한 변경 메소드들
-    public void updateMenuInfo(String name, String content, Integer price) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("메뉴명은 필수입니다.");
-        }
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("메뉴 설명은 필수입니다.");
-        }
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("가격은 0보다 커야 합니다.");
-        }
-
-        this.name = name;
-        this.content = content;
-        this.price = price;
+    public void setMenuCategory(MenuCategory menuCategory){
+        this.menuCategory = menuCategory;
+        menuCategory.getMenus().add(this);
     }
 
-    public void updateMenuPicture(String menuPicture) {
-        this.menuPicture = menuPicture;
-    }
-
-    public void updateStatus(MenuStatus status) {
-        if (status == null) {
-            throw new IllegalArgumentException("메뉴 상태는 필수입니다.");
-        }
-        this.status = status;
+    public void setStore(Store store){
+        this.store = store;
+        store.getMenus().add(this);
     }
 }

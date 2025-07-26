@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
+package com.example.cloudfour.peopleofdelivery.domain.menu.enums;
 
 public enum MenuStatus {
     판매중,
