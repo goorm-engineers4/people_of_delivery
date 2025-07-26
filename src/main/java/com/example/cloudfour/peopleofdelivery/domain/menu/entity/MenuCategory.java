@@ -19,6 +19,9 @@ public class MenuCategory {
     @Column(name = "category", nullable = false)
     private String category;
 
+    @OneToMany(mappedBy = "menuCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Menu> menus = new java.util.ArrayList<>();
+
     // ID 제외한 필드들만 받는 정적 팩토리 메소드
     public static MenuCategory createMenuCategory(String category) {
         if (category == null || category.trim().isEmpty()) {
