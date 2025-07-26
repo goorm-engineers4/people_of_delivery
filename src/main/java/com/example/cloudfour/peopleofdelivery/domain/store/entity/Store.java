@@ -1,26 +1,22 @@
 package com.example.cloudfour.peopleofdelivery.domain.store.entity;
 
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = "storeCategory")
-public class Store {
-
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SuperBuilder
+@Table(name = "p_store")
+public class Store extends BaseEntity {
     @Id
     @GeneratedValue
-    @Column(nullable = false)
-    private UUID storeId;
-
-    @Column(nullable = false)
-    private UUID userId;
-
-    @Column(nullable = false)
-    private UUID regionID;
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storeCategoriesId", nullable = false)
@@ -57,26 +53,4 @@ public class Store {
 
     @Column(nullable = false, length = 255)
     private String closedDays;
-
-    @Builder
-    public Store(UUID userId, UUID regionID, StoreCategory  storeCategory , String name, String address,
-                 String storePicture, String phone, String content, Integer minPrice, Integer deliveryTip,
-                 Float rating, Integer likeCount, Integer reviewCount, String operationHours,
-                 String closedDays) {
-        this.userId = userId;
-        this.regionID = regionID;
-        this.storeCategory  = storeCategory ;
-        this.name = name;
-        this.address = address;
-        this.storePicture = storePicture;
-        this.phone = phone;
-        this.content = content;
-        this.minPrice = minPrice;
-        this.deliveryTip = deliveryTip;
-        this.rating = rating;
-        this.likeCount = likeCount;
-        this.reviewCount = reviewCount;
-        this.operationHours = operationHours;
-        this.closedDays = closedDays;
-    }
 }

@@ -1,25 +1,22 @@
 package com.example.cloudfour.peopleofdelivery.domain.review.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
+@SuperBuilder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_review")
-public class Review {
+public class Review extends BaseEntity {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
@@ -32,6 +29,6 @@ public class Review {
     private String pictureUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 }
