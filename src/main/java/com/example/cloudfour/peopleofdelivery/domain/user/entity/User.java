@@ -3,12 +3,12 @@ package com.example.cloudfour.peopleofdelivery.domain.user.entity;
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
+import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.domain.useraddress.entity.UserAddress;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SuperBuilder
+@Builder
 @Table(name = "p_user")
 public class User extends BaseEntity {
     @Id
@@ -53,4 +53,14 @@ public class User extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Store> stores = new ArrayList<>();
+
+    public static class UserBuilder {
+        private UserBuilder id(UUID id) {
+            throw new UnsupportedOperationException("id 수동 생성 불가");
+        }
+    }
 }
