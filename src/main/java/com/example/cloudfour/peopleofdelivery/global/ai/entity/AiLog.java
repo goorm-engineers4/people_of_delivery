@@ -3,7 +3,6 @@ package com.example.cloudfour.peopleofdelivery.global.ai.entity;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
@@ -11,7 +10,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SuperBuilder
+@Builder
 @Table(name = "p_ailog")
 public class AiLog extends BaseEntity {
     @Id
@@ -28,4 +27,10 @@ public class AiLog extends BaseEntity {
 
     @Lob
     private String options;
+
+    public static class AiLogBuilder {
+        private AiLogBuilder id(UUID id) {
+            throw new UnsupportedOperationException("id 생성 불가");
+        }
+    }
 }
