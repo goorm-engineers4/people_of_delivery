@@ -1,9 +1,10 @@
 package com.example.cloudfour.peopleofdelivery.domain.cartitem.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
@@ -15,11 +16,7 @@ import java.util.UUID;
 @Table(name = "p_cartitem")
 public class CartItem {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
@@ -29,9 +26,35 @@ public class CartItem {
     private Integer price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "cartId" ,nullable = false)
     private Cart cart;
 
-    //TODO 메뉴, 메뉴 옵션 ManytoOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menuId" ,nullable = false)
+    private Menu menu;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menuOptionId" ,nullable = false)
+    private MenuOption menuOption;
+
+    public static class CartItemBuilder{
+        private CartItemBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수정 불가");
+        }
+    }
+
+    public void setCart(Cart cart){
+        this.cart = cart;
+        cart.getCartItems().add(this);
+    }
+
+    public void setMenu(Menu menu){
+        this.menu = menu;
+        menu.getCartItems().add(this);
+    }
+
+    public void setMenuOption(MenuOption menuOption){
+        this.menuOption = menuOption;
+        menuOption.getCartItems().add(this);
+    }
 }

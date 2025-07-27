@@ -1,10 +1,12 @@
 package com.example.cloudfour.peopleofdelivery.domain.cart.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
+import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,28 +21,44 @@ import java.util.UUID;
 @Table(name="p_cart")
 public class Cart {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
     private Integer count;
 
+    @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "userId" ,nullable = false)
     private User user;
 
-    // TODO 가게 ManyToOne으로 추가하기
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storeId" ,nullable = false)
+    private Store store;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "cart",cascade = CascadeType.ALL)
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
+
+    public static class CartBuilder{
+        private CartBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수정 불가");
+        }
+    }
+
+    public void setUser(User user){
+        this.user = user;
+        user.getCarts().add(this);
+    }
+
+    public void setStore(Store store){
+        this.store = store;
+        store.getCarts().add(this);
+    }
 }

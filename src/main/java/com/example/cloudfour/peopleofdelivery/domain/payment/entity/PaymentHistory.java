@@ -4,16 +4,14 @@ import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SuperBuilder
-@Table(name = "p_paymenthistory")
+@Builder
+@Table(name = "p_payment_history")
 public class PaymentHistory extends BaseEntity {
     @Id
     @GeneratedValue
@@ -29,4 +27,15 @@ public class PaymentHistory extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paymentId", nullable = false)
     private Payment payment;
+
+    public static class PaymentHistoryBuilder{
+        private PaymentHistoryBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수동 생성 불가");
+        }
+    }
+
+    public void setPayment(Payment payment){
+        this.payment = payment;
+        payment.setPaymentHistory(this);
+    }
 }

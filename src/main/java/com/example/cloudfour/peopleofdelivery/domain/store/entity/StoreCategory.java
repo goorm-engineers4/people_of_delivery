@@ -10,23 +10,26 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = "stores")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+@Table(name = "p_storecategory")
 public class StoreCategory {
-
     @Id
     @GeneratedValue
     @Column(nullable = false)
-    private UUID storeCategoriesId;
+    private UUID id;
 
     @Column(nullable = false, length = 255)
     private String category;
 
     // 🔽 양방향 관계 추가
     @OneToMany(mappedBy = "storeCategory", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Store> stores = new ArrayList<>();
 
-    @Builder
-    public StoreCategory(String category) {
-        this.category = category;
+    public static class StoreCategoryBuilder {
+        private StoreCategoryBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 생성 불가");
+        }
     }
 }

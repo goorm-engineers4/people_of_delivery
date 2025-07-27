@@ -4,7 +4,6 @@ import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
@@ -16,21 +15,33 @@ import java.util.UUID;
 @Table(name = "p_useraddress")
 public class UserAddress {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "regionId", nullable = false)
     private Region region;
+
+    public static class UserAddressBuilder {
+        private UserAddressBuilder id(UUID id) {
+            throw new UnsupportedOperationException("id 수동 생성 불가");
+        }
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        user.getAddresses().add(this);
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
+        region.getAddresses().add(this);
+    }
 }

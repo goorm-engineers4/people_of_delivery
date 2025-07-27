@@ -4,16 +4,14 @@ import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SuperBuilder
-@Table(name = "p_orderhistory")
+@Builder
+@Table(name = "p_order_history")
 public class OrderHistory extends BaseEntity {
     @Id
     @GeneratedValue
@@ -26,4 +24,15 @@ public class OrderHistory extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orderId" ,nullable = false)
     private Order order;
+
+    public static class OrderHistoryBuilder{
+        private OrderHistoryBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수동 생성 불가");
+        }
+    }
+
+    public void setOrder(Order order){
+        this.order = order;
+        order.setOrderHistory(this);
+    }
 }

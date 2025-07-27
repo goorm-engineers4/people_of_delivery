@@ -1,26 +1,29 @@
 package com.example.cloudfour.peopleofdelivery.domain.store.entity;
 
+import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
+import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
+import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
+import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SuperBuilder
+@Builder
 @Table(name = "p_store")
 public class Store extends BaseEntity {
     @Id
     @GeneratedValue
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "storeCategoriesId", nullable = false)
-    private StoreCategory storeCategory;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -53,4 +56,53 @@ public class Store extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String closedDays;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storeCategoryId", nullable = false)
+    private StoreCategory storeCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "regionId", nullable = false)
+    private Region region;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Cart> carts = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Menu> menus = new ArrayList<>();
+    
+    public static class StoreBuilder {
+        private StoreBuilder id(UUID id) {
+            throw new UnsupportedOperationException("id 수동 생성 불가");
+        }
+    }
+
+    public void setStoreCategory(StoreCategory storeCategory) {
+        this.storeCategory = storeCategory;
+        storeCategory.getStores().add(this);
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        user.getStores().add(this);
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
+        region.getStores().add(this);
+    }
 }

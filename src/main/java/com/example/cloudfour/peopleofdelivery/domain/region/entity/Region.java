@@ -1,9 +1,9 @@
 package com.example.cloudfour.peopleofdelivery.domain.region.entity;
 
+import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.useraddress.entity.UserAddress;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +17,7 @@ import java.util.UUID;
 @Table(name = "p_region")
 public class Region {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
@@ -37,5 +33,14 @@ public class Region {
     @Builder.Default
     private List<UserAddress> addresses = new ArrayList<>();
 
-    //TODO: 가게 OneToMany 추가
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "region", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Store> stores = new ArrayList<>();
+
+    public static class RegionBuilder{
+        private RegionBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수정 불가");
+        }
+    }
+
 }

@@ -4,9 +4,7 @@ import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -17,11 +15,7 @@ import java.util.UUID;
 @Table(name = "p_payment")
 public class Payment {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
@@ -37,9 +31,6 @@ public class Payment {
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     @Lob
     private String failedReason;
 
@@ -47,7 +38,22 @@ public class Payment {
     private PaymentHistory paymentHistory;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name ="orderId", nullable = false)
     private Order order;
+
+    public static class PaymentBuilder{
+        private PaymentBuilder id(UUID id){
+            throw new UnsupportedOperationException("id 수동 생성 불가");
+        }
+    }
+
+    public void setPaymentHistory(PaymentHistory paymentHistory){
+        this.paymentHistory = paymentHistory;
+    }
+
+    public void setOrder(Order order){
+        this.order = order;
+        order.setPayment(this);
+    }
 }
 
