@@ -4,6 +4,7 @@ import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
+import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.domain.useraddress.entity.UserAddress;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
@@ -25,11 +26,13 @@ public class User extends BaseEntity {
     @GeneratedValue
     private UUID id;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
     @Column(nullable = false)
     private String nickname;
 
-    @Column(nullable = false)
-    private String password;
+    private String password; // 자체 로그인(LOCAL)만 사용
 
     @Column(nullable = false)
     private String number;
@@ -37,6 +40,12 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LoginType loginType;
+
+    private String providerId; // 소셜 로그인 고유 식별자 (sub ..)
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
