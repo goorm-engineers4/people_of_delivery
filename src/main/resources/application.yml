@@ -15,3 +15,9 @@ spring:
       hibernate:
         format_sql: true
         highlight_sql: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 900000
+  refresh-secret: ${JWT_REFRESH_SECRET}
+  refresh-expiration: 604800000
