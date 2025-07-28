@@ -32,9 +32,9 @@ public class ReviewCommandServiceImpl implements ReviewCommandService {
     private final ReviewRepository reviewRepository;
 
     @Override
-    public ReviewResponseDTO.ReviewCreateResponseDTO createReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO, UUID storeId, User user) {
+    public ReviewResponseDTO.ReviewCreateResponseDTO createReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
-        Store findStore = storeRepository.findById(storeId).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
+        Store findStore = storeRepository.findById(reviewCreateRequestDTO.getStoreId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
         Review review = ReviewConverter.toReview(reviewCreateRequestDTO);
         review.setUser(user);
         review.setStore(findStore);
@@ -53,9 +53,9 @@ public class ReviewCommandServiceImpl implements ReviewCommandService {
     }
 
     @Override
-    public ReviewResponseDTO.ReviewUpdateResponseDTO updateReview(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO, UUID storeId, UUID reviewId, User user) {
+    public ReviewResponseDTO.ReviewUpdateResponseDTO updateReview(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO, UUID reviewId, User user) {
         User finduser = userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
-        Store findStore = storeRepository.findById(storeId).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
+        Store findStore = storeRepository.findById(reviewUpdateRequestDTO.getStoreId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
         Review findReview = reviewRepository.findById(reviewId).orElseThrow(()->new ReviewException(ReviewErrorCode.NOT_FOUND));
         findReview.update(reviewUpdateRequestDTO);
         findReview.setStore(findStore);

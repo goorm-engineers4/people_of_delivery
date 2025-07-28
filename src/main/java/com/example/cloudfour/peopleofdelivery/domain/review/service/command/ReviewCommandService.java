@@ -7,9 +7,9 @@ import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import java.util.UUID;
 
 public interface ReviewCommandService {
-    ReviewResponseDTO.ReviewCreateResponseDTO createReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO, UUID storeId, User user);
+    ReviewResponseDTO.ReviewCreateResponseDTO createReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO,  User user);
 
-    ReviewResponseDTO.ReviewUpdateResponseDTO updateReview(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO, UUID storeId, UUID reviewId, User user);
+    ReviewResponseDTO.ReviewUpdateResponseDTO updateReview(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO, UUID reviewId, User user);
 
     void deleteReview(UUID reviewId, User user);
 }
