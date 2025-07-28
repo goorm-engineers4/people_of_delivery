@@ -24,26 +24,24 @@ public class ReviewController {
     private final ReviewCommandService reviewCommandService;
     private final ReviewQueryService reviewQueryService;
 
-    @PostMapping("/{storeId}")
+    @PostMapping("/")
     @Operation(summary = "리뷰 생성", description = "리뷰를 생성합니다. 리뷰 생성에 사용되는 API입니다.")
     public CustomResponse<ReviewResponseDTO.ReviewCreateResponseDTO> createReview(
         @RequestBody ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO,
-        @PathVariable("storeId") UUID storeId,
         @AuthenticationPrincipal User user
     ){
-        ReviewResponseDTO.ReviewCreateResponseDTO review = reviewCommandService.createReview(reviewCreateRequestDTO,storeId,user);
+        ReviewResponseDTO.ReviewCreateResponseDTO review = reviewCommandService.createReview(reviewCreateRequestDTO,user);
         return CustomResponse.onSuccess(HttpStatus.CREATED, review);
     }
 
-    @PatchMapping("/{storeId}/{reviewId}")
+    @PatchMapping("/{reviewId}")
     @Operation(summary = "리뷰 수정", description = "리뷰를 수정합니다. 리뷰 수정에 사용되는 API입니다.")
     public CustomResponse<ReviewResponseDTO.ReviewUpdateResponseDTO> updateReview(
             @RequestBody ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO,
-            @PathVariable("storeId") UUID storeId,
             @PathVariable("reviewId") UUID reviewId,
             @AuthenticationPrincipal User user
     ){
-        ReviewResponseDTO.ReviewUpdateResponseDTO review = reviewCommandService.updateReview(reviewUpdateRequestDTO,storeId,reviewId,user);
+        ReviewResponseDTO.ReviewUpdateResponseDTO review = reviewCommandService.updateReview(reviewUpdateRequestDTO,reviewId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, review);
     }
 
