@@ -1,6 +1,8 @@
 package com.example.cloudfour.peopleofdelivery.domain.review.entity;
 
-import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewRequestDTO;
+import com.example.cloudfour.peopleofdelivery.domain.review.exception.ReviewErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.review.exception.ReviewException;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
@@ -33,16 +35,12 @@ public class Review extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menuId", nullable = false)
-    private Menu menu;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storeId", nullable = false)
     private Store store;
 
     public static class ReviewBuilder{
         private ReviewBuilder id(UUID id){
-            throw new UnsupportedOperationException("id 수동 생성 불가");
+            throw new ReviewException(ReviewErrorCode.CREATE_FAILED);
         }
     }
 
@@ -51,13 +49,14 @@ public class Review extends BaseEntity {
         user.getReviews().add(this);
     }
 
-    public void setMenu(Menu menu){
-        this.menu = menu;
-        menu.getReviews().add(this);
-    }
-
     public void setStore(Store store){
         this.store = store;
         store.getReviews().add(this);
+    }
+
+    public void update(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO){
+        this.score = reviewUpdateRequestDTO.getScore();
+        this.content = reviewUpdateRequestDTO.getContent();
+        this.pictureUrl = reviewUpdateRequestDTO.getPictureUrl();
     }
 }
