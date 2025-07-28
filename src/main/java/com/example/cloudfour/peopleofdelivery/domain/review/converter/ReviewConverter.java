@@ -4,9 +4,6 @@ import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewRequestDTO
 import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 public class ReviewConverter {
     public static Review toReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO){
         return Review.builder()
