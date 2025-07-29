@@ -13,15 +13,13 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-public class CartCommandService {
+public class CartCommandServicelmpl implements CartCommandService{
+    @Override
     public CartResponseDTO.CartCreateResponseDTO createCart(CartRequestDTO.CartCreateRequestDTO CartCreateRequestDTO, User user) {
         return null;
     }
 
-public interface CartCommandService {
-    CartResponseDTO.CartCreateResponseDTO createCart(CartRequestDTO.CartCreateRequestDTO CartCreateRequestDTO, User user);
-
-    void deleteCart(UUID cartId, User user);
+    @Override
     public void deleteCart(UUID cartId, User user) {
     }
 }
