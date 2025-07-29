@@ -83,4 +83,28 @@ public class Menu {
         this.store = store;
         store.getMenus().add(this);
     }
+
+    // 메뉴 정보 업데이트 메서드
+    public void update(String name, String content, Integer price, String menuPicture, MenuStatus status) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (content != null) {
+            this.content = content;
+        }
+        if (price != null) {
+            this.price = price;
+        }
+        if (menuPicture != null) {
+            this.menuPicture = menuPicture;
+        }
+        if (status != null) {
+            this.status = status;
+        }
+    }
+
+    // 소프트 삭제 메서드 (상태를 숨김으로 변경)
+    public void softDelete() {
+        this.status = MenuStatus.숨김;
+    }
 }
