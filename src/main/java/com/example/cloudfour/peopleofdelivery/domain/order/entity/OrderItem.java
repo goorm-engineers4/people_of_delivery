@@ -1,8 +1,7 @@
-package com.example.cloudfour.peopleofdelivery.domain.orderitem.entity;
+package com.example.cloudfour.peopleofdelivery.domain.order.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
-import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;

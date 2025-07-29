@@ -1,7 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
-import com.example.cloudfour.peopleofdelivery.domain.orderitem.entity.OrderItem;
+import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;

@@ -1,6 +1,6 @@
-package com.example.cloudfour.peopleofdelivery.domain.orderitem.repository;
+package com.example.cloudfour.peopleofdelivery.domain.order.repository;
 
-import com.example.cloudfour.peopleofdelivery.domain.orderitem.entity.OrderItem;
+import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
