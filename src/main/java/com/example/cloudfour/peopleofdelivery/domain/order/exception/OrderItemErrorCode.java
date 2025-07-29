@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.orderitem.exception;
+package com.example.cloudfour.peopleofdelivery.domain.order.exception;
 
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
