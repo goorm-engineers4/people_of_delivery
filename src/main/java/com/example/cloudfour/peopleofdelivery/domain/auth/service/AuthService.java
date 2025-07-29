@@ -25,7 +25,7 @@ public class AuthService {
                 .number(dto.getNumber())
                 .loginType(LoginType.GOOGLE)
                 .providerId(dto.getProviderId())
-                .role(Role.CUSTMER)
+                .role(Role.CUSTOMER)
                 .build();
 
         userRepository.save(user);
