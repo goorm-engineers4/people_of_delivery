@@ -23,19 +23,17 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ReviewQueryServiceImpl implements ReviewQueryService {
+public class ReviewQueryServiceImpl{
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
 
-    @Override
     public ReviewResponseDTO.ReviewDetailResponseDTO getReviewById(UUID reviewId, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Review findReview = reviewRepository.findById(reviewId).orElseThrow(()->new ReviewException(ReviewErrorCode.NOT_FOUND));
         return ReviewConverter.toReviewDetailResponseDTO(findReview);
     }
 
-    @Override
     public List<ReviewResponseDTO.ReviewStoreListResponseDTO> getReviewListByStore(UUID storeId, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         storeRepository.findById(storeId).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
@@ -43,7 +41,6 @@ public class ReviewQueryServiceImpl implements ReviewQueryService {
         return findReviews.stream().map(ReviewConverter::toReviewStoreListResponseDTO).toList();
     }
 
-    @Override
     public List<ReviewResponseDTO.ReviewUserListResponseDTO> getReviewListByUser(User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         List<Review> findReviews = reviewRepository.findAllByUserId(user.getId());
