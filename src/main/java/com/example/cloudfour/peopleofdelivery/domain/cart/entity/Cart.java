@@ -24,9 +24,6 @@ public class Cart {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
-    private Integer count;
-
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
