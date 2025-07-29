@@ -2,8 +2,7 @@ package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
-import com.example.cloudfour.peopleofdelivery.domain.orderitem.entity.OrderItem;
-import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
+import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
@@ -60,10 +59,6 @@ public class Menu {
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
     @Builder.Default
     private List<MenuOption> menuOptions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
     @Builder.Default
