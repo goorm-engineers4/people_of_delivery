@@ -1,10 +1,14 @@
 package com.example.cloudfour.peopleofdelivery.domain.auth.controller;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.AdditionalSignupRequestDto;
+import com.example.cloudfour.peopleofdelivery.domain.auth.dto.LoginRequestDto;
+import com.example.cloudfour.peopleofdelivery.domain.auth.dto.PasswordChangeDto;
+import com.example.cloudfour.peopleofdelivery.domain.auth.dto.RegisterRequestDto;
+import com.example.cloudfour.peopleofdelivery.domain.auth.dto.TokenDto;
 import com.example.cloudfour.peopleofdelivery.domain.auth.service.AuthService;
-import jakarta.validation.Valid;
+import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +21,24 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/complete-profile")
-    public ResponseEntity<Void> completeSignup(@RequestBody @Valid AdditionalSignupRequestDto dto) {
-        authService.completeSignup(dto);
-        return ResponseEntity.ok().build();
+    @PostMapping("/register")
+    public CustomResponse<Void> register(@RequestBody RegisterRequestDto request) {
+        authService.register(request);
+        return CustomResponse.onSuccess(HttpStatus.CREATED, null);
     }
+
+    @PostMapping("/login")
+    public CustomResponse<TokenDto> login(@RequestBody LoginRequestDto request) {
+        TokenDto token = authService.login(request);
+        return CustomResponse.onSuccess(HttpStatus.OK, token);
+    }
+
+    @PostMapping("/password")
+    public CustomResponse<Void> changePassword(@RequestBody PasswordChangeDto request,
+                                               @AuthenticationPrincipal CustomUserDetails user) {
+        authService.changePassword(user.getUser().getId(), request);
+        return CustomResponse.onSuccess(null);
+    }
+
+
 }
