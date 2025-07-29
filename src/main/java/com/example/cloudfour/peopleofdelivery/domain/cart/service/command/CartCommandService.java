@@ -18,10 +18,6 @@ public class CartCommandService {
         return null;
     }
 
-public interface CartCommandService {
-    CartResponseDTO.CartCreateResponseDTO createCart(CartRequestDTO.CartCreateRequestDTO CartCreateRequestDTO, User user);
-
-    void deleteCart(UUID cartId, User user);
     public void deleteCart(UUID cartId, User user) {
     }
 }
