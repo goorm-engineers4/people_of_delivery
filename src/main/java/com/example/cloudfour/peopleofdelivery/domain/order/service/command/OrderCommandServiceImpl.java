@@ -14,20 +14,16 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class OrderCommandServiceImpl implements OrderCommandService {
-    @Override
+public class OrderCommandServiceImpl {
     public OrderResponseDTO.OrderCreateResponseDTO createOrder(OrderRequestDTO.OrderCreateRequestDTO orderCreateRequestDTO, User user) {
         return null;
     }
 
-    @Override
     public OrderResponseDTO.OrderUpdateResponseDTO updateOrder(OrderRequestDTO.OrderUpdateRequestDTO orderUpdateRequestDTO, UUID orderId, User user) {
         return null;
     }
 
-    @Override
     public void deleteOrder(UUID orderId, User user) {
 
     }
-
 }
