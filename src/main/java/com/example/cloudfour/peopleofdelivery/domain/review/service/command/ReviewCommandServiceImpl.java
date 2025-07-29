@@ -26,12 +26,11 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ReviewCommandServiceImpl implements ReviewCommandService {
+public class ReviewCommandServiceImpl{
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final ReviewRepository reviewRepository;
 
-    @Override
     public ReviewResponseDTO.ReviewCreateResponseDTO createReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Store findStore = storeRepository.findById(reviewCreateRequestDTO.getStoreId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
@@ -42,7 +41,6 @@ public class ReviewCommandServiceImpl implements ReviewCommandService {
         return ReviewConverter.toReviewCreateResponseDTO(review);
     }
 
-    @Override
     public void deleteReview(UUID reviewId, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Review findReview = reviewRepository.findById(reviewId).orElseThrow(()->new ReviewException(ReviewErrorCode.NOT_FOUND));
@@ -52,7 +50,6 @@ public class ReviewCommandServiceImpl implements ReviewCommandService {
         findReview.softDelete();
     }
 
-    @Override
     public ReviewResponseDTO.ReviewUpdateResponseDTO updateReview(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO, UUID reviewId, User user) {
         User finduser = userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Store findStore = storeRepository.findById(reviewUpdateRequestDTO.getStoreId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));

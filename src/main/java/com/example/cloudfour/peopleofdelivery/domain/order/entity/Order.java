@@ -3,7 +3,6 @@ package com.example.cloudfour.peopleofdelivery.domain.order.entity;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderType;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.ReceiptType;
-import com.example.cloudfour.peopleofdelivery.domain.orderitem.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
