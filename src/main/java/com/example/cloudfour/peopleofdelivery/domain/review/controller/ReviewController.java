@@ -2,8 +2,8 @@ package com.example.cloudfour.peopleofdelivery.domain.review.controller;
 
 import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewResponseDTO;
-import com.example.cloudfour.peopleofdelivery.domain.review.service.command.ReviewCommandService;
-import com.example.cloudfour.peopleofdelivery.domain.review.service.query.ReviewQueryService;
+import com.example.cloudfour.peopleofdelivery.domain.review.service.command.ReviewCommandServiceImpl;
+import com.example.cloudfour.peopleofdelivery.domain.review.service.query.ReviewQueryServiceImpl;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,8 +21,8 @@ import java.util.UUID;
 @RequestMapping("/api/reviews")
 @Tag(name = "Review", description = "리뷰 API by 김준형")
 public class ReviewController {
-    private final ReviewCommandService reviewCommandService;
-    private final ReviewQueryService reviewQueryService;
+    private final ReviewCommandServiceImpl reviewCommandService;
+    private final ReviewQueryServiceImpl reviewQueryService;
 
     @PostMapping("/")
     @Operation(summary = "리뷰 생성", description = "리뷰를 생성합니다. 리뷰 생성에 사용되는 API입니다.")
