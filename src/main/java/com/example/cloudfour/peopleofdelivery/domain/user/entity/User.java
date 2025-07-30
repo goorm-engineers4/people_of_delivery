@@ -6,7 +6,6 @@ import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
-import com.example.cloudfour.peopleofdelivery.domain.useraddress.entity.UserAddress;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
