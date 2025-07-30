@@ -1,9 +1,8 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.oauth;
+package com.example.cloudfour.peopleofdelivery.global.auth.oauth;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.TokenDto;
-import com.example.cloudfour.peopleofdelivery.domain.auth.jwt.JwtTokenProvider;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.jwt.JwtTokenProvider;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
-import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

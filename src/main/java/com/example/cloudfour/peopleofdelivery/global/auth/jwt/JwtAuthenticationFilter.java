@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.jwt;
+package com.example.cloudfour.peopleofdelivery.global.auth.jwt;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import jakarta.servlet.FilterChain;

@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.oauth;
+package com.example.cloudfour.peopleofdelivery.global.auth.oauth;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;

@@ -1,7 +1,6 @@
-package com.example.cloudfour.peopleofdelivery.domain.useraddress.entity;
+package com.example.cloudfour.peopleofdelivery.domain.user.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
