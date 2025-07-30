@@ -1,4 +1,4 @@
 package com.example.cloudfour.peopleofdelivery.domain.auth.dto;
 
-public class RegisterRequestDto {
+public class AuthResponseDTO {
 }
