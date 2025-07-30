@@ -1,6 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.domain.user.controller;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.userdetails.CustomUserDetails;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import com.example.cloudfour.peopleofdelivery.domain.user.dto.UserRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.dto.UserResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.service.UserAddressService;

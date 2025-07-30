@@ -1,6 +1,5 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.controller;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.*;
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthRequestDTO;
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
 import com.example.cloudfour.peopleofdelivery.global.auth.service.AuthService;
