@@ -15,6 +15,8 @@ public class PaymentResponseDTO {
         UUID orderId;
         Integer totalPrice;
         String orderName;
+        PaymentStatus paymentStatus;
+        String paymentMethod;
     }
 
     @Getter
