@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+// MenuResponseDTO: 서버 → 클라이언트로 보내는 데이터
 public class MenuResponseDTO {
 
     // 메뉴 생성 응답

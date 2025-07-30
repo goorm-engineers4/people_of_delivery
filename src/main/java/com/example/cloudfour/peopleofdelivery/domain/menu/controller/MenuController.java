@@ -38,14 +38,14 @@ import java.util.UUID;
   - @PathVariable: URL 경로에 변수 매핑
  */
 
-@Slf4j
+@Slf4j // 로그 찍는 기능
 @RestController // API를 요청하면 JSON으로 응답
 @RequiredArgsConstructor    // final 필드를 생성자 주입 방식으로 초기화
 @RequestMapping("/api/menus")   // API의 기본 경로 설정
 @Tag(name = "Menu", description = "메뉴 API by 정병민")  // Swagger에서 사용할 태그
 public class MenuController {
-    private final MenuCommandServiceImpl menuCommandService;
-    private final MenuQueryServiceImpl menuQueryService;
+    private final MenuCommandServiceImpl menuCommandService; // 메뉴 생성/수정/삭제
+    private final MenuQueryServiceImpl menuQueryService; // 메뉴 조회
 
     @PostMapping("")    // 메뉴 생성 API, HTTP POST 메소드 사용
     @Operation(summary = "메뉴 생성", description = "메뉴를 생성합니다. 메뉴 생성에 사용되는 API입니다.")   // Swagger에서 사용할 설명
