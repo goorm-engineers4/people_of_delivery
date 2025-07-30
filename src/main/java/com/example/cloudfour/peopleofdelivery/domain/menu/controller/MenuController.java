@@ -85,7 +85,7 @@ public class MenuController {
     }
 
     @GetMapping("/{storeId}")
-    @Operation(summary = "해당 ���게 메뉴 목록 조회", description = "가게의 메뉴 목록을 조회합니다. 해당 가게의 메뉴를 조회하는 API입니다.")
+    @Operation(summary = "해당 가게 메뉴 목록 조회", description = "가게의 메뉴 목록을 조회합니다. 해당 가게의 메뉴를 조회하는 API입니다.")
     public CustomResponse<List<MenuResponseDTO.MenuListResponseDTO>> getMenusByStore(
             @PathVariable("storeId") UUID storeId) {
 
