@@ -23,6 +23,7 @@ public class OAuthService {
         }
 
         User user = User.builder()
+                .email(dto.getEmail())
                 .nickname(dto.getNickname())
                 .number(dto.getNumber())
                 .loginType(LoginType.GOOGLE)
