@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface MenuOptionRepository extends JpaRepository<MenuCategory, UUID> {
 
+    // 특정 메뉴의 옵션들 조회
 }
