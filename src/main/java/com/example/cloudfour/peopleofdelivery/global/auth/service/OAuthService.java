@@ -1,6 +1,6 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.service;
+package com.example.cloudfour.peopleofdelivery.global.auth.service;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.OAuthRequestDTO;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.OAuthRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;

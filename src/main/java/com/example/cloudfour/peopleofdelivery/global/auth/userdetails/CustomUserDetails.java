@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.userdetails;
+package com.example.cloudfour.peopleofdelivery.global.auth.userdetails;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import lombok.Getter;

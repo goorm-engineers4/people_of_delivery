@@ -1,8 +1,10 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.controller;
+package com.example.cloudfour.peopleofdelivery.global.auth.controller;
 
 import com.example.cloudfour.peopleofdelivery.domain.auth.dto.*;
-import com.example.cloudfour.peopleofdelivery.domain.auth.service.AuthService;
-import com.example.cloudfour.peopleofdelivery.domain.auth.userdetails.CustomUserDetails;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthRequestDTO;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.service.AuthService;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

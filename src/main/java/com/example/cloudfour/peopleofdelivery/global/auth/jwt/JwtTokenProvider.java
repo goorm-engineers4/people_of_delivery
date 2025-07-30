@@ -1,7 +1,7 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.jwt;
+package com.example.cloudfour.peopleofdelivery.global.auth.jwt;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.config.JwtProperties;
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.config.JwtProperties;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

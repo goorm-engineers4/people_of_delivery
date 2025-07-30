@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.config;
+package com.example.cloudfour.peopleofdelivery.global.auth.config;
 
 import lombok.Getter;
 import lombok.Setter;
