@@ -2,9 +2,9 @@ package com.example.cloudfour.peopleofdelivery.domain.payment.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.UUID;
 
 @Entity
@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Table(name = "p_payment")
-public class Payment {
+public class Payment extends BaseEntity {
     @Id
     @GeneratedValue
     private UUID id;
