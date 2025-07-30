@@ -1,10 +1,8 @@
 package com.example.cloudfour.peopleofdelivery.domain.auth.controller;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.LoginRequestDto;
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.PasswordChangeDto;
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.RegisterRequestDto;
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.domain.auth.dto.*;
 import com.example.cloudfour.peopleofdelivery.domain.auth.service.AuthService;
+import com.example.cloudfour.peopleofdelivery.domain.auth.userdetails.CustomUserDetails;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,21 +20,33 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public CustomResponse<Void> register(@RequestBody RegisterRequestDto request) {
+    public CustomResponse<Void> register(@RequestBody AuthRequestDTO.RegisterRequestDto request) {
         authService.register(request);
         return CustomResponse.onSuccess(HttpStatus.CREATED, null);
     }
 
     @PostMapping("/login")
-    public CustomResponse<TokenDto> login(@RequestBody LoginRequestDto request) {
+    public CustomResponse<TokenDto> login(@RequestBody AuthRequestDTO.LoginRequestDto request) {
         TokenDto token = authService.login(request);
         return CustomResponse.onSuccess(HttpStatus.OK, token);
     }
 
     @PostMapping("/password")
-    public CustomResponse<Void> changePassword(@RequestBody PasswordChangeDto request,
+    public CustomResponse<Void> changePassword(@RequestBody AuthRequestDTO.PasswordChangeDto request,
                                                @AuthenticationPrincipal CustomUserDetails user) {
         authService.changePassword(user.getUser().getId(), request);
+        return CustomResponse.onSuccess(null);
+    }
+
+    @PostMapping("/email/send")
+    public CustomResponse<Void> sendEmail(@RequestBody AuthRequestDTO.EmailSendRequestDTO request) {
+        authService.sendVerificationEmail(request.getEmail());
+        return CustomResponse.onSuccess(null);
+    }
+
+    @PostMapping("/email/verify")
+    public CustomResponse<Void> verifyEmail(@RequestBody AuthRequestDTO.EmailVerifyRequestDTO request) {
+        authService.verifyEmailCode(request);
         return CustomResponse.onSuccess(null);
     }
 
