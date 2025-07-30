@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.dto;
+package com.example.cloudfour.peopleofdelivery.global.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

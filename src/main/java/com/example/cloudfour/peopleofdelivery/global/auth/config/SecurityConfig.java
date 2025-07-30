@@ -1,8 +1,8 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.config;
+package com.example.cloudfour.peopleofdelivery.global.auth.config;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.jwt.JwtAuthenticationFilter;
-import com.example.cloudfour.peopleofdelivery.domain.auth.jwt.JwtTokenProvider;
-import com.example.cloudfour.peopleofdelivery.domain.auth.oauth.OAuth2SuccessHandler;
+import com.example.cloudfour.peopleofdelivery.global.auth.jwt.JwtAuthenticationFilter;
+import com.example.cloudfour.peopleofdelivery.global.auth.jwt.JwtTokenProvider;
+import com.example.cloudfour.peopleofdelivery.global.auth.oauth.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

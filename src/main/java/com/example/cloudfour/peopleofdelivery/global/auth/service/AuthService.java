@@ -1,7 +1,7 @@
-package com.example.cloudfour.peopleofdelivery.domain.auth.service;
+package com.example.cloudfour.peopleofdelivery.global.auth.service;
 
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.AuthRequestDTO;
-import com.example.cloudfour.peopleofdelivery.domain.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthRequestDTO;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
