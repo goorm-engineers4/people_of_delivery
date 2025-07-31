@@ -7,13 +7,14 @@ import com.example.cloudfour.peopleofdelivery.domain.order.service.query.OrderQu
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -46,20 +47,26 @@ public class OrderController {
 
     @GetMapping("/me")
     @Operation(summary = "내 주문 내역 조회", description = "내 주문 내역을 조회합니다. 내 주문 내역 조회에 사용되는 API입니다.")
-    public CustomResponse<List<OrderResponseDTO.OrderUserListResponseDTO>> getMyOrder(
+    @Parameter(name = "cursor", description = "데이터가 시작하는 부분을 표시합니다")
+    @Parameter(name = "size", description = "size만큼 데이터를 가져옵니다.")
+    public CustomResponse<OrderResponseDTO.OrderUserListResponseDTO> getMyOrder(
             @AuthenticationPrincipal User user
+            , @RequestParam(name = "cursor") LocalDateTime cursor, @RequestParam(name = "size") Integer size
     ){
-        List<OrderResponseDTO.OrderUserListResponseDTO> order = orderQueryService.getOrderListByUser(user);
+        OrderResponseDTO.OrderUserListResponseDTO order = orderQueryService.getOrderListByUser(user,cursor,size);
         return CustomResponse.onSuccess(HttpStatus.OK, order);
     }
 
     @GetMapping("/{storeId}/orders")
     @Operation(summary = "가게 주문 조회", description = "가게 주문을 조회합니다. 가게 주문 조회에 사용되는 API입니다.")
-    public CustomResponse<List<OrderResponseDTO.OrderStoreListResponseDTO>> getStoreOrder(
+    @Parameter(name = "cursor", description = "데이터가 시작하는 부분을 표시합니다")
+    @Parameter(name = "size", description = "size만큼 데이터를 가져옵니다.")
+    public CustomResponse<OrderResponseDTO.OrderStoreListResponseDTO> getStoreOrder(
             @PathVariable("storeId") UUID storeId,
             @AuthenticationPrincipal User user
+            , @RequestParam(name = "cursor") LocalDateTime cursor, @RequestParam(name = "size") Integer size
     ){
-        List<OrderResponseDTO.OrderStoreListResponseDTO> order = orderQueryService.getOrderListByStore(storeId,user);
+        OrderResponseDTO.OrderStoreListResponseDTO order = orderQueryService.getOrderListByStore(storeId,cursor,size,user);
         return CustomResponse.onSuccess(HttpStatus.OK, order);
     }
 
@@ -83,15 +90,4 @@ public class OrderController {
         orderCommandService.deleteOrder(orderId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, "주문 취소 완료.");
     }
-
-    @GetMapping("/{orderId}/history")
-    @Operation(summary = "주문 상태 이력 조회", description = "주문 상태 이력을 조회합니다. 주문 상태 이력 조회에 사용되는 API입니다.")
-    public CustomResponse<OrderResponseDTO.OrderStatusResponseDTO> getOrderStatus(
-            @PathVariable("orderId") UUID orderId,
-            @AuthenticationPrincipal User user
-    ){
-        OrderResponseDTO.OrderStatusResponseDTO order = orderQueryService.getOrderStatusById(orderId,user);
-        return CustomResponse.onSuccess(HttpStatus.OK, order);
-    }
-
 }

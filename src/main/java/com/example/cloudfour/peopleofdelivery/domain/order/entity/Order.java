@@ -6,6 +6,7 @@ import com.example.cloudfour.peopleofdelivery.domain.order.enums.ReceiptType;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Table(name = "p_order")
-public class Order{
+public class Order extends BaseEntity {
     @Id
     @GeneratedValue
     private UUID id;
@@ -55,9 +56,6 @@ public class Order{
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Payment payment;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private OrderHistory orderHistory;
-
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -82,7 +80,7 @@ public class Order{
         this.payment = payment;
     }
 
-    public void setOrderHistory(OrderHistory orderHistory){
-        this.orderHistory = orderHistory;
+    public void updateOrderStatus(OrderStatus orderStatus){
+        this.status = orderStatus;
     }
 }
