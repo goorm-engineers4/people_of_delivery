@@ -20,7 +20,8 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/stores")
-@Tag(name = "Store", description = "가게 API by 지윤")
+
+@Tag(name = "Store", description = "가게 API by 지윤") //swagger UI
 public class StoreController { //가게 컨트롤러 클래스 정의
 
     // 가게 등록, 수정, 삭제 (쓰기 관련) 처리하는 서비스
@@ -70,6 +71,13 @@ public class StoreController { //가게 컨트롤러 클래스 정의
             @AuthenticationPrincipal User user) {
         storeCommandService.deleteStore(storeId, user);
         return CustomResponse.onSuccess(HttpStatus.OK, "가게 삭제 완료");
+    }
+    // GET /api/stores/category/{categoryId}
+    @GetMapping("/category/{categoryId}")
+    @Operation(summary = "카테고리별 가게 목록 조회", description = "카테고리 ID로 해당 카테고리의 가게 목록을 조회합니다.")
+    public CustomResponse<List<StoreResponseDTO.StoreListResponseDTO>> getStoresByCategory(
+            @PathVariable UUID categoryId) {
+        return CustomResponse.onSuccess(HttpStatus.OK, storeQueryService.getStoresByCategory(categoryId));
     }
 
 }
