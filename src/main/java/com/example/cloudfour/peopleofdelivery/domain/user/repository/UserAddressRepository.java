@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.useraddress.repository;
+package com.example.cloudfour.peopleofdelivery.domain.user.repository;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.UserAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
