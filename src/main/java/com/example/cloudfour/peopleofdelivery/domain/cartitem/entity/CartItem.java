@@ -1,6 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.domain.cartitem.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.dto.CartItemRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import jakarta.persistence.*;
@@ -56,5 +57,10 @@ public class CartItem {
     public void setMenuOption(MenuOption menuOption){
         this.menuOption = menuOption;
         menuOption.getCartItems().add(this);
+    }
+
+    public void update(CartItemRequestDTO.CartItemUpdateRequestDTO requestDTO){
+        this.quantity = requestDTO.getQuantity();
+        this.price = requestDTO.getPrice();
     }
 }

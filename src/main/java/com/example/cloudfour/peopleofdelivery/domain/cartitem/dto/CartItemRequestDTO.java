@@ -6,6 +6,14 @@ import lombok.Setter;
 import java.util.UUID;
 
 public class CartItemRequestDTO {
+    @Getter
+    @Setter
+    public static class CartItemAddRequestDTO {
+        private UUID menuId;
+        private UUID menuOptionId;
+        private Integer quantity;
+        private Integer price;
+    }
 
     @Getter
     @Setter
