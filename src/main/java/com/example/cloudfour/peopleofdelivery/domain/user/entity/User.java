@@ -26,7 +26,10 @@ public class User extends BaseEntity {
     private UUID id;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String email; // 확정 이메일
+
+    @Column(unique = false)
+    private String pendingEmail; // 검증 대기 중인 새 이메일
 
     @Column(nullable = false)
     private String nickname;
@@ -45,6 +48,14 @@ public class User extends BaseEntity {
     private LoginType loginType;
 
     private String providerId; // 소셜 로그인 고유 식별자 (sub ..)
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean deleted = false; // 소프트 삭제 여부
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean emailVerified = false; // 현재 email의 인증 여부
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
@@ -74,4 +85,23 @@ public class User extends BaseEntity {
     public void setCart(Cart cart) {
         this.cart = cart;
     }
+
+    public void changePassword(String encodedPassword) { this.password = encodedPassword; }
+    public void changeNickname(String nickname) { this.nickname = nickname; }
+    public void changeNumber(String number) { this.number = number; }
+
+    // 새 이메일로 변경 요청 — 실제 email 교체는 아님
+    public void requestEmailChange(String newEmail) { this.pendingEmail = newEmail; }
+
+    // 새 이메일 인증 성공 시에만 확정
+    public void confirmEmailChange() {
+        if (this.pendingEmail == null) return;
+        this.email = this.pendingEmail;
+        this.pendingEmail = null;
+        this.emailVerified = true; // 새 이메일을 인증
+    }
+
+    public void markEmailVerified() { this.emailVerified = true; }
+    // 소프트 삭제
+    public void softDelete() { this.deleted = true; }
 }
