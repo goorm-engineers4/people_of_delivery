@@ -1,4 +1,3 @@
-
 package com.example.cloudfour.peopleofdelivery.domain.store.controller;
 
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreRequestDTO;
@@ -8,28 +7,26 @@ import com.example.cloudfour.peopleofdelivery.domain.store.service.query.StoreQu
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/stores")
+@Tag(name = "Store", description = "가게 API by 지윤")
+public class StoreController {
 
-@Tag(name = "Store", description = "가게 API by 지윤") //swagger UI
-public class StoreController { //가게 컨트롤러 클래스 정의
-
-    // 가게 등록, 수정, 삭제 (쓰기 관련) 처리하는 서비스
     private final StoreCommandService storeCommandService;
-    // 가게 조회 관련 서비스
     private final StoreQueryService storeQueryService;
 
-    // POST /api/stores
+    // 가게 등록
     @PostMapping("")
     @Operation(summary = "가게 등록", description = "가게를 등록합니다.")
     public CustomResponse<StoreResponseDTO.StoreCreateResponseDTO> createStore(
@@ -38,14 +35,20 @@ public class StoreController { //가게 컨트롤러 클래스 정의
         return CustomResponse.onSuccess(HttpStatus.CREATED, storeCommandService.createStore(dto, user));
     }
 
-    // GET /api/stores
+    // 전체 가게 목록 조회 (커서 기반)
     @GetMapping("")
-    @Operation(summary = "가게 목록 조회", description = "전체 가게 목록을 조회합니다.")
-    public CustomResponse<List<StoreResponseDTO.StoreListResponseDTO>> getStoreList() {
-        return CustomResponse.onSuccess(HttpStatus.OK, storeQueryService.getAllStores());
+    @Operation(summary = "가게 목록 조회", description = "전체 가게 목록을 커서 기반으로 조회합니다.")
+    @Parameter(name = "cursor", description = "데이터가 시작하는 기준 시간입니다.")
+    @Parameter(name = "size", description = "가져올 데이터 수입니다.")
+    public CustomResponse<StoreResponseDTO.StoreCursorListResponseDTO> getStoreList(
+            @RequestParam(name = "cursor", required = false) LocalDateTime cursor,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getAllStores(cursor, size);
+        return CustomResponse.onSuccess(HttpStatus.OK, response);
     }
 
-    //GET /api/stores/{storeId}
+    // 가게 상세 정보 조회
     @GetMapping("/{storeId}")
     @Operation(summary = "가게 상세 정보 조회", description = "가게의 상세 정보를 조회합니다.")
     public CustomResponse<StoreResponseDTO.StoreDetailResponseDTO> getStoreDetail(
@@ -53,7 +56,7 @@ public class StoreController { //가게 컨트롤러 클래스 정의
         return CustomResponse.onSuccess(HttpStatus.OK, storeQueryService.getStoreById(storeId));
     }
 
-    // PATCH /api/stores/{storeId}
+    // 가게 정보 수정
     @PatchMapping("/{storeId}")
     @Operation(summary = "가게 정보 수정", description = "본인의 가게 정보를 수정합니다.")
     public CustomResponse<StoreResponseDTO.StoreUpdateResponseDTO> updateStore(
@@ -63,7 +66,7 @@ public class StoreController { //가게 컨트롤러 클래스 정의
         return CustomResponse.onSuccess(HttpStatus.OK, storeCommandService.updateStore(storeId, dto, user));
     }
 
-    // PATCH /api/stores/{storeID}/deleted
+    // 가게 삭제
     @PatchMapping("/{storeId}/deleted")
     @Operation(summary = "가게 삭제", description = "본인의 가게를 삭제합니다.")
     public CustomResponse<String> deleteStore(
@@ -72,13 +75,18 @@ public class StoreController { //가게 컨트롤러 클래스 정의
         storeCommandService.deleteStore(storeId, user);
         return CustomResponse.onSuccess(HttpStatus.OK, "가게 삭제 완료");
     }
-    // GET /api/stores/category/{categoryId}
+
+    // 카테고리별 가게 목록 조회 (커서 기반)
     @GetMapping("/category/{categoryId}")
-    @Operation(summary = "카테고리별 가게 목록 조회", description = "카테고리 ID로 해당 카테고리의 가게 목록을 조회합니다.")
-    public CustomResponse<List<StoreResponseDTO.StoreListResponseDTO>> getStoresByCategory(
-            @PathVariable UUID categoryId) {
-        return CustomResponse.onSuccess(HttpStatus.OK, storeQueryService.getStoresByCategory(categoryId));
+    @Operation(summary = "카테고리별 가게 목록 조회", description = "카테고리 ID로 해당 카테고리의 가게 목록을 커서 기반으로 조회합니다.")
+    @Parameter(name = "cursor", description = "데이터가 시작하는 기준 시간입니다.")
+    @Parameter(name = "size", description = "가져올 데이터 수입니다.")
+    public CustomResponse<StoreResponseDTO.StoreCursorListResponseDTO> getStoresByCategory(
+            @PathVariable UUID categoryId,
+            @RequestParam(name = "cursor", required = false) LocalDateTime cursor,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getStoresByCategory(categoryId, cursor, size);
+        return CustomResponse.onSuccess(HttpStatus.OK, response);
     }
-
 }
-

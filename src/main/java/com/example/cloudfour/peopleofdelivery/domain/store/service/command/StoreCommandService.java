@@ -7,6 +7,8 @@ import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.StoreCategory;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreCategoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
@@ -28,20 +30,23 @@ public class StoreCommandService {
     // 가게 생성
     public StoreResponseDTO.StoreCreateResponseDTO createStore(StoreRequestDTO.StoreCreateRequestDTO dto, User user) {
         if (!(user.getRole() == Role.MASTER || user.getRole() == Role.OWNER)) {
-            throw new IllegalArgumentException("가게를 생성할 권한이 없습니다.");
+            throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         if (storeRepository.existsByName(dto.getName())) {
-            throw new IllegalArgumentException("이미 존재하는 가게 이름입니다.");
+            throw new StoreException(StoreErrorCode.ALREADY_ADD);
         }
 
         StoreCategory category = storeCategoryRepository.findById(dto.getStoreCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다."));
+                .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
 
         Region region = regionRepository.findById(dto.getRegionId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
+                .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
 
-        Store store = StoreConverter.toStore(dto, category, user, region);
+        Store store = StoreConverter.toStore(dto);
+        store.setStoreCategory(category);
+        store.setRegion(region);
+        store.setUser(user);
         storeRepository.save(store);
 
         return StoreConverter.toStoreCreateResponseDTO(store);
@@ -50,10 +55,10 @@ public class StoreCommandService {
     // 가게 정보 수정
     public StoreResponseDTO.StoreUpdateResponseDTO updateStore(UUID storeId, StoreRequestDTO.StoreUpdateRequestDTO dto, User user) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다."));
+                .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
 
         if (!store.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("본인의 가게만 수정할 수 있습니다.");
+            throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         if (dto.getName() != null) store.setName(dto.getName());
@@ -69,10 +74,10 @@ public class StoreCommandService {
     // 가게 삭제
     public void deleteStore(UUID storeId, User user) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다."));
+                .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
 
         if (!store.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("본인의 가게만 삭제할 수 있습니다.");
+            throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         storeRepository.delete(store);

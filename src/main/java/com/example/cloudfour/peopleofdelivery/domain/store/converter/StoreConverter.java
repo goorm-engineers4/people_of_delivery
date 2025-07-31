@@ -10,7 +10,7 @@ import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 public class StoreConverter {
 
     // CreateRequestDTO → Entity 변환
-    public static Store toStore(StoreRequestDTO.StoreCreateRequestDTO dto, StoreCategory category, User user, Region region) {
+    public static Store toStore(StoreRequestDTO.StoreCreateRequestDTO dto) {
         return Store.builder()
                 .name(dto.getName())
                 .address(dto.getAddress())
@@ -21,9 +21,6 @@ public class StoreConverter {
                 .deliveryTip(dto.getDeliveryTip())
                 .operationHours(dto.getOperationHours())
                 .closedDays(dto.getClosedDays())
-                .storeCategory(category)
-                .user(user)
-                .region(region) // null 허용
                 .rating(0f)
                 .likeCount(0)
                 .reviewCount(0)
