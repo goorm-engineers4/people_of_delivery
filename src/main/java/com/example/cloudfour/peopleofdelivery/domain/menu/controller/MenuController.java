@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -130,6 +131,32 @@ public class MenuController {
         log.info("메뉴 상세 조회 요청 - menuId: {}", menuId);
 
         MenuResponseDTO.MenuDetailResponseDTO result = menuQueryService.getMenuDetail(menuId);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/{storeId}/paged")
+    @Operation(summary = "해당 가게 메뉴 목록 조회 (페이지네이션)", description = "가게의 메뉴 목록을 페이지 단위로 조회합니다.")
+    public CustomResponse<List<MenuResponseDTO.MenuListResponseDTO>> getMenusByStoreWithPagination(
+            @PathVariable("storeId") UUID storeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        log.info("가게별 메뉴 페이지네이션 조회 요청 - storeId: {}, page: {}, size: {}", storeId, page, size);
+
+        List<MenuResponseDTO.MenuListResponseDTO> result = menuQueryService.getMenusByStore(storeId, page, size);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/{storeId}/cursor")
+    @Operation(summary = "해당 가게 메뉴 목록 조회 (커서 기반 페이지네이션)", description = "가게의 메뉴 목록을 커서 기반으로 조회합니다.")
+    public CustomResponse<MenuResponseDTO.MenuStoreListResponseDTO> getMenusByStoreWithCursor(
+            @PathVariable("storeId") UUID storeId,
+            @RequestParam(required = false) LocalDateTime cursor,
+            @RequestParam(defaultValue = "20") Integer size) {
+
+        log.info("가게별 메뉴 커서 기반 페이지네이션 조회 요청 - storeId: {}, cursor: {}, size: {}", storeId, cursor, size);
+
+        MenuResponseDTO.MenuStoreListResponseDTO result = menuQueryService.getMenusByStoreWithCursor(storeId, cursor, size);
         return CustomResponse.onSuccess(HttpStatus.OK, result);
     }
 }

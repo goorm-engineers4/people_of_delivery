@@ -2,11 +2,14 @@ package com.example.cloudfour.peopleofdelivery.domain.menu.service.query;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
-import com.example.cloudfour.peopleofdelivery.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class MenuQueryServiceImpl {
 
     private final MenuRepository menuRepository;
+    private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
 
     // 특정 가게의 메뉴 목록 조회
     public List<MenuResponseDTO.MenuListResponseDTO> getMenusByStore(UUID storeId) {
@@ -35,6 +39,24 @@ public class MenuQueryServiceImpl {
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
                         .status(menu.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // 기존 메서드 호환성을 위한 오버로드 (기본 페이지네이션)
+    public List<MenuResponseDTO.MenuListResponseDTO> getMenusByStore(UUID storeId, int page, int size) {
+        // 페이지네이션을 적용하여 메뉴 조회
+        List<Menu> menus = menuRepository.findByStoreIdAndDeletedFalseOrderByCreatedAtDesc(
+                storeId, PageRequest.of(page, size));
+
+        return menus.stream()
+                .map(menu -> MenuResponseDTO.MenuListResponseDTO.builder()
+                        .menuId(menu.getId())
+                        .name(menu.getName())
+                        .price(menu.getPrice())
+                        .menuPicture(menu.getMenuPicture())
+                        .status(menu.getStatus())
+                        .category(menu.getMenuCategory().getCategory())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -94,7 +116,7 @@ public class MenuQueryServiceImpl {
     // 메뉴 상세 조회
     public MenuResponseDTO.MenuDetailResponseDTO getMenuDetail(UUID menuId) {
         Menu menu = menuRepository.findById(menuId)
-                .orElseThrow(() -> new NotFoundException("메뉴를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
 
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(menu.getId())
@@ -108,6 +130,43 @@ public class MenuQueryServiceImpl {
                 .category(menu.getMenuCategory().getCategory())
                 .createdAt(menu.getCreatedAt())
                 .updatedAt(menu.getUpdatedAt())
+                .build();
+    }
+
+    // 커서 기반 페이지네이션을 사용한 가게별 메뉴 조회
+    public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size) {
+        if (cursor == null) {
+            cursor = first_cursor;
+        }
+
+        Pageable pageable = PageRequest.of(0, size);
+        Slice<Menu> menuSlice = menuRepository.findByStoreIdAndDeletedFalseAndCreatedAtBefore(storeId, cursor, pageable);
+
+        if (menuSlice.isEmpty()) {
+            throw new MenuException(MenuErrorCode.NOT_FOUND);
+        }
+
+        List<Menu> menuList = menuSlice.getContent();
+        List<MenuResponseDTO.MenuListResponseDTO> menuDTOS = menuList.stream()
+                .map(menu -> MenuResponseDTO.MenuListResponseDTO.builder()
+                        .menuId(menu.getId())
+                        .name(menu.getName())
+                        .price(menu.getPrice())
+                        .menuPicture(menu.getMenuPicture())
+                        .status(menu.getStatus())
+                        .category(menu.getMenuCategory().getCategory())
+                        .build())
+                .collect(Collectors.toList());
+
+        LocalDateTime next_cursor = null;
+        if (!menuList.isEmpty() && menuSlice.hasNext()) {
+            next_cursor = menuList.getLast().getCreatedAt();
+        }
+
+        return MenuResponseDTO.MenuStoreListResponseDTO.builder()
+                .menus(menuDTOS)
+                .hasNext(menuSlice.hasNext())
+                .nextCursor(next_cursor)
                 .build();
     }
 }

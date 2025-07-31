@@ -90,4 +90,15 @@ public class MenuResponseDTO {
         private String storeName;
         private String region;
     }
+
+    // 커서 기반 페이지네이션을 위한 가게별 메뉴 목록 응답
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MenuStoreListResponseDTO {
+        private java.util.List<MenuListResponseDTO> menus;
+        private Boolean hasNext;
+        private java.time.LocalDateTime nextCursor;
+    }
 }

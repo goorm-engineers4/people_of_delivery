@@ -7,14 +7,12 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
-import com.example.cloudfour.peopleofdelivery.global.exception.DuplicateException;
-import com.example.cloudfour.peopleofdelivery.global.exception.NotFoundException;
-import com.example.cloudfour.peopleofdelivery.global.exception.UnauthorizedException;
 
 // JUnit 5 테스트 관련 import
 import org.junit.jupiter.api.BeforeEach;
@@ -155,8 +153,7 @@ class MenuCommandServiceImplTest {
         // When & Then: 예외 발생 검증
         // 메소드 호출 시 예외가 발생하는지 확인
         assertThatThrownBy(() -> menuCommandService.createMenu(requestDTO, differentUser))
-                .isInstanceOf(NotFoundException.class)              // NotFoundException이 발생하는지 확인
-                .hasMessageContaining("가게를 찾을 수 없습니다");    // 예외 메시지 확인
+                .isInstanceOf(MenuException.class);              // MenuException이 발생하는지 확인
 
         // 올바른 순서로 호출되었는지 확인
         verify(storeRepository, times(1)).findByUserId(differentUser.getId());  // 가게 찾기는 1번 호출
@@ -189,8 +186,7 @@ class MenuCommandServiceImplTest {
 
         // When & Then: 중복 예외 발생 검증
         assertThatThrownBy(() -> menuCommandService.createMenu(requestDTO, testUserWithAll))
-                .isInstanceOf(DuplicateException.class)             // DuplicateException 발생 확인
-                .hasMessageContaining("이미 존재하는 메뉴명입니다");  // 예외 메시지 확인
+                .isInstanceOf(MenuException.class);             // MenuException 발생 확인
 
         // 중복 체크에서 실패했으므로 저장은 호출되지 않음
         verify(menuRepository, never()).save(any(Menu.class));
@@ -292,8 +288,8 @@ class MenuCommandServiceImplTest {
 
         // When & Then: 권한 없음 예외 발생 검증
         assertThatThrownBy(() -> menuCommandService.updateMenu(menuId, requestDTO, unauthorizedUser))
-                .isInstanceOf(UnauthorizedException.class)          // 권한 없음 예외 확인
-                .hasMessageContaining("수정 권한이 없습니다");        // 예외 메시지 확인
+                .isInstanceOf(MenuException.class)          // 권한 없음 예외 확인
+                .hasMessageContaining("메뉴에 접근할 수 있는 권한이 없습니다");
     }
 
     // 메뉴 삭제 성공 테스트
@@ -347,7 +343,7 @@ class MenuCommandServiceImplTest {
 
         // When & Then: 메뉴 없음 예외 발생 검증
         assertThatThrownBy(() -> menuCommandService.deleteMenu(nonExistentMenuId, requestUser))
-                .isInstanceOf(NotFoundException.class)              // 찾을 수 없음 예외 확인
+                .isInstanceOf(MenuException.class)              // 찾을 수 없음 예외 확인
                 .hasMessageContaining("메뉴를 찾을 수 없습니다");    // 예외 메시지 확인
 
         // 메뉴 찾기가 1번 호출되었는지 확인

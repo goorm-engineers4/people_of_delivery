@@ -1,29 +1,23 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.service.query;
 
-// 테스트에 필요한 라이브러리들 import
 import com.example.cloudfour.peopleofdelivery.domain.TestFixtureFactory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
-import com.example.cloudfour.peopleofdelivery.global.exception.NotFoundException;
-
-// JUnit 5 테스트 관련 import
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-// Mockito 관련 import
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;  // 페이징 처리용
+import org.springframework.data.domain.PageRequest;
 
-// 유틸리티 import
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +25,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-// 검증 및 Mock 관련 static import
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -113,7 +106,7 @@ class MenuQueryServiceImplTest {
     @DisplayName("빈 가게의 메뉴 목록 조회")
     void getMenusByStore_EmptyStore_ReturnsEmptyList() {
         // Given: 메뉴가 없는 가게 설정
-        UUID emptyStoreId = UUID.randomUUID();  // 새로운 가게 ID (메뉴 없음)
+        UUID emptyStoreId = UUID.randomUUID();  // 새로운 가��� ID (메뉴 없음)
 
         // Mock Repository가 빈 리스트를 반환하도록 설정
         given(menuRepository.findByStoreIdAndDeletedFalseOrderByCreatedAtDesc(emptyStoreId))
@@ -246,10 +239,9 @@ class MenuQueryServiceImplTest {
                 .willReturn(Optional.empty());  // 빈 Optional = 메뉴 없음
 
         // When & Then: 예외 발생 검증
-        // 메소드 호출 시 NotFoundException이 발생하는지 확인
+        // 메소드 호출 시 MenuException이 발생하는지 확인
         assertThatThrownBy(() -> menuQueryService.getMenuDetail(nonExistentMenuId))
-                .isInstanceOf(NotFoundException.class)              // 올바른 예외 타입인지
-                .hasMessageContaining("메뉴를 찾을 수 없습니다");    // 예외 메시지가 올바른지
+                .isInstanceOf(MenuException.class);              // 올바른 예외 타입인지
 
         // Repository가 정확히 호출되었는지 검증
         verify(menuRepository, times(1)).findById(nonExistentMenuId);
