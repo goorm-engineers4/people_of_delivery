@@ -8,6 +8,17 @@ import java.util.UUID;
 public class CartItemResponseDTO {
     @Getter
     @Builder
+    public static class CartItemAddResponseDTO {
+        UUID cartItemId;
+        UUID cartId;
+        UUID menuId;
+        UUID menuOptionId;
+        Integer quantity;
+        Integer price;
+    }
+
+    @Getter
+    @Builder
     public static class CartItemListResponseDTO {
         UUID cartItemId;
         UUID cartId;
