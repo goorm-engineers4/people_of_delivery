@@ -7,9 +7,9 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.service.query.MenuQuer
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -39,36 +39,69 @@ import java.util.UUID;
   - @PathVariable: URL 경로에 변수 매핑
  */
 
-@Slf4j // 로그 찍는 기능
-@RestController // API를 요청하면 JSON으로 응답
-@RequiredArgsConstructor    // final 필드를 생성자 주입 방식으로 초기화
-@RequestMapping("/api/menus")   // API의 기본 경로 설정
-@Tag(name = "Menu", description = "메뉴 API by 정병민")  // Swagger에서 사용할 태그
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/menus")
+@Tag(name = "Menu", description = "메뉴 API by 정병민")
 public class MenuController {
     private final MenuCommandServiceImpl menuCommandService; // 메뉴 생성/수정/삭제
     private final MenuQueryServiceImpl menuQueryService; // 메뉴 조회
-
-    @PostMapping("")    // 메뉴 생성 API, HTTP POST 메소드 사용
-    @Operation(summary = "메뉴 생성", description = "메뉴를 생성합니다. 메뉴 생성에 사용되는 API입니다.")   // Swagger에서 사용할 설명
+    @PostMapping("")
+    @Operation(summary = "메뉴 생성", description = "메뉴를 생성합니다. 메뉴 생성에 사용되는 API입니다.")
     public CustomResponse<MenuResponseDTO.MenuDetailResponseDTO> createMenu(
             @RequestBody MenuRequestDTO.MenuCreateRequestDTO requestDTO,
-            @AuthenticationPrincipal User user) {  // JSON 요청 본문을 MenuCreateRequestDTO로 매핑
-
-        log.info("메뉴 생성 요청 - userId: {}, menuName: {}", user.getId(), requestDTO.getName());
-
+            @AuthenticationPrincipal User user) {
         MenuResponseDTO.MenuDetailResponseDTO result = menuCommandService.createMenu(requestDTO, user);
         return CustomResponse.onSuccess(HttpStatus.CREATED, result);
+    }
+
+    @GetMapping("/{menuId}/detail")
+    @Operation(summary = "메뉴 상세 조회", description = "메뉴의 상세 정보를 조회합니다. 메뉴 상세 조회에 사용되는 API입니다.")
+    public CustomResponse<MenuResponseDTO.MenuDetailResponseDTO> getMenuDetail(
+            @PathVariable("menuId") UUID menuId) {
+        MenuResponseDTO.MenuDetailResponseDTO result = menuQueryService.getMenuDetail(menuId);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/{storeId}")
+    @Operation(summary = "해당 가게 메뉴 목록 조회", description = "가게의 메뉴 목록을 조회합니다. 해당 가게의 메뉴를 조회하는 API입니다.")
+    @Parameter(name = "cursor", description = "데이터가 시작하는 부분을 표시합니다")
+    @Parameter(name = "size", description = "size만큼 데이터를 가져옵니다.")
+    public CustomResponse<MenuResponseDTO.MenuStoreListResponseDTO> getMenusByStore(
+            @PathVariable("storeId") UUID storeId,
+            @RequestParam(name = "cursor") LocalDateTime cursor,
+            @RequestParam(name = "size") Integer size) {
+        MenuResponseDTO.MenuStoreListResponseDTO result = menuQueryService.getMenusByStoreWithCursor(storeId, cursor, size);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/top")
+    @Operation(summary = "인기 메뉴 TOP20 조회", description = "인기 메뉴 TOP20을 조회합니다. 인기 메뉴 조회에 사용되는 API입니다.")
+    public CustomResponse<List<MenuResponseDTO.MenuTopResponseDTO>> getTopMenus() {
+        List<MenuResponseDTO.MenuTopResponseDTO> result = menuQueryService.getTopMenus();
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/timetop")
+    @Operation(summary = "시간대별 인기 메뉴 TOP20 조회", description = "시간대별 인기 메뉴 TOP20을 조회합니다. 시간대별 인기 메뉴 조회에 사용되는 API입니다.")
+    public CustomResponse<List<MenuResponseDTO.MenuTimeTopResponseDTO>> getTimeTopMenus() {
+        List<MenuResponseDTO.MenuTimeTopResponseDTO> result = menuQueryService.getTimeTopMenus();
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/regiontop")
+    @Operation(summary = "지역별 인기 메뉴 TOP20 조회", description = "지역별 인기 메뉴 TOP20을 조회합니다. 지역별 인기 메뉴 조회에 사용되는 API입니다.")
+    public CustomResponse<List<MenuResponseDTO.MenuRegionTopResponseDTO>> getRegionTopMenus() {
+        List<MenuResponseDTO.MenuRegionTopResponseDTO> result = menuQueryService.getRegionTopMenus();
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
     }
 
     @PatchMapping("/{menuId}")
     @Operation(summary = "메뉴 수정", description = "메뉴를 수정합니다. 메뉴 수정에 사용되는 API입니다.")
     public CustomResponse<MenuResponseDTO.MenuDetailResponseDTO> updateMenu(
-            @PathVariable("menuId") UUID menuId,
             @RequestBody MenuRequestDTO.MenuUpdateRequestDTO requestDTO,
+            @PathVariable("menuId") UUID menuId,
             @AuthenticationPrincipal User user) {
-
-        log.info("메뉴 수정 요청 - userId: {}, menuId: {}", user.getId(), menuId);
-
         MenuResponseDTO.MenuDetailResponseDTO result = menuCommandService.updateMenu(menuId, requestDTO, user);
         return CustomResponse.onSuccess(HttpStatus.OK, result);
     }
@@ -78,85 +111,7 @@ public class MenuController {
     public CustomResponse<String> deleteMenu(
             @PathVariable("menuId") UUID menuId,
             @AuthenticationPrincipal User user) {
-
-        log.info("메뉴 삭제 요청 - userId: {}, menuId: {}", user.getId(), menuId);
-
         menuCommandService.deleteMenu(menuId, user);
-        return CustomResponse.onSuccess(HttpStatus.OK, "메뉴 삭제 완료");
-    }
-
-    @GetMapping("/{storeId}")
-    @Operation(summary = "해당 가게 메뉴 목록 조회", description = "가게의 메뉴 목록을 조회합니다. 해당 가게의 메뉴를 조회하는 API입니다.")
-    public CustomResponse<List<MenuResponseDTO.MenuListResponseDTO>> getMenusByStore(
-            @PathVariable("storeId") UUID storeId) {
-
-        log.info("가게별 메뉴 조회 요청 - storeId: {}", storeId);
-
-        List<MenuResponseDTO.MenuListResponseDTO> result = menuQueryService.getMenusByStore(storeId);
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
-    }
-
-    @GetMapping("/top")
-    @Operation(summary = "인기 메뉴 TOP20 조회", description = "인기 메뉴 TOP20을 조회합니다. 인기 메뉴 조회에 사용되는 API입니다.")
-    public CustomResponse<List<MenuResponseDTO.MenuTopResponseDTO>> getTopMenus() {
-        log.info("인기 메뉴 TOP20 조회 요청");
-
-        List<MenuResponseDTO.MenuTopResponseDTO> result = menuQueryService.getTopMenus();
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
-    }
-
-    @GetMapping("/timetop")
-    @Operation(summary = "시간대별 인기 메뉴 TOP20 조회", description = "시간대별 인기 메뉴 TOP20을 조회합니다. 시간대별 인기 메뉴 조회에 사용되는 API입니다.")
-    public CustomResponse<List<MenuResponseDTO.MenuTimeTopResponseDTO>> getTimeTopMenus() {
-        log.info("시간대별 인기 메뉴 TOP20 조회 요청");
-
-        List<MenuResponseDTO.MenuTimeTopResponseDTO> result = menuQueryService.getTimeTopMenus();
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
-    }
-
-    @GetMapping("/regiontop")
-    @Operation(summary = "지역별 인기 메뉴 TOP20 조회", description = "지역별 인기 메뉴 TOP20을 조회합니다. 지역별 인기 메뉴 조회에 사용되는 API입니다.")
-    public CustomResponse<List<MenuResponseDTO.MenuRegionTopResponseDTO>> getRegionTopMenus() {
-        log.info("지역별 인기 메뉴 TOP20 조회 요청");
-
-        List<MenuResponseDTO.MenuRegionTopResponseDTO> result = menuQueryService.getRegionTopMenus();
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
-    }
-
-    @GetMapping("/{menuId}/detail")
-    @Operation(summary = "메뉴 상세 조회", description = "메뉴의 상세 정보를 조회합니다. 메뉴 상세 조회에 사용되는 API입니다.")
-    public CustomResponse<MenuResponseDTO.MenuDetailResponseDTO> getMenuDetail(
-            @PathVariable("menuId") UUID menuId) {
-
-        log.info("메뉴 상세 조회 요청 - menuId: {}", menuId);
-
-        MenuResponseDTO.MenuDetailResponseDTO result = menuQueryService.getMenuDetail(menuId);
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
-    }
-
-    @GetMapping("/{storeId}/paged")
-    @Operation(summary = "해당 가게 메뉴 목록 조회 (페이지네이션)", description = "가게의 메뉴 목록을 페이지 단위로 조회합니다.")
-    public CustomResponse<List<MenuResponseDTO.MenuListResponseDTO>> getMenusByStoreWithPagination(
-            @PathVariable("storeId") UUID storeId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        log.info("가게별 메뉴 페이지네이션 조회 요청 - storeId: {}, page: {}, size: {}", storeId, page, size);
-
-        List<MenuResponseDTO.MenuListResponseDTO> result = menuQueryService.getMenusByStore(storeId, page, size);
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
-    }
-
-    @GetMapping("/{storeId}/cursor")
-    @Operation(summary = "해당 가게 메뉴 목록 조회 (커서 기반 페이지네이션)", description = "가게의 메뉴 목록을 커서 기반으로 조회합니다.")
-    public CustomResponse<MenuResponseDTO.MenuStoreListResponseDTO> getMenusByStoreWithCursor(
-            @PathVariable("storeId") UUID storeId,
-            @RequestParam(required = false) LocalDateTime cursor,
-            @RequestParam(defaultValue = "20") Integer size) {
-
-        log.info("가게별 메뉴 커서 기반 페이지네이션 조회 요청 - storeId: {}, cursor: {}, size: {}", storeId, cursor, size);
-
-        MenuResponseDTO.MenuStoreListResponseDTO result = menuQueryService.getMenusByStoreWithCursor(storeId, cursor, size);
-        return CustomResponse.onSuccess(HttpStatus.OK, result);
+        return CustomResponse.onSuccess(HttpStatus.OK, "메뉴 삭제 완료.");
     }
 }
