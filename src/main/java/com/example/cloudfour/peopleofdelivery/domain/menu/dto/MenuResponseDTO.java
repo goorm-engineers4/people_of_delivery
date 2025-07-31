@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-// MenuResponseDTO: 서버 → 클라이언트로 보내는 데이터
+// MenuResponseDTO: 서버 -> 클라이언트로 보내는 데이터
 public class MenuResponseDTO {
 
     // 메뉴 생성 응답
@@ -19,12 +19,15 @@ public class MenuResponseDTO {
     public static class MenuDetailResponseDTO {
         private UUID menuId;
         private UUID storeId;
+        private String storeName;
         private String name;
         private String content;
         private Integer price;
         private String menuPicture;
         private MenuStatus status;
         private String category;
+        private java.time.LocalDateTime createdAt;
+        private java.time.LocalDateTime updatedAt;
     }
 
     // 해당 가게 메뉴 목록 조회 응답
@@ -53,6 +56,7 @@ public class MenuResponseDTO {
         private String menuPicture;
         private MenuStatus status;
         private String category;
+        private String storeName;
     }
 
     // 시간대별 인기 메뉴 TOP20 조회 응답
@@ -67,6 +71,8 @@ public class MenuResponseDTO {
         private String menuPicture;
         private MenuStatus status;
         private String category;
+        private String storeName;
+        private Integer orderCount;
     }
 
     // 지역별 인기 메뉴 TOP20 조회 응답
@@ -81,5 +87,7 @@ public class MenuResponseDTO {
         private String menuPicture;
         private MenuStatus status;
         private String category;
+        private String storeName;
+        private String region;
     }
 }
