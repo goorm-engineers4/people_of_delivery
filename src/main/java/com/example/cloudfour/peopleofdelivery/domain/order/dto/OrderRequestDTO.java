@@ -16,9 +16,11 @@ public class OrderRequestDTO {
     public static class OrderCreateRequestDTO {
         UUID storeId;
         OrderType orderType;
+        OrderStatus orderStatus;
         ReceiptType receiptType;
-        UUID addressId;
+        String address;
         String request;
+        Integer totalPrice;
         List<OrderItem> items;
         UUID menuId;
         List<UUID> menuOptionIds;

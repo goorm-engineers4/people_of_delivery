@@ -1,5 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.domain.order.dto;
 
+import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderType;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.ReceiptType;
@@ -7,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class OrderResponseDTO {
@@ -31,12 +33,12 @@ public class OrderResponseDTO {
         String request;
         Integer totalPrice;
         LocalDateTime createdAt;
-        String items;
+        List<OrderItemResponseDTO.OrderItemListResponseDTO> items;
     }
 
     @Getter
     @Builder
-    public static class OrderUserListResponseDTO {
+    public static class OrderUserResponseDTO {
         UUID orderId;
         String storeName;
         Integer totalPrice;
@@ -46,7 +48,15 @@ public class OrderResponseDTO {
 
     @Getter
     @Builder
-    public static class OrderStoreListResponseDTO {
+    public static class OrderUserListResponseDTO {
+        List<OrderUserResponseDTO>  orderUsers;
+        private boolean hasNext;
+        private LocalDateTime cursor;
+    }
+
+    @Getter
+    @Builder
+    public static class OrderStoreResponseDTO {
         UUID orderId;
         String userName;
         OrderType orderType;
@@ -58,10 +68,18 @@ public class OrderResponseDTO {
 
     @Getter
     @Builder
+    public static class OrderStoreListResponseDTO {
+        List<OrderStoreResponseDTO> orderStores;
+        private boolean hasNext;
+        private LocalDateTime cursor;
+    }
+
+    @Getter
+    @Builder
     public static class OrderUpdateResponseDTO {
         UUID orderId;
-        String previousStatus;
-        String currentStatus;
+        OrderStatus previousStatus;
+        OrderStatus currentStatus;
         LocalDateTime updatedAt;
     }
 
