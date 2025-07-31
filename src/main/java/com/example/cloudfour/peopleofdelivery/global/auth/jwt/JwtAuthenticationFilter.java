@@ -41,15 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 && StringUtils.hasText(token)
                 && jwtTokenProvider.isValidToken(token, false)) {
             try {
-                UUID userId = jwtTokenProvider.getUserIdFromToken(token, false);
+                UUID userId = UUID.fromString(jwtTokenProvider.getIdFromToken(token, false));
                 if (userId != null) {
                     // soft-delete 고려한 쿼리 권장
                     Optional<User> optUser = userRepository.findByIdAndDeletedFalse(userId);
                     if (optUser.isPresent()) {
                         User user = optUser.get();
-
-                        // (선택) 토큰 role과 DB role 불일치 시 처리/로깅을 하고 싶다면 여기서 비교
-                        // Role tokenRole = jwtTokenProvider.getRoleFromToken(token);
 
                         CustomUserDetails principal = new CustomUserDetails(user);
                         UsernamePasswordAuthenticationToken authentication =

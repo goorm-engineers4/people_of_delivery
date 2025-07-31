@@ -45,17 +45,17 @@ public class UserController {
     @PostMapping("/addresses")
     public CustomResponse<Void> addAddress(
             @RequestBody UserRequestDTO.AddressRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        addressService.addAddress(userDetails.getUser().getId(), request);
+        addressService.addAddress(user.getId(), request);
         return CustomResponse.onSuccess(HttpStatus.CREATED, null);
     }
 
     @GetMapping("/addresses")
     public CustomResponse<List<UserResponseDTO.AddressResponseDTO>> getAddressList(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        List<UserResponseDTO.AddressResponseDTO> addressList = addressService.getAddresses(userDetails.getUser().getId());
+        List<UserResponseDTO.AddressResponseDTO> addressList = addressService.getAddresses(String.valueOf(user.getId()));
         return CustomResponse.onSuccess(addressList);
     }
 
@@ -63,18 +63,18 @@ public class UserController {
     public CustomResponse<Void> updateAddress(
             @PathVariable UUID addressId,
             @RequestBody UserRequestDTO.AddressRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        addressService.updateAddress(userDetails.getUser().getId(), addressId, request);
+        addressService.updateAddress(user.getId(), addressId, request);
         return CustomResponse.onSuccess(null);
     }
 
     @PatchMapping("/addresses/delete/{addressId}")
     public CustomResponse<Void> deleteAddress(
             @PathVariable UUID addressId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        addressService.softDeleteAddress(userDetails.getUser().getId(), addressId);
+        addressService.softDeleteAddress(user.getId(), addressId);
         return CustomResponse.onSuccess(null);
     }
 //

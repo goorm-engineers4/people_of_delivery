@@ -1,75 +1,65 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.jwt;
 
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.global.auth.config.JwtProperties;
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
+    // Jwt Access, refresh 정보 가져오기
     private final JwtProperties jwtProperties;
 
-    public JwtTokenProvider(JwtProperties jwtProperties) {
-        this.jwtProperties = jwtProperties;
-    }
-
-    /** Access: sub = userId, role 포함 / Refresh: sub = userId 만 */
     public TokenDto createToken(UUID userId, Role role) {
         Date now = new Date();
-        Date accessExp  = new Date(now.getTime() + jwtProperties.getExpiration());
-        Date refreshExp = new Date(now.getTime() + jwtProperties.getRefreshExpiration());
+        String sub = userId.toString();
 
-        String access = Jwts.builder()
-                .setSubject(userId.toString()) // sub = UUID
-                .claim("role", role.name())    // 최소 권한 정보
+        String accessToken = Jwts.builder()
+                .setSubject(sub)
+                .claim("role", role.name())
                 .setIssuedAt(now)
-                .setExpiration(accessExp)
-                .signWith(getSigningKey(jwtProperties.getSecret()), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + jwtProperties.getExpiration()))
+                .signWith(SignatureAlgorithm.HS256, getSigningKey(jwtProperties.getSecret()))
                 .compact();
 
-        String refresh = Jwts.builder()
-                .setSubject(userId.toString()) // 최소 정보만
+        String refreshToken = Jwts.builder()
+                .setSubject(sub)
                 .setIssuedAt(now)
-                .setExpiration(refreshExp)
-                .signWith(getSigningKey(jwtProperties.getRefreshSecret()), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + jwtProperties.getRefreshExpiration()))
+                .signWith(SignatureAlgorithm.HS256, getSigningKey(jwtProperties.getRefreshSecret()))
                 .compact();
 
-        return new TokenDto("Bearer", access, refresh, jwtProperties.getExpiration());
+        return new TokenDto("Bearer", accessToken, refreshToken, jwtProperties.getExpiration());
+    }
+
+    public String getIdFromToken(String token, boolean isRefresh) {
+        return getClaims(token, isRefresh).getSubject();
+    }
+
+    public Role getRoleFromToken(String token) {
+        String role = (String) getClaims(token, false).get("role");
+        return Role.valueOf(role);
     }
 
     public boolean isValidToken(String token, boolean isRefresh) {
         try {
-            if (token == null || token.isBlank()) return false;
             getClaims(token, isRefresh);
             return true;
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public UUID getUserIdFromToken(String token, boolean isRefresh) {
-        String sub = getClaims(token, isRefresh).getSubject();
-        return UUID.fromString(sub);
-    }
-
-    public Role getRoleFromToken(String token) {
-        String r = (String) getClaims(token, false).get("role");
-        return Role.valueOf(r);
-    }
-
-    public Instant getExpirationInstant(String token, boolean isRefresh) {
-        return getClaims(token, isRefresh).getExpiration().toInstant();
     }
 
     private Claims getClaims(String token, boolean isRefresh) {
@@ -82,6 +72,6 @@ public class JwtTokenProvider {
     }
 
     private Key getSigningKey(String secret) {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)); // 32B 이상
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 }
