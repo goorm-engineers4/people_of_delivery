@@ -7,6 +7,14 @@ import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.cart.exception.CartErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.cart.exception.CartException;
 import com.example.cloudfour.peopleofdelivery.domain.cart.repository.CartRepository;
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.converter.CartItemConverter;
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.dto.CartItemRequestDTO;
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.dto.CartItemResponseDTO;
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.service.command.CartItemCommandService;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
@@ -21,8 +29,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class CartCommandService {
-    CartRepository cartRepository;
-    StoreRepository storeRepository;
+    private final CartRepository cartRepository;
+    private final StoreRepository storeRepository;
+    private final MenuRepository menuRepository;
+    private final CartItemCommandService cartItemCommandService;
 
     public CartResponseDTO.CartCreateResponseDTO createCart(CartRequestDTO.CartCreateRequestDTO cartCreateRequestDTO, User user) {
         Store store = storeRepository.findById(cartCreateRequestDTO.getStoreId())
@@ -40,7 +50,10 @@ public class CartCommandService {
         Cart savedCart = cartRepository.save(cart);
         log.info("장바구니 생성 완료, cartId={}", savedCart.getId());
 
-        return CartConverter.toCartCreateResponseDTO(savedCart);
+        Menu menu = menuRepository.findById(cartCreateRequestDTO.getMenuId()).orElseThrow(()->new MenuException(MenuErrorCode.NOT_FOUND));
+        CartItemRequestDTO.CartItemAddRequestDTO cartItemAddRequestDTO = CartItemConverter.toCartItemAddRequestDTO(cartCreateRequestDTO,menu.getPrice());
+        CartItemResponseDTO.CartItemAddResponseDTO cartItemAddResponseDTO = cartItemCommandService.AddCartItem(cartItemAddRequestDTO, savedCart.getId(), user);
+        return CartConverter.toCartCreateResponseDTO(savedCart,cartItemAddResponseDTO.getCartItemId());
 
     }
 

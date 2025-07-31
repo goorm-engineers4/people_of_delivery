@@ -10,5 +10,7 @@ public class CartRequestDTO {
     @Builder
     public static class CartCreateRequestDTO{
         UUID storeId;
+        UUID menuId;
+        UUID menuOptionId;
     }
 }

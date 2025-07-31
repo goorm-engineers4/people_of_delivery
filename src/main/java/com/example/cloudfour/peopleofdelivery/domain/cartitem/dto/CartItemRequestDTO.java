@@ -1,13 +1,13 @@
 package com.example.cloudfour.peopleofdelivery.domain.cartitem.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.UUID;
 
 public class CartItemRequestDTO {
     @Getter
-    @Setter
+    @Builder
     public static class CartItemAddRequestDTO {
         private UUID menuId;
         private UUID menuOptionId;
@@ -16,7 +16,7 @@ public class CartItemRequestDTO {
     }
 
     @Getter
-    @Setter
+    @Builder
     public static class CartItemUpdateRequestDTO {
         private UUID menuId;
         private UUID menuOptionId;

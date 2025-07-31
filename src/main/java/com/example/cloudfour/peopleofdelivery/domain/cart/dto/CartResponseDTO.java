@@ -13,6 +13,7 @@ public class CartResponseDTO {
         UUID cartId;
         UUID userId;
         UUID storeId;
+        UUID cartItemId;
         LocalDateTime createdAt;
     }
 
