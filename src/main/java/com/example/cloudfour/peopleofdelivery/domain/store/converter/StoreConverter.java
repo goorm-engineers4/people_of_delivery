@@ -1,11 +1,8 @@
 package com.example.cloudfour.peopleofdelivery.domain.store.converter;
 
-import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
-import com.example.cloudfour.peopleofdelivery.domain.store.entity.StoreCategory;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 
 public class StoreConverter {
 

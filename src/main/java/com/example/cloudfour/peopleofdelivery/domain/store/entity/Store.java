@@ -91,12 +91,6 @@ public class Store extends BaseEntity {
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
 
-    public static class StoreBuilder {
-        private StoreBuilder id(UUID id) {
-            throw new UnsupportedOperationException("id 수동 생성 불가");
-        }
-    }
-
     public void setStoreCategory(StoreCategory storeCategory) {
         this.storeCategory = storeCategory;
         storeCategory.getStores().add(this);
