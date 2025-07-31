@@ -14,4 +14,3 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
     @Query("SELECT s FROM Store s WHERE s.user.id = :userId")
     Optional<Store> findByUserId(@Param("userId") UUID userId);
 }
-StoreRepository.java: 사용자 ID로 가게 조회
