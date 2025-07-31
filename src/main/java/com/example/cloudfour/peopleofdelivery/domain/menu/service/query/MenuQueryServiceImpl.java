@@ -27,29 +27,21 @@ public class MenuQueryServiceImpl {
     private final MenuRepository menuRepository;
     private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
 
-    // 특정 가게의 메뉴 목록 조회
-    public List<MenuResponseDTO.MenuListResponseDTO> getMenusByStore(UUID storeId) {
-        // 가게 존재 확인, 활성 상태 메뉴만 조회, DTO 변환
-        List<Menu> menus = menuRepository.findByStoreIdAndDeletedFalseOrderByCreatedAtDesc(storeId);
+    // 커서 기반 페이지네이션을 사용한 가게별 메뉴 조회
+    public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size) {
+        if (cursor == null) {
+            cursor = first_cursor;
+        }
 
-        return menus.stream()
-                .map(menu -> MenuResponseDTO.MenuListResponseDTO.builder()
-                        .menuId(menu.getId()) // .id() → .menuId()로 수정
-                        .name(menu.getName())
-                        .price(menu.getPrice())
-                        .menuPicture(menu.getMenuPicture())
-                        .status(menu.getStatus())
-                        .build())
-                .collect(Collectors.toList());
-    }
+        Pageable pageable = PageRequest.of(0, size);
+        Slice<Menu> menuSlice = menuRepository.findByStoreIdAndDeletedFalseAndCreatedAtBefore(storeId, cursor, pageable);
 
-    // 기존 메서드 호환성을 위한 오버로드 (기본 페이지네이션)
-    public List<MenuResponseDTO.MenuListResponseDTO> getMenusByStore(UUID storeId, int page, int size) {
-        // 페이지네이션을 적용하여 메뉴 조회
-        List<Menu> menus = menuRepository.findByStoreIdAndDeletedFalseOrderByCreatedAtDesc(
-                storeId, PageRequest.of(page, size));
+        if (menuSlice.isEmpty()) {
+            throw new MenuException(MenuErrorCode.NOT_FOUND);
+        }
 
-        return menus.stream()
+        List<Menu> menuList = menuSlice.getContent();
+        List<MenuResponseDTO.MenuListResponseDTO> menuDTOS = menuList.stream()
                 .map(menu -> MenuResponseDTO.MenuListResponseDTO.builder()
                         .menuId(menu.getId())
                         .name(menu.getName())
@@ -59,6 +51,17 @@ public class MenuQueryServiceImpl {
                         .category(menu.getMenuCategory().getCategory())
                         .build())
                 .collect(Collectors.toList());
+
+        LocalDateTime next_cursor = null;
+        if (!menuList.isEmpty() && menuSlice.hasNext()) {
+            next_cursor = menuList.getLast().getCreatedAt();
+        }
+
+        return MenuResponseDTO.MenuStoreListResponseDTO.builder()
+                .menus(menuDTOS)
+                .hasNext(menuSlice.hasNext())
+                .nextCursor(next_cursor)
+                .build();
     }
 
     // 전체 인기 메뉴 TOP20 조회
@@ -91,7 +94,7 @@ public class MenuQueryServiceImpl {
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
                         .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
-                        .orderCount(menu.getOrderItems().size()) // Mock에서는 단순하게
+                        .orderCount(menu.getOrderItems().size())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -130,43 +133,6 @@ public class MenuQueryServiceImpl {
                 .category(menu.getMenuCategory().getCategory())
                 .createdAt(menu.getCreatedAt())
                 .updatedAt(menu.getUpdatedAt())
-                .build();
-    }
-
-    // 커서 기반 페이지네이션을 사용한 가게별 메뉴 조회
-    public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size) {
-        if (cursor == null) {
-            cursor = first_cursor;
-        }
-
-        Pageable pageable = PageRequest.of(0, size);
-        Slice<Menu> menuSlice = menuRepository.findByStoreIdAndDeletedFalseAndCreatedAtBefore(storeId, cursor, pageable);
-
-        if (menuSlice.isEmpty()) {
-            throw new MenuException(MenuErrorCode.NOT_FOUND);
-        }
-
-        List<Menu> menuList = menuSlice.getContent();
-        List<MenuResponseDTO.MenuListResponseDTO> menuDTOS = menuList.stream()
-                .map(menu -> MenuResponseDTO.MenuListResponseDTO.builder()
-                        .menuId(menu.getId())
-                        .name(menu.getName())
-                        .price(menu.getPrice())
-                        .menuPicture(menu.getMenuPicture())
-                        .status(menu.getStatus())
-                        .category(menu.getMenuCategory().getCategory())
-                        .build())
-                .collect(Collectors.toList());
-
-        LocalDateTime next_cursor = null;
-        if (!menuList.isEmpty() && menuSlice.hasNext()) {
-            next_cursor = menuList.getLast().getCreatedAt();
-        }
-
-        return MenuResponseDTO.MenuStoreListResponseDTO.builder()
-                .menus(menuDTOS)
-                .hasNext(menuSlice.hasNext())
-                .nextCursor(next_cursor)
                 .build();
     }
 }

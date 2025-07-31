@@ -99,27 +99,45 @@ public class MenuCommandServiceImpl {
                 throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
             }
 
-            // 메뉴 정보 업데이트
-            if (requestDTO.getName() != null) {
+            // 메뉴 정보 업데이트 - updateMenuInfo 메서드 사용
+            if (requestDTO.getName() != null || requestDTO.getContent() != null ||
+                requestDTO.getPrice() != null || requestDTO.getMenuPicture() != null) {
+
                 // 메뉴명 중복 체크 (자기 자신 제외)
-                if (!menu.getName().equals(requestDTO.getName()) &&
+                if (requestDTO.getName() != null && !menu.getName().equals(requestDTO.getName()) &&
                     menuRepository.existsByNameAndStoreId(requestDTO.getName(), menu.getStore().getId())) {
                     throw new MenuException(MenuErrorCode.ALREADY_ADD);
                 }
+
+                // updateMenuInfo 메서드 사용하여 일괄 업데이트
+                menu.updateMenuInfo(
+                    requestDTO.getName() != null ? requestDTO.getName() : menu.getName(),
+                    requestDTO.getContent() != null ? requestDTO.getContent() : menu.getContent(),
+                    requestDTO.getPrice() != null ? requestDTO.getPrice() : menu.getPrice(),
+                    requestDTO.getMenuPicture() != null ? requestDTO.getMenuPicture() : menu.getMenuPicture()
+                );
             }
 
+            // 상태 변경이 있으면 updateStatus 메서드 사용
+            if (requestDTO.getStatus() != null) {
+                menu.updateStatus(requestDTO.getStatus());
+            }
+
+            // 변경된 메뉴 저장
+            Menu updatedMenu = menuRepository.save(menu);
+
             return MenuResponseDTO.MenuDetailResponseDTO.builder()
-                    .menuId(menu.getId())
-                    .name(requestDTO.getName() != null ? requestDTO.getName() : menu.getName())
-                    .content(requestDTO.getContent() != null ? requestDTO.getContent() : menu.getContent())
-                    .price(requestDTO.getPrice() != null ? requestDTO.getPrice() : menu.getPrice())
-                    .menuPicture(menu.getMenuPicture())
-                    .status(menu.getStatus())
-                    .storeId(menu.getStore().getId())
-                    .storeName(menu.getStore().getName())
-                    .category(menu.getMenuCategory().getCategory())
-                    .createdAt(menu.getCreatedAt())
-                    .updatedAt(menu.getUpdatedAt())
+                    .menuId(updatedMenu.getId())
+                    .name(updatedMenu.getName())
+                    .content(updatedMenu.getContent())
+                    .price(updatedMenu.getPrice())
+                    .menuPicture(updatedMenu.getMenuPicture())
+                    .status(updatedMenu.getStatus())
+                    .storeId(updatedMenu.getStore().getId())
+                    .storeName(updatedMenu.getStore().getName())
+                    .category(updatedMenu.getMenuCategory().getCategory())
+                    .createdAt(updatedMenu.getCreatedAt())
+                    .updatedAt(updatedMenu.getUpdatedAt())
                     .build();
         } catch (MenuException e) {
             throw e;

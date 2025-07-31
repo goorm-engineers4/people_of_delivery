@@ -112,6 +112,6 @@ public class MenuController {
             @PathVariable("menuId") UUID menuId,
             @AuthenticationPrincipal User user) {
         menuCommandService.deleteMenu(menuId, user);
-        return CustomResponse.onSuccess(HttpStatus.OK, "메뉴 삭제 완료.");
+        return CustomResponse.onSuccess(HttpStatus.OK, "메뉴 삭제 완료");
     }
 }
