@@ -31,7 +31,7 @@ public class Cart {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId" ,nullable = false)
     private User user;
 
@@ -51,7 +51,7 @@ public class Cart {
 
     public void setUser(User user){
         this.user = user;
-        user.getCarts().add(this);
+        user.setCart(this);
     }
 
     public void setStore(Store store){

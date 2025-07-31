@@ -34,10 +34,9 @@ public class CartCommandService {
         }
 
         Cart cart = Cart.builder()
-                .user(user)
-                .store(store)
                 .build();
-
+        cart.setUser(user);
+        cart.setStore(store);
         Cart savedCart = cartRepository.save(cart);
         log.info("장바구니 생성 완료, cartId={}", savedCart.getId());
 

@@ -54,9 +54,8 @@ public class User extends BaseEntity {
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Cart> carts= new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    private Cart cart;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
@@ -70,5 +69,9 @@ public class User extends BaseEntity {
         private UserBuilder id(UUID id) {
             throw new UnsupportedOperationException("id 수동 생성 불가");
         }
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 }
