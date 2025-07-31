@@ -4,6 +4,9 @@ import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewRequestDTO
 import com.example.cloudfour.peopleofdelivery.domain.review.dto.ReviewResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public class ReviewConverter {
     public static Review toReview(ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequestDTO){
         return Review.builder()
@@ -26,8 +29,8 @@ public class ReviewConverter {
                 .build();
     }
 
-    public static ReviewResponseDTO.ReviewStoreListResponseDTO toReviewStoreListResponseDTO(Review review){
-        return ReviewResponseDTO.ReviewStoreListResponseDTO.builder()
+    public static ReviewResponseDTO.ReviewStoreResponseDTO toReviewStoreResponseDTO(Review review){
+        return ReviewResponseDTO.ReviewStoreResponseDTO.builder()
                 .reviewId(review.getId())
                 .userId(review.getUser().getId())
                 .content(review.getContent())
@@ -38,8 +41,16 @@ public class ReviewConverter {
                 .build();
     }
 
-    public static ReviewResponseDTO.ReviewUserListResponseDTO toReviewUserListResponseDTO(Review review){
-        return ReviewResponseDTO.ReviewUserListResponseDTO.builder()
+    public static ReviewResponseDTO.ReviewStoreListResponseDTO toReviewStoreListResponseDTO(List<ReviewResponseDTO.ReviewStoreResponseDTO> reviews, Boolean hasNext, LocalDateTime cursor) {
+        return ReviewResponseDTO.ReviewStoreListResponseDTO.builder()
+                .reviews(reviews)
+                .hasNext(hasNext)
+                .cursor(cursor)
+                .build();
+    }
+
+    public static ReviewResponseDTO.ReviewUserResponseDTO toReviewUserResponseDTO(Review review){
+        return ReviewResponseDTO.ReviewUserResponseDTO.builder()
                 .reviewId(review.getId())
                 .storeName(review.getStore().getName())
                 .content(review.getContent())
@@ -49,6 +60,15 @@ public class ReviewConverter {
                 .createdBy(review.getUser().getId())
                 .build();
     }
+
+    public static ReviewResponseDTO.ReviewUserListResponseDTO toReviewUserListResponseDTO(List<ReviewResponseDTO.ReviewUserResponseDTO> reviews, Boolean hasNext, LocalDateTime cursor) {
+        return ReviewResponseDTO.ReviewUserListResponseDTO.builder()
+                .reviews(reviews)
+                .hasNext(hasNext)
+                .cursor(cursor)
+                .build();
+    }
+
 
     public static ReviewResponseDTO.ReviewCreateResponseDTO toReviewCreateResponseDTO(Review review){
         return ReviewResponseDTO.ReviewCreateResponseDTO.builder()
