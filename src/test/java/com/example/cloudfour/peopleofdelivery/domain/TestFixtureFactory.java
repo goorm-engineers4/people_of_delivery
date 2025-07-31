@@ -9,7 +9,7 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderHistory;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
-import com.example.cloudfour.peopleofdelivery.domain.orderitem.entity.OrderItem;
+import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.PaymentHistory;
 import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
@@ -54,7 +54,7 @@ public class TestFixtureFactory {
                 .nickname("mockUser")
                 .password("encoded")
                 .number("010-1111-2222")
-                .role(Role.CUSTMER)
+                .role(Role.CUSTOMER)
                 .providerId("google-oauth2|1234567890")
                 .loginType(LoginType.GOOGLE)
                 .build();
@@ -187,7 +187,6 @@ public class TestFixtureFactory {
 
         user.getReviews().add(review);
         store.getReviews().add(review);
-        menu.getReviews().add(review);
 
         AiLog aiLog = AiLog.builder()
                 .question("치킨 추천해줘")
