@@ -61,7 +61,6 @@ public class CartCommandService {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new CartException(CartErrorCode.NOT_FOUND));
 
-        // 권한 체크 (Cart 소유자와 요청 User 비교)
         if (!cart.getUser().getId().equals(user.getId())) {
             throw new CartException(CartErrorCode.UNAUTHORIZED_ACCESS);
         }
