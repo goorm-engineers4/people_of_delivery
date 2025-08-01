@@ -66,7 +66,6 @@ public class StoreResponseDTO {
         }
     }
 
-    // StoreListResponseDTO에 createdAt 추가
     @Getter
     @Builder
     public static class StoreListResponseDTO {

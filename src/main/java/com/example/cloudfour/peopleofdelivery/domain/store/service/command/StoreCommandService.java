@@ -62,7 +62,7 @@ public class StoreCommandService {
 
         storeRepository.save(store);
 
-        return StoreResponseDTO.StoreUpdateResponseDTO.builder().build(); // 응답 내용 필요 시 추가
+        return StoreResponseDTO.StoreUpdateResponseDTO.builder().build();
     }
 
     public void deleteStore(UUID storeId, User user) {

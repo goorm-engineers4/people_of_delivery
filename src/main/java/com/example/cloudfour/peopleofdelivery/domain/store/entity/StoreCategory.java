@@ -34,7 +34,6 @@ public class StoreCategory {
     @Column(nullable = false, length = 255)
     private String category;
 
-    // 🔽 양방향 관계 추가
     @OneToMany(mappedBy = "storeCategory", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Store> stores = new ArrayList<>();
