@@ -18,7 +18,7 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
     // 사용자 ID로 가게 조회 (soft delete된 유저 제외)
     @Query("SELECT s FROM Store s WHERE s.user.id = :userId AND s.user.isDeleted = false")
     Optional<Store> findByUserId(@Param("userId") UUID userId);
-}
+
     boolean existsByName(String name);
 
     @Query("SELECT s FROM Store s WHERE s.isDeleted = false AND s.createdAt < :cursor ORDER BY s.createdAt DESC")
