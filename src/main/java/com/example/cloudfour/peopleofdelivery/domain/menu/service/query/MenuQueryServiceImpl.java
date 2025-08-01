@@ -18,16 +18,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service // 서비스 레이어 어노테이션
-@Slf4j // 로그 찍기 기능
-@RequiredArgsConstructor // 생성자 주입을 위한 어노테이션
-@Transactional(readOnly = true) // 트랜잭션 관리 어노테이션
+@Service
+@Slf4j
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MenuQueryServiceImpl {
 
     private final MenuRepository menuRepository;
     private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
 
-    // 커서 기반 페이지네이션을 사용한 가게별 메뉴 조회
     public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size) {
         if (cursor == null) {
             cursor = first_cursor;
@@ -64,7 +63,6 @@ public class MenuQueryServiceImpl {
                 .build();
     }
 
-    // 전체 인기 메뉴 TOP20 조회
     public List<MenuResponseDTO.MenuTopResponseDTO> getTopMenus() {
         List<Menu> topMenus = menuRepository.findTopMenusByOrderCount(PageRequest.of(0, 20));
 
@@ -79,7 +77,6 @@ public class MenuQueryServiceImpl {
                 .collect(Collectors.toList());
     }
 
-    // 시간대별 인기 메뉴 TOP20 조회
     public List<MenuResponseDTO.MenuTimeTopResponseDTO> getTimeTopMenus() {
         LocalDateTime startTime = LocalDateTime.now().minusHours(24); // 최근 24시간
         LocalDateTime endTime = LocalDateTime.now();
@@ -99,7 +96,6 @@ public class MenuQueryServiceImpl {
                 .collect(Collectors.toList());
     }
 
-    // 지역별 인기 메뉴 TOP20 조회
     public List<MenuResponseDTO.MenuRegionTopResponseDTO> getRegionTopMenus(String si, String gu) {
         List<Menu> regionTopMenus = menuRepository.findTopMenusByRegion(si, gu, PageRequest.of(0, 20));
 
@@ -117,7 +113,6 @@ public class MenuQueryServiceImpl {
                 .collect(Collectors.toList());
     }
 
-    // 메뉴 상세 조회
     public MenuResponseDTO.MenuDetailResponseDTO getMenuDetail(UUID menuId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
@@ -130,7 +125,7 @@ public class MenuQueryServiceImpl {
                 .menuPicture(menu.getMenuPicture())
                 .status(menu.getStatus())
                 .storeId(menu.getStore().getId())
-                .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
+                .storeName(menu.getStore().getName())
                 .category(menu.getMenuCategory().getCategory())
                 .createdAt(menu.getCreatedAt())
                 .updatedAt(menu.getUpdatedAt())

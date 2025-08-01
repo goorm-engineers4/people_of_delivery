@@ -6,10 +6,8 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-// MenuResponseDTO: 서버 -> 클라이언트로 보내는 데이터
 public class MenuResponseDTO {
 
-    // 메뉴 생성 응답
     @Getter
     @Builder
     public static class MenuDetailResponseDTO {
@@ -26,7 +24,6 @@ public class MenuResponseDTO {
         private java.time.LocalDateTime updatedAt;
     }
 
-    // 해당 가게 메뉴 목록 조회 응답
     @Getter
     @Builder
     public static class MenuListResponseDTO {
@@ -38,7 +35,6 @@ public class MenuResponseDTO {
         private String category;
     }
 
-    // 인기 메뉴 TOP20 조회 응답
     @Getter
     @Builder
     public static class MenuTopResponseDTO {
@@ -51,7 +47,6 @@ public class MenuResponseDTO {
         private String storeName;
     }
 
-    // 시간대별 인기 메뉴 TOP20 조회 응답
     @Getter
     @Builder
     public static class MenuTimeTopResponseDTO {
@@ -65,7 +60,6 @@ public class MenuResponseDTO {
         private Integer orderCount;
     }
 
-    // 지역별 인기 메뉴 TOP20 조회 응답
     @Getter
     @Builder
     public static class MenuRegionTopResponseDTO {
@@ -79,7 +73,6 @@ public class MenuResponseDTO {
         private String region;
     }
 
-    // 커서 기반 페이지네이션을 위한 가게별 메뉴 목록 응답
     @Getter
     @Builder
     public static class MenuStoreListResponseDTO {
