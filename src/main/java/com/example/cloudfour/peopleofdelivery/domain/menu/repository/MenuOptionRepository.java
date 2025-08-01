@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MenuOptionRepository extends JpaRepository<MenuOption, UUID> {
-    // 특정 메뉴의 옵션들 조회
+
     @Query("select mo from MenuOption mo join fetch OrderItem oi on oi.menu.id = mo.menu.id where oi.order.id =:OrderId")
     List<MenuOption> findByOrderId(@Param("OrderId") UUID orderId);
 }
