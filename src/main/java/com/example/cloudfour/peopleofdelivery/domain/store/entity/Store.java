@@ -26,12 +26,9 @@ public class Store extends BaseEntity {
     @GeneratedValue
     private UUID id;
 
-    // updateStore() 기능을 위한 setter 메서드 추가
-    @Setter
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Setter
     @Column(nullable = false, length = 255)
     private String address;
 
@@ -49,12 +46,10 @@ public class Store extends BaseEntity {
     @Column(nullable = false)
     private Integer deliveryTip;
 
-    @Setter
     private Float rating;
 
     private Integer likeCount;
 
-    @Setter
     private Integer reviewCount;
 
     @Column(nullable = false, length = 255)
