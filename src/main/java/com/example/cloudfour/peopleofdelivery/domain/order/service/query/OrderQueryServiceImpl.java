@@ -1,5 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.domain.order.service.query;
 
+import com.example.cloudfour.peopleofdelivery.domain.menu.converter.MenuOptionConverter;
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.order.converter.OrderConverter;
@@ -42,13 +44,12 @@ public class OrderQueryServiceImpl {
         if(!orderRepository.existsByOrderIdAndUserId(orderId, user.getId())) {
             throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
         }
-        //order에 있는 orderitems, orderitems에 있는 menuoptions 필요
         Order order = orderRepository.findById(orderId).orElseThrow(()->new OrderException(OrderErrorCode.NOT_FOUND));
         List<OrderItem> orderItems =  orderItemRepository.findByOrderId(orderId);
         List<MenuOption> menuOptions = menuOptionRepository.findByOrderId(orderId);
-        List<OrderItemResponseDTO.OrderItemListResponseDTO> orderItemDTOS = orderItems.stream().map(orderItem -> OrderItemConverter.toOrderItemClassListDTO(orderItem,menuOptions)).toList();
-        OrderResponseDTO.OrderDetailResponseDTO orderDetailResponseDTO = OrderConverter.toOrderDetailResponseDTO(order,orderItemDTOS);
-        return orderDetailResponseDTO;
+        List<MenuOptionResponseDTO.MenuOptionListResponseDTO> menuOptionListResponseDTOS = menuOptions.stream().map(MenuOptionConverter::toMenuOptionListResponseDTO).toList();
+        List<OrderItemResponseDTO.OrderItemListResponseDTO> orderItemDTOS = orderItems.stream().map(orderItem -> OrderItemConverter.toOrderItemClassListDTO(orderItem,menuOptionListResponseDTOS)).toList();
+        return OrderConverter.toOrderDetailResponseDTO(order,orderItemDTOS);
     }
 
     public OrderResponseDTO.OrderUserListResponseDTO getOrderListByUser(User user, LocalDateTime cursor, Integer size) {
