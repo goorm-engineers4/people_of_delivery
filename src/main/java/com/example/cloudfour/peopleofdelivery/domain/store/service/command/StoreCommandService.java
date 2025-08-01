@@ -61,10 +61,8 @@ public class StoreCommandService {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        if (dto.getName() != null) store.setName(dto.getName());
-        if (dto.getAddress() != null) store.setAddress(dto.getAddress());
-        if (dto.getRating() >= 0) store.setRating(dto.getRating());
-        if (dto.getReviewCount() >= 0) store.setReviewCount(dto.getReviewCount());
+        //setter 직접 호출하는 방식에서 도메인 메서드 호출하는 방식으로 수정
+        store.update(dto.getName(), dto.getAddress(), dto.getRating(), dto.getReviewCount());
 
         storeRepository.save(store);
 
