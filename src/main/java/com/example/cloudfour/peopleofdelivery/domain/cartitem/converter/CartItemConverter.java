@@ -1,5 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.domain.cartitem.converter;
 
+import com.example.cloudfour.peopleofdelivery.domain.cart.dto.CartRequestDTO;
+import com.example.cloudfour.peopleofdelivery.domain.cartitem.dto.CartItemRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.dto.CartItemResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
 
@@ -37,6 +39,15 @@ public class CartItemConverter {
                 .menuOptionId(cartItem.getMenuOption().getId())
                 .quantity(cartItem.getQuantity())
                 .price(cartItem.getPrice())
+                .build();
+    }
+
+    public static CartItemRequestDTO.CartItemAddRequestDTO toCartItemAddRequestDTO(CartRequestDTO.CartCreateRequestDTO cartCreateRequestDTO, int price){
+        return   CartItemRequestDTO.CartItemAddRequestDTO.builder()
+                .menuId(cartCreateRequestDTO.getMenuId())
+                .menuOptionId(cartCreateRequestDTO.getMenuOptionId())
+                .quantity(1)
+                .price(price)
                 .build();
     }
 }
