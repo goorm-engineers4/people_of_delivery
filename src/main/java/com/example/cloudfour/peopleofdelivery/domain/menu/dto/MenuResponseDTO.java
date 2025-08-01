@@ -1,10 +1,8 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.dto;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -14,8 +12,6 @@ public class MenuResponseDTO {
     // 메뉴 생성 응답
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MenuDetailResponseDTO {
         private UUID menuId;
         private UUID storeId;
@@ -33,8 +29,6 @@ public class MenuResponseDTO {
     // 해당 가게 메뉴 목록 조회 응답
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MenuListResponseDTO {
         private UUID menuId;
         private String name;
@@ -47,8 +41,6 @@ public class MenuResponseDTO {
     // 인기 메뉴 TOP20 조회 응답
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MenuTopResponseDTO {
         private UUID menuId;
         private String name;
@@ -62,8 +54,6 @@ public class MenuResponseDTO {
     // 시간대별 인기 메뉴 TOP20 조회 응답
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MenuTimeTopResponseDTO {
         private UUID menuId;
         private String name;
@@ -78,8 +68,6 @@ public class MenuResponseDTO {
     // 지역별 인기 메뉴 TOP20 조회 응답
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MenuRegionTopResponseDTO {
         private UUID menuId;
         private String name;
@@ -94,8 +82,6 @@ public class MenuResponseDTO {
     // 커서 기반 페이지네이션을 위한 가게별 메뉴 목록 응답
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class MenuStoreListResponseDTO {
         private java.util.List<MenuListResponseDTO> menus;
         private Boolean hasNext;

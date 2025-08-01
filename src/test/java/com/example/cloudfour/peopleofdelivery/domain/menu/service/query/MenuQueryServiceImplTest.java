@@ -183,23 +183,25 @@ class MenuQueryServiceImplTest {
     @DisplayName("지역별 인기 메뉴 TOP20 조회 성공")
     void getRegionTopMenus_Success() {
         // Given: 지역별 인기 메뉴 20개 생성
+        String si = "서울특별시";
+        String gu = "강남구";
         List<Menu> mockRegionTopMenus = IntStream.range(1, 21)
                 .mapToObj(i -> createMockMenu("지역별 " + i + "위 메뉴", 10000 + i * 800))  // 지역별 메뉴
                 .collect(Collectors.toList());
 
         // Mock Repository 설정
-        given(menuRepository.findTopMenusByRegion(anyString(), any()))  // 지역명, 페이징
+        given(menuRepository.findTopMenusByRegion(eq(si), eq(gu), any()))  // si, gu, 페이징
                 .willReturn(mockRegionTopMenus);
 
         // When: 지역별 인기 메뉴 조회
-        List<MenuResponseDTO.MenuRegionTopResponseDTO> result = menuQueryService.getRegionTopMenus();
+        List<MenuResponseDTO.MenuRegionTopResponseDTO> result = menuQueryService.getRegionTopMenus(si, gu);
 
         // Then: 결과 검증
         assertThat(result).hasSize(20);
         assertThat(result.get(0).getName()).isEqualTo("지역별 1위 메뉴");
         assertThat(result.get(0).getPrice()).isEqualTo(10800);  // 10000 + 1 * 800
 
-        verify(menuRepository, times(1)).findTopMenusByRegion(anyString(), any());
+        verify(menuRepository, times(1)).findTopMenusByRegion(eq(si), eq(gu), any());
     }
 
     // 메뉴 상세 조회 성공 테스트

@@ -100,9 +100,8 @@ public class MenuQueryServiceImpl {
     }
 
     // 지역별 인기 메뉴 TOP20 조회
-    public List<MenuResponseDTO.MenuRegionTopResponseDTO> getRegionTopMenus() {
-        String region = "서울"; // 기본값 설정
-        List<Menu> regionTopMenus = menuRepository.findTopMenusByRegion(region, PageRequest.of(0, 20));
+    public List<MenuResponseDTO.MenuRegionTopResponseDTO> getRegionTopMenus(String si, String gu) {
+        List<Menu> regionTopMenus = menuRepository.findTopMenusByRegion(si, gu, PageRequest.of(0, 20));
 
         return regionTopMenus.stream()
                 .map(menu -> MenuResponseDTO.MenuRegionTopResponseDTO.builder()
@@ -110,8 +109,10 @@ public class MenuQueryServiceImpl {
                         .name(menu.getName())
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
-                        .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
-                        .region(region)
+                        .status(menu.getStatus())
+                        .category(menu.getMenuCategory().getCategory())
+                        .storeName(menu.getStore().getName())
+                        .region(menu.getStore().getRegion().getSi() + " " + menu.getStore().getRegion().getGu())
                         .build())
                 .collect(Collectors.toList());
     }

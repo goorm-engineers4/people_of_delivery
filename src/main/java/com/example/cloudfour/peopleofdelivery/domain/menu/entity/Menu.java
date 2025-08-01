@@ -2,6 +2,8 @@ package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import jakarta.persistence.*;
@@ -56,22 +58,22 @@ public class Menu {
     @JoinColumn(name = "storeId", nullable = false)
     private Store store;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu")
     @Builder.Default
     private List<MenuOption> menuOptions = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu")
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu")
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
     // Builder에서 id 필드 제외
     public static class MenuBuilder {
         private MenuBuilder id(UUID id) {
-            throw new UnsupportedOperationException("id 수동 생성 불가");
+            throw new MenuException(MenuErrorCode.CREATE_FAILED);
         }
     }
 
