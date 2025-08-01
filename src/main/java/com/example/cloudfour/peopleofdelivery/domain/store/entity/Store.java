@@ -40,7 +40,7 @@ public class Store extends BaseEntity {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 255, unique = true)
     private String name;
 
     @Column(nullable = false, length = 255)
