@@ -30,8 +30,8 @@ import java.util.UUID;
 @RequestMapping("/api/menus")
 @Tag(name = "Menu", description = "메뉴 API by 정병민")
 public class MenuController {
-    private final MenuCommandServiceImpl menuCommandService; // 메뉴 생성/수정/삭제
-    private final MenuQueryServiceImpl menuQueryService; // 메뉴 조회
+    private final MenuCommandServiceImpl menuCommandService;
+    private final MenuQueryServiceImpl menuQueryService;
     @PostMapping("")
     @Operation(summary = "메뉴 생성", description = "메뉴를 생성합니다. 메뉴 생성에 사용되는 API입니다.")
     public CustomResponse<MenuResponseDTO.MenuDetailResponseDTO> createMenu(
