@@ -1,6 +1,6 @@
-package com.example.cloudfour.peopleofdelivery.domain.store.service.command;
+package com.example.cloudfour.peopleofdelivery.unit.domain.store.service.command;
 
-import com.example.cloudfour.peopleofdelivery.domain.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.unit.domain.TestFixtureFactory;
 import com.example.cloudfour.peopleofdelivery.domain.region.repository.RegionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 import java.util.UUID;

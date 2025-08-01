@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain.useraddress.entity;
+package com.example.cloudfour.peopleofdelivery.unit.domain.useraddress.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.UserAddress;
 import org.junit.jupiter.api.Test;
