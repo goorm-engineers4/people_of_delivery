@@ -1,6 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.unit.domain.store.service.command;
 
-import com.example.cloudfour.peopleofdelivery.unit.domain.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.mock.TestFixtureFactory;
 import com.example.cloudfour.peopleofdelivery.domain.region.repository.RegionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;

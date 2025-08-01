@@ -1,6 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.unit.domain.menu.service.query;
 
-import com.example.cloudfour.peopleofdelivery.unit.domain.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.mock.TestFixtureFactory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;

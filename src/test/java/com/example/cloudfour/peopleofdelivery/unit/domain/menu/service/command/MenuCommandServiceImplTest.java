@@ -1,7 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.unit.domain.menu.service.command;
 
 // 테스트에 필요한 라이브러리들 import
-import com.example.cloudfour.peopleofdelivery.unit.domain.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.mock.TestFixtureFactory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;

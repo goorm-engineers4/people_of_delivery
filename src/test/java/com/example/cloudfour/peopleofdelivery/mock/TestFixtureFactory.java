@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.unit.domain;
+package com.example.cloudfour.peopleofdelivery.mock;
 
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
