@@ -20,7 +20,7 @@ public class CartConverter {
                 .userId(cart.getUser().getId())
                 .storeId(cart.getStore().getId())
                 .cartItemId(cartItemId)
-                .createdAt(cart.getCreatedAt())  // createdAt 필드 정상참조
+                .createdAt(cart.getCreatedAt())
                 .build();
     }
 

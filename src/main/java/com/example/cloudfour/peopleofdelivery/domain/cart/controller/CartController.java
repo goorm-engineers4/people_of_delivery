@@ -11,7 +11,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -23,8 +29,6 @@ public class CartController {
     private final CartCommandService cartCommandService;
     private final CartQueryService cartQueryService;
 
-
-    // 장바구니 항목도 같이 생성 추가해야됨
     @PostMapping
     @Operation(summary = "장바구니 생성", description = "장바구니를 생성합니다. 장바구니 생성에 사용되는 API입니다.")
     public CustomResponse<CartResponseDTO.CartCreateResponseDTO> createCart(
@@ -54,6 +58,5 @@ public class CartController {
         cartCommandService.deleteCart(cartId, user);
         return CustomResponse.onSuccess(HttpStatus.OK, "장바구니 삭제 완료");
     }
-
 
 }
