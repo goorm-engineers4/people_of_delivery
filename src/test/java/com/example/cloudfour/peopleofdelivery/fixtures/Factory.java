@@ -190,7 +190,7 @@ public class Factory {
     }
 
 
-    //가게 생성시 권한있는 유저 확인하기 위해 추가
+
     public static User createMockUserWithRole(Role role) {
         Region region = createMockRegion();
 
@@ -199,7 +199,7 @@ public class Factory {
                 .nickname("mockUser")
                 .password("encoded")
                 .number("010-1111-2222")
-                .role(role)  //  이 부분! 권한을 인자로 받음
+                .role(role)
                 .providerId("google-oauth2|1234567890")
                 .loginType(LoginType.GOOGLE)
                 .build();
