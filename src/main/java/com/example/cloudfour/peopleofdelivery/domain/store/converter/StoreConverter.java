@@ -6,7 +6,6 @@ import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 
 public class StoreConverter {
 
-    // CreateRequestDTO → Entity 변환
     public static Store toStore(StoreRequestDTO.StoreCreateRequestDTO dto) {
         return Store.builder()
                 .name(dto.getName())
@@ -24,7 +23,6 @@ public class StoreConverter {
                 .build();
     }
 
-    // Entity → CreateResponseDTO 변환
     public static StoreResponseDTO.StoreCreateResponseDTO toStoreCreateResponseDTO(Store store) {
         return StoreResponseDTO.StoreCreateResponseDTO.builder()
                 .storeId(store.getId())

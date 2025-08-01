@@ -1,7 +1,19 @@
 package com.example.cloudfour.peopleofdelivery.domain.store.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +34,6 @@ public class StoreCategory {
     @Column(nullable = false, length = 255)
     private String category;
 
-    // 🔽 양방향 관계 추가
     @OneToMany(mappedBy = "storeCategory", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Store> stores = new ArrayList<>();

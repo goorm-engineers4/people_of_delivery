@@ -26,8 +26,6 @@ public class StoreCommandService {
     private final RegionRepository regionRepository;
     private final StoreCategoryRepository storeCategoryRepository;
 
-
-    // 가게 생성
     public StoreResponseDTO.StoreCreateResponseDTO createStore(StoreRequestDTO.StoreCreateRequestDTO dto, User user) {
         if (!(user.getRole() == Role.MASTER || user.getRole() == Role.OWNER)) {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
@@ -52,7 +50,6 @@ public class StoreCommandService {
         return StoreConverter.toStoreCreateResponseDTO(store);
     }
 
-    // 가게 정보 수정
     public StoreResponseDTO.StoreUpdateResponseDTO updateStore(UUID storeId, StoreRequestDTO.StoreUpdateRequestDTO dto, User user) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
@@ -61,15 +58,13 @@ public class StoreCommandService {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        //setter 직접 호출하는 방식에서 도메인 메서드 호출하는 방식으로 수정
         store.update(dto.getName(), dto.getAddress(), dto.getRating(), dto.getReviewCount());
 
         storeRepository.save(store);
 
-        return StoreResponseDTO.StoreUpdateResponseDTO.builder().build(); // 응답 내용 필요 시 추가
+        return StoreResponseDTO.StoreUpdateResponseDTO.builder().build();
     }
 
-    // 가게 삭제
     public void deleteStore(UUID storeId, User user) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
