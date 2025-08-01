@@ -51,9 +51,12 @@ public class ReviewCommandServiceImpl{
     }
 
     public ReviewResponseDTO.ReviewUpdateResponseDTO updateReview(ReviewRequestDTO.ReviewUpdateRequestDTO reviewUpdateRequestDTO, UUID reviewId, User user) {
-        User finduser = userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
+        userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Store findStore = storeRepository.findById(reviewUpdateRequestDTO.getStoreId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
         Review findReview = reviewRepository.findById(reviewId).orElseThrow(()->new ReviewException(ReviewErrorCode.NOT_FOUND));
+        if(!reviewRepository.existsByReviewIdAndUserId(reviewId, user.getId())) {
+            throw new ReviewException(ReviewErrorCode.UNAUTHORIZED_ACCESS);
+        }
         findReview.update(reviewUpdateRequestDTO);
         findReview.setStore(findStore);
         return ReviewConverter.toReviewUpdateResponseDTO(findReview);

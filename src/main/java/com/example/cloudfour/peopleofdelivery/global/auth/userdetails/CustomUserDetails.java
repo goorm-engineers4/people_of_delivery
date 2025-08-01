@@ -1,6 +1,8 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.userdetails;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
+import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,41 +15,63 @@ import java.util.UUID;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final UUID id;
+    private final String email;
+    private final String passwordHash;   // LOCAL만 사용(BCrypt 해시)
+    private final Role role;
+    private final LoginType loginType;
+    private final String providerId;
 
     public CustomUserDetails(User user) {
-        this.user = user;
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.passwordHash = user.getPassword();
+        this.role = user.getRole();
+        this.loginType = user.getLoginType();
+        this.providerId = user.getProviderId();
     }
 
-    public UUID getId(){
-        return user.getId(); // User 엔티티의 ID 반환
+    public static CustomUserDetails of(UUID id, String email, Role role, LoginType loginType) {
+        return new CustomUserDetails(id, email, null, role, loginType, null);
     }
+
+    private CustomUserDetails(UUID id, String email, String passwordHash,
+                              Role role, LoginType loginType, String providerId) {
+        this.id = id;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.loginType = loginType;
+        this.providerId = providerId;
+    }
+
+    public UUID getId() { return id; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword(); // 소셜 로그인인 경우 null 도 가능
+        return passwordHash;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail(); // 인증 기준값
+        // 인증 식별자는 email
+        return email;
     }
 
-    @Override
-    public boolean isAccountNonExpired() { return true; }
+
+    @Override public boolean isAccountNonExpired()  { return true; }
+    @Override public boolean isAccountNonLocked()   { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled()            { return true; }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
+    public String toString() {
+        return "CustomUserDetails{id=%s,role=%s"
+                .formatted(id, role);
+    }
 }
-
