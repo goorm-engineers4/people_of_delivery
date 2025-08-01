@@ -72,13 +72,13 @@ public class MenuQueryServiceImpl {
                         .name(menu.getName())
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
-                        .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
+                        .storeName(menu.getStore().getName())
                         .build())
                 .collect(Collectors.toList());
     }
 
     public List<MenuResponseDTO.MenuTimeTopResponseDTO> getTimeTopMenus() {
-        LocalDateTime startTime = LocalDateTime.now().minusHours(24); // 최근 24시간
+        LocalDateTime startTime = LocalDateTime.now().minusHours(24);
         LocalDateTime endTime = LocalDateTime.now();
 
         List<Menu> timeTopMenus = menuRepository.findTopMenusByTimeRange(
@@ -90,7 +90,7 @@ public class MenuQueryServiceImpl {
                         .name(menu.getName())
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
-                        .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
+                        .storeName(menu.getStore().getName())
                         .orderCount(menu.getOrderItems().size())
                         .build())
                 .collect(Collectors.toList());
