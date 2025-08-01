@@ -30,23 +30,25 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         User user = oAuth2User.getUser();
 
-        if (user == null) {
-            // 신규 유저 → 추가 정보 입력 요청
-            Map<String, String> result = new HashMap<>();
-            result.put("providerId", oAuth2User.getProviderId());
-            result.put("email", oAuth2User.getEmail());
+        response.setContentType("application/json;charset=UTF-8");
 
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write(objectMapper.writeValueAsString(result));
+        if (user == null) {
+            // 신규 - 추가 정보 입력 요청
+            var body = Map.of(
+                    "needSignup", true,
+                    "providerId", oAuth2User.getProviderId(),
+                    "email", oAuth2User.getEmail()
+            );
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(objectMapper.writeValueAsString(body));
             return;
         }
 
-        // 기존 유저 → JWT 발급
-        TokenDto tokenDto = jwtTokenProvider.createToken(user.getEmail(), user.getRole());
+        // 기존 - JWT 발급
+        TokenDto tokenDto = jwtTokenProvider.createToken(user.getId(), user.getRole());
 
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
         response.getWriter().write(objectMapper.writeValueAsString(tokenDto));
     }
 }

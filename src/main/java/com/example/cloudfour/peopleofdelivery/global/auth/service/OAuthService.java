@@ -18,7 +18,7 @@ public class OAuthService {
 
     public void completeSignup(OAuthRequestDTO.AdditionalSignupRequestDto dto) {
         // 이미 가입된 이메일이면 예외 처리
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+        if (userRepository.findByEmailAndDeletedFalse(dto.getEmail()).isPresent()) {
             throw new IllegalStateException("이미 가입된 이메일입니다.");
         }
 

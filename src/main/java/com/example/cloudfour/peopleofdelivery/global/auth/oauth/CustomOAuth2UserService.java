@@ -19,20 +19,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final UserRepository userRepository;
 
+    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService(); // 주입 받음
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = new DefaultOAuth2UserService().loadUser(request); // 로그인 응답에서 사용자 정보 불러오기
+        OAuth2User oAuth2User = delegate.loadUser(request);
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
+
         String providerId = (String) attributes.get("sub");
         String email = (String) attributes.get("email");
 
-        // 존재하는 유저인지 확인 (Google 로그인 기준)
-        Optional<User> userOptional = userRepository.findByProviderId(providerId);
+        if (providerId == null || providerId.isBlank()) {
+            throw new IllegalArgumentException("OAuth2 provider id(sub)가 없습니다.");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("OAuth2 email 속성이 없습니다.");
+        }
 
-        User user = userOptional.orElse(null); // 아직 가입되지 않은 경우
-
-        // SecurityContext에 들어가는 유저 정보
+        User user = userRepository.findByProviderId(providerId).orElse(null);
         return new CustomOAuth2User(user, attributes, providerId, email);
     }
 }
