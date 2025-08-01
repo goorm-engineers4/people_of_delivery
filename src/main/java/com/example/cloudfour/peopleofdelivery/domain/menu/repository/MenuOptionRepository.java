@@ -1,6 +1,5 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.repository;
 
-import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -2,6 +2,8 @@ package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import jakarta.persistence.*;
@@ -17,12 +19,12 @@ import java.util.UUID;
 @Table(name = "p_menu")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)  // Builder만 사용하도록 제한
 public class Menu {
     @Id
     @GeneratedValue
-    private UUID id;  // 자동 생성되는 UUID
+    private UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -31,22 +33,22 @@ public class Menu {
     private String content;
 
     @Column(name = "price", nullable = false)
-    private Integer price;  // INT 타입으로 변경
+    private Integer price;
 
     @Column(name = "menuPicture", columnDefinition = "TEXT")
-    private String menuPicture;  // TEXT 타입으로 변경
+    private String menuPicture;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private MenuStatus status;
 
     @CreationTimestamp
-    @Column(name = "createdAt", nullable = false)
-    private LocalDateTime createdAt;  // TIMESTAMP 타입
+    @Column(name = "createdAt", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updatedAt")
-    private LocalDateTime updatedAt;  // TIMESTAMP 타입
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menuCategoryId", nullable = false)
@@ -56,21 +58,22 @@ public class Menu {
     @JoinColumn(name = "storeId", nullable = false)
     private Store store;
 
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu")
     @Builder.Default
     private List<MenuOption> menuOptions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu")
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu")
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
+    // Builder에서 id 필드 제외
     public static class MenuBuilder {
-        private MenuBuilder id(UUID id){
-            throw new UnsupportedOperationException("id 수정 불가");
+        private MenuBuilder id(UUID id) {
+            throw new MenuException(MenuErrorCode.CREATE_FAILED);
         }
     }
 
@@ -84,27 +87,15 @@ public class Menu {
         store.getMenus().add(this);
     }
 
-    // 메뉴 정보 업데이트 메서드
-    public void update(String name, String content, Integer price, String menuPicture, MenuStatus status) {
-        if (name != null) {
-            this.name = name;
-        }
-        if (content != null) {
-            this.content = content;
-        }
-        if (price != null) {
-            this.price = price;
-        }
-        if (menuPicture != null) {
-            this.menuPicture = menuPicture;
-        }
-        if (status != null) {
-            this.status = status;
-        }
+    // 메뉴 정보 수정을 위한 업데이트 메서드
+    public void updateMenuInfo(String name, String content, Integer price, String menuPicture) {
+        this.name = name;
+        this.content = content;
+        this.price = price;
+        this.menuPicture = menuPicture;
     }
 
-    // 소프트 삭제 메서드 (상태를 숨김으로 변경)
-    public void softDelete() {
-        this.status = MenuStatus.숨김;
+    public void updateStatus(MenuStatus status) {
+        this.status = status;
     }
 }
