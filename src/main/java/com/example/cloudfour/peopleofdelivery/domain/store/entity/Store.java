@@ -21,6 +21,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "p_store")
 public class Store extends BaseEntity {
+
     @Id
     @GeneratedValue
     private UUID id;
@@ -84,12 +85,6 @@ public class Store extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "store", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
-    
-    public static class StoreBuilder {
-        private StoreBuilder id(UUID id) {
-            throw new UnsupportedOperationException("id 수동 생성 불가");
-        }
-    }
 
     public void setStoreCategory(StoreCategory storeCategory) {
         this.storeCategory = storeCategory;
@@ -104,5 +99,13 @@ public class Store extends BaseEntity {
     public void setRegion(Region region) {
         this.region = region;
         region.getStores().add(this);
+    }
+
+    //@Setter제거하고 도메인 메서드 추가
+    public void update(String name, String address, float rating, int reviewCount) {
+        if (name != null) this.name = name;
+        if (address != null) this.address = address;
+        if (rating >= 0) this.rating = rating;
+        if (reviewCount >= 0) this.reviewCount = reviewCount;
     }
 }

@@ -24,6 +24,7 @@ public class CartController {
     private final CartQueryService cartQueryService;
 
 
+    // 장바구니 항목도 같이 생성 추가해야됨
     @PostMapping
     @Operation(summary = "장바구니 생성", description = "장바구니를 생성합니다. 장바구니 생성에 사용되는 API입니다.")
     public CustomResponse<CartResponseDTO.CartCreateResponseDTO> createCart(

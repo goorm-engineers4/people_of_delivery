@@ -5,8 +5,21 @@ spring:
   datasource:
     url: ${LOCAL_DB_URL}
     driver-class-name: org.postgresql.Driver
+#    driver-class-name: org.h2.Driver # 테스트용
     username: ${LOCAL_DB_USERNAME}
     password: ${LOCAL_DB_PASSWORD}
+    
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   jpa:
     hibernate.ddl-auto: create
@@ -24,13 +37,19 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET_ID}
-            scope:
-              - profile
-              - email
+            scope: [ openid, profile, email ]
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: Google
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
 
 jwt:
   secret: ${JWT_SECRET}
   expiration: 900000
   refresh-secret: ${JWT_REFRESH_SECRET}
   refresh-expiration: 604800000
+

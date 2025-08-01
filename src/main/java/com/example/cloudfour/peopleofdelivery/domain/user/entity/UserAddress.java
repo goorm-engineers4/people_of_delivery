@@ -40,7 +40,14 @@ public class UserAddress {
     }
 
     public void setRegion(Region region) {
+        if (this.region != null) {
+            this.region.getAddresses().remove(this);
+        }
         this.region = region;
         region.getAddresses().add(this);
+    }
+
+    public void changeAddress(String address) {
+        this.address = address;
     }
 }

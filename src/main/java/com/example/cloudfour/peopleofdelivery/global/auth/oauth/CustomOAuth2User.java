@@ -1,6 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.oauth;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -30,22 +31,25 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        if (user == null) {
+            return List.of(new SimpleGrantedAuthority("ROLE_GUEST"));
+        }
+        Role role = user.getRole();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
 
     @Override
     public String getName() {
-        return email;
+        return providerId != null ? providerId : email;
     }
 
     public User getUser() {
         return user;
     }
-
     public String getProviderId() {
         return providerId;
     }
-
     public String getEmail() {
         return email;
     }

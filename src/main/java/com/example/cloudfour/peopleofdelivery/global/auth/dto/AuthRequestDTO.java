@@ -1,50 +1,43 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.dto;
 
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
-import lombok.Builder;
-import lombok.Getter;
 
-import java.util.UUID;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class AuthRequestDTO {
 
-    @Getter
-    @Builder
-    public static class RegisterRequestDto {
-        UUID userId;
-        String email;
-        String nickname;
-        String password;
-        String number;
-        Role role;
-        LoginType loginType;
-    }
+    public record RegisterRequestDto(
+            @Email @NotBlank String email,
+            @NotBlank @Size(min=2, max=20) String nickname,
+            @NotBlank @Size(min=8, max=64) String password,
+            @NotBlank String number
+    ) {}
 
-    @Getter
-    @Builder
-    public static class LoginRequestDto {
-        String email;
-        String password;
-    }
+    public record LoginRequestDto(
+            @Email @NotBlank String email,
+            @NotBlank @Size(min=8, max=64) String password
+    ) {}
 
-    @Getter
-    @Builder
-    public static class PasswordChangeDto {
-        String currentPassword;
-        String newPassword;
-    }
+    public record PasswordChangeDto(
+            @NotBlank String currentPassword,
+            @NotBlank @Size(min = 8, max = 64) String newPassword
+    ) {}
 
-    @Getter
-    @Builder
-    public static class EmailSendRequestDTO {
-        String email;
-    }
+    // 기존 이메일 인증
+    public record EmailVerifyRequestDTO(
+            @Email @NotBlank String email,
+            @NotBlank @Size(min=6, max=6) String code
+    ) {}
 
-    @Getter
-    @Builder
-    public static class EmailVerifyRequestDTO {
-        String email;
-        String code;
-    }
+    // 이메일 변경 단계용(선택)
+    public record EmailChangeStartRequest(
+            @Email @NotBlank String newEmail
+    ) {}
+
+    public record EmailChangeVerifyRequest(
+            @Email @NotBlank String newEmail,
+            @NotBlank @Size(min=6, max=6) String code
+    ) {}
 }
+

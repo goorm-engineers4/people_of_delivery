@@ -7,6 +7,7 @@ import com.example.cloudfour.peopleofdelivery.domain.user.service.UserAddressSer
 import com.example.cloudfour.peopleofdelivery.domain.user.service.UserService;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,56 +26,49 @@ public class UserController {
     private final UserAddressService addressService;
 
     @GetMapping("/me")
-    public ResponseEntity<String> getMyInfo(@AuthenticationPrincipal CustomUserDetails user) {
-        return ResponseEntity.ok(userService.getMyInfo(user.getId()));
+    public CustomResponse<UserResponseDTO.MeResponseDTO> getMyInfo(@AuthenticationPrincipal CustomUserDetails user) {
+        return CustomResponse.onSuccess(userService.getMyInfo(user.getId()));
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<?> updateMyInfo(@AuthenticationPrincipal CustomUserDetails user,
-                                          @RequestBody UserRequestDTO.UserUpdateRequestDTO request) {
-        userService.updateMyInfo(user.getId(), request);
-        return ResponseEntity.ok().build();
+    public CustomResponse<Void> updateMyInfo(@AuthenticationPrincipal CustomUserDetails user,
+                                             @Valid @RequestBody UserRequestDTO.UserUpdateRequestDTO request) {
+        userService.updateProfile(user.getId(), request.nickname(), request.number());
+        return CustomResponse.onSuccess(null);
     }
 
     @PatchMapping("/deleted")
-    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails user) {
+    public CustomResponse<Void> deleteAccount(@AuthenticationPrincipal CustomUserDetails user) {
         userService.deleteAccount(user.getId());
-        return ResponseEntity.ok().build();
+        return CustomResponse.onSuccess(null);
     }
 
     @PostMapping("/addresses")
-    public CustomResponse<Void> addAddress(
-            @RequestBody UserRequestDTO.AddressRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-
-        addressService.addAddress(userDetails.getUser().getId(), request);
-        return CustomResponse.onSuccess(HttpStatus.CREATED, null);
+    public CustomResponse<Void> addAddress(@Valid @RequestBody UserRequestDTO.AddressRequestDTO request,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        addressService.addAddress(userDetails.getId(), request);
+        return CustomResponse.onSuccess(HttpStatus.CREATED, null); // 201
     }
 
     @GetMapping("/addresses")
     public CustomResponse<List<UserResponseDTO.AddressResponseDTO>> getAddressList(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-
-        List<UserResponseDTO.AddressResponseDTO> addressList = addressService.getAddresses(userDetails.getUser().getId());
-        return CustomResponse.onSuccess(addressList);
+        List<UserResponseDTO.AddressResponseDTO> list = addressService.getAddresses(userDetails.getId());
+        return CustomResponse.onSuccess(list);
     }
 
     @PatchMapping("/addresses/{addressId}")
-    public CustomResponse<Void> updateAddress(
-            @PathVariable UUID addressId,
-            @RequestBody UserRequestDTO.AddressRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-
-        addressService.updateAddress(userDetails.getUser().getId(), addressId, request);
+    public CustomResponse<Void> updateAddress(@PathVariable UUID addressId,
+                                              @Valid @RequestBody UserRequestDTO.AddressRequestDTO request,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        addressService.updateAddress(userDetails.getId(), addressId, request);
         return CustomResponse.onSuccess(null);
     }
 
     @PatchMapping("/addresses/delete/{addressId}")
-    public CustomResponse<Void> deleteAddress(
-            @PathVariable UUID addressId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-
-        addressService.softDeleteAddress(userDetails.getUser().getId(), addressId);
+    public CustomResponse<Void> deleteAddress(@PathVariable UUID addressId,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        addressService.deleteAddress(userDetails.getId(), addressId);
         return CustomResponse.onSuccess(null);
     }
 //

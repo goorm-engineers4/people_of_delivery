@@ -1,16 +1,24 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.dto;
 
 
-import lombok.Builder;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 public class OAuthRequestDTO {
     @Getter
-    @Builder
     public static class AdditionalSignupRequestDto {
-        String email;
-        String number;
-        String nickname;
-        String providerId; // OAuth2 'sub' 값
+        @Email
+        @NotBlank
+        private String email;
+
+        @NotBlank
+        private String number;
+
+        @NotBlank
+        private String nickname;
+
+        @NotBlank
+        private String providerId;  // OAuth2 'sub' 값
     }
 }

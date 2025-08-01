@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -21,11 +22,12 @@ public class JwtTokenProvider {
     // Jwt Access, refresh 정보 가져오기
     private final JwtProperties jwtProperties;
 
-    public TokenDto createToken(String email, Role role) {
+    public TokenDto createToken(UUID userId, Role role) {
         Date now = new Date();
+        String sub = userId.toString();
 
         String accessToken = Jwts.builder()
-                .setSubject(email)
+                .setSubject(sub)
                 .claim("role", role.name())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtProperties.getExpiration()))
@@ -33,7 +35,7 @@ public class JwtTokenProvider {
                 .compact();
 
         String refreshToken = Jwts.builder()
-                .setSubject(email)
+                .setSubject(sub)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtProperties.getRefreshExpiration()))
                 .signWith(SignatureAlgorithm.HS256, getSigningKey(jwtProperties.getRefreshSecret()))
@@ -42,7 +44,7 @@ public class JwtTokenProvider {
         return new TokenDto("Bearer", accessToken, refreshToken, jwtProperties.getExpiration());
     }
 
-    public String getEmailFromToken(String token, boolean isRefresh) {
+    public String getIdFromToken(String token, boolean isRefresh) {
         return getClaims(token, isRefresh).getSubject();
     }
 
