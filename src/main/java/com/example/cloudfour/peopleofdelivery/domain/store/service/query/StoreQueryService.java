@@ -28,7 +28,7 @@ public class StoreQueryService {
         List<StoreResponseDTO.StoreListResponseDTO> storeList = storeSlice.getContent().stream()
                 .map(StoreResponseDTO.StoreListResponseDTO::from)
                 .toList();
-        // 빈 리스트에서 꺼내는거 방지하기 위해 조건 추가
+
         LocalDateTime nextCursor = storeSlice.hasNext() && !storeList.isEmpty()
                 ? storeList.get(storeList.size() - 1).getCreatedAt()
                 : null;
@@ -46,7 +46,6 @@ public class StoreQueryService {
                 .map(StoreResponseDTO.StoreListResponseDTO::from)
                 .toList();
 
-        // 빈 리스트에서 꺼내는거 방지하기 위해 조건 추가
         LocalDateTime nextCursor = storeSlice.hasNext() && !storeList.isEmpty()
                 ? storeList.get(storeList.size() - 1).getCreatedAt()
                 : null;

@@ -26,7 +26,6 @@ public class StoreController {
     private final StoreCommandService storeCommandService;
     private final StoreQueryService storeQueryService;
 
-    // 가게 등록
     @PostMapping("")
     @Operation(summary = "가게 등록", description = "가게를 등록합니다.")
     public CustomResponse<StoreResponseDTO.StoreCreateResponseDTO> createStore(
@@ -35,7 +34,6 @@ public class StoreController {
         return CustomResponse.onSuccess(HttpStatus.CREATED, storeCommandService.createStore(dto, user));
     }
 
-    // 전체 가게 목록 조회 (커서 기반)
     @GetMapping("")
     @Operation(summary = "가게 목록 조회", description = "전체 가게 목록을 커서 기반으로 조회합니다.")
     @Parameter(name = "cursor", description = "데이터가 시작하는 기준 시간입니다.")
@@ -48,7 +46,6 @@ public class StoreController {
         return CustomResponse.onSuccess(HttpStatus.OK, response);
     }
 
-    // 가게 상세 정보 조회
     @GetMapping("/{storeId}")
     @Operation(summary = "가게 상세 정보 조회", description = "가게의 상세 정보를 조회합니다.")
     public CustomResponse<StoreResponseDTO.StoreDetailResponseDTO> getStoreDetail(
@@ -56,7 +53,6 @@ public class StoreController {
         return CustomResponse.onSuccess(HttpStatus.OK, storeQueryService.getStoreById(storeId));
     }
 
-    // 가게 정보 수정
     @PatchMapping("/{storeId}")
     @Operation(summary = "가게 정보 수정", description = "본인의 가게 정보를 수정합니다.")
     public CustomResponse<StoreResponseDTO.StoreUpdateResponseDTO> updateStore(
@@ -66,7 +62,6 @@ public class StoreController {
         return CustomResponse.onSuccess(HttpStatus.OK, storeCommandService.updateStore(storeId, dto, user));
     }
 
-    // 가게 삭제
     @PatchMapping("/{storeId}/deleted")
     @Operation(summary = "가게 삭제", description = "본인의 가게를 삭제합니다.")
     public CustomResponse<String> deleteStore(
@@ -76,7 +71,6 @@ public class StoreController {
         return CustomResponse.onSuccess(HttpStatus.OK, "가게 삭제 완료");
     }
 
-    // 카테고리별 가게 목록 조회 (커서 기반)
     @GetMapping("/category/{categoryId}")
     @Operation(summary = "카테고리별 가게 목록 조회", description = "카테고리 ID로 해당 카테고리의 가게 목록을 커서 기반으로 조회합니다.")
     @Parameter(name = "cursor", description = "데이터가 시작하는 기준 시간입니다.")

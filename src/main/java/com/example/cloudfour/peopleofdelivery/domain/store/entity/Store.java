@@ -101,7 +101,6 @@ public class Store extends BaseEntity {
         region.getStores().add(this);
     }
 
-    //@Setter제거하고 도메인 메서드 추가
     public void update(String name, String address, float rating, int reviewCount) {
         if (name != null) this.name = name;
         if (address != null) this.address = address;
