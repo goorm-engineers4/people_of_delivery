@@ -1,6 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.unit.domain.store.service.command;
 
-import com.example.cloudfour.peopleofdelivery.mock.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.fixtures.Factory;
 import com.example.cloudfour.peopleofdelivery.domain.region.repository.RegionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
@@ -49,7 +49,7 @@ class StoreCommandServiceTest {
     void createStore_fail_duplicate_name() {
 
         // given
-        User user = TestFixtureFactory.createMockUserWithAll();
+        User user = Factory.createMockUserWithAll();
         StoreCategory category = user.getStores().get(0).getStoreCategory();
 
         StoreRequestDTO.StoreCreateRequestDTO request = StoreRequestDTO.StoreCreateRequestDTO.builder()
@@ -82,7 +82,7 @@ class StoreCommandServiceTest {
     void createStore_fail_invalid_category() {
 
         // given
-        User user = TestFixtureFactory.createMockUserWithAll(); // 사용자 mock
+        User user = Factory.createMockUserWithAll(); // 사용자 mock
         UUID invalidCategoryId = UUID.randomUUID(); // 존재하지 않는 카테고리 ID
 
         StoreRequestDTO.StoreCreateRequestDTO request = StoreRequestDTO.StoreCreateRequestDTO.builder()
@@ -115,8 +115,8 @@ class StoreCommandServiceTest {
     @DisplayName("가게 생성 실패 - 가게 생성 권한없는 유저")
     void createStore_fail_no_permission(Role role) {
         // given
-        User user = TestFixtureFactory.createMockUserWithRole(role); // ->  권한 없는 유저
-        StoreCategory category = TestFixtureFactory.createMockStoreCategory();
+        User user = Factory.createMockUserWithRole(role); // ->  권한 없는 유저
+        StoreCategory category = Factory.createMockStoreCategory();
 
         StoreRequestDTO.StoreCreateRequestDTO request = StoreRequestDTO.StoreCreateRequestDTO.builder()
                 .name("김밥천국")
@@ -143,8 +143,8 @@ class StoreCommandServiceTest {
     @DisplayName("가게 생성 성공 - MASTER 유저")
     void createStore_success_with_master_role(Role role) {
         // given
-        User user = TestFixtureFactory.createMockUserWithRole(role); // -> 가게 생성 가능 권한
-        StoreCategory category = TestFixtureFactory.createMockStoreCategory();
+        User user = Factory.createMockUserWithRole(role); // -> 가게 생성 가능 권한
+        StoreCategory category = Factory.createMockStoreCategory();
 
         StoreRequestDTO.StoreCreateRequestDTO request = StoreRequestDTO.StoreCreateRequestDTO.builder()
                 .name("김밥천국")

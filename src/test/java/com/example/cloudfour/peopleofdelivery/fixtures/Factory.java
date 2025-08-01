@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.mock;
+package com.example.cloudfour.peopleofdelivery.fixtures;
 
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
@@ -24,7 +24,7 @@ import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.global.ai.entity.AiLog;
 
 
-public class TestFixtureFactory {
+public class Factory {
 
     public static Region createMockRegion() {
         return Region.builder()

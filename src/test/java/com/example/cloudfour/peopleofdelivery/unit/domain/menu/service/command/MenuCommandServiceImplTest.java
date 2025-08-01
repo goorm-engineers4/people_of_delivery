@@ -1,7 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.unit.domain.menu.service.command;
 
 // 테스트에 필요한 라이브러리들 import
-import com.example.cloudfour.peopleofdelivery.mock.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.fixtures.Factory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
@@ -64,7 +64,7 @@ class MenuCommandServiceImplTest {
     @BeforeEach  // 모든 @Test 메소드 실행 전마다 호출
     void setUp() {
         // TestFixtureFactory를 활용하여 완전한 테스트 데이터 생성
-        testUserWithAll = TestFixtureFactory.createMockUserWithAll();
+        testUserWithAll = Factory.createMockUserWithAll();
 
         // 연관관계를 통해 필요한 객체들 추출
         testStore = testUserWithAll.getStores().getFirst();        // 사용자의 첫 번째 가게
@@ -144,7 +144,7 @@ class MenuCommandServiceImplTest {
                 .build();
 
         // 다른 사용자 생성 (가게 소유자가 아닌)
-        User differentUser = TestFixtureFactory.createMockUserWithAll();
+        User differentUser = Factory.createMockUserWithAll();
 
         // 가게를 찾을 수 없는 상황 설정
         given(storeRepository.findByUserId(differentUser.getId()))
