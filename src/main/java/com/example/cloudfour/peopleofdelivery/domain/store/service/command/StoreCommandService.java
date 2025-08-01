@@ -78,6 +78,6 @@ public class StoreCommandService {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        storeRepository.delete(store);
+        store.softDelete();
     }
 }
