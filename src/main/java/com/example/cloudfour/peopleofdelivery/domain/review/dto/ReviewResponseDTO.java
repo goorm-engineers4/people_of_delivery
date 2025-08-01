@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class ReviewResponseDTO {
@@ -33,10 +34,9 @@ public class ReviewResponseDTO {
         UUID updatedBy;
     }
 
-
     @Getter
     @Builder
-    public static class ReviewStoreListResponseDTO{
+    public static class ReviewStoreResponseDTO{
         UUID reviewId;
         UUID userId;
         Integer score;
@@ -48,7 +48,15 @@ public class ReviewResponseDTO {
 
     @Getter
     @Builder
-    public static class ReviewUserListResponseDTO{
+    public static class ReviewStoreListResponseDTO{
+        List<ReviewResponseDTO.ReviewStoreResponseDTO> reviews;
+        private boolean hasNext;
+        private LocalDateTime cursor;
+    }
+
+    @Getter
+    @Builder
+    public static class ReviewUserResponseDTO{
         UUID reviewId;
         String storeName;
         Integer score;
@@ -56,6 +64,14 @@ public class ReviewResponseDTO {
         String pictureUrl;
         LocalDateTime createdAt;
         UUID createdBy;
+    }
+
+    @Getter
+    @Builder
+    public static class ReviewUserListResponseDTO{
+        List<ReviewResponseDTO.ReviewUserResponseDTO> reviews;
+        private boolean hasNext;
+        private LocalDateTime cursor;
     }
 
     @Getter

@@ -15,8 +15,12 @@ import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserExceptio
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +31,7 @@ public class ReviewQueryServiceImpl{
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
 
     public ReviewResponseDTO.ReviewDetailResponseDTO getReviewById(UUID reviewId, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
@@ -34,16 +39,44 @@ public class ReviewQueryServiceImpl{
         return ReviewConverter.toReviewDetailResponseDTO(findReview);
     }
 
-    public List<ReviewResponseDTO.ReviewStoreListResponseDTO> getReviewListByStore(UUID storeId, User user) {
+    public ReviewResponseDTO.ReviewStoreListResponseDTO getReviewListByStore(UUID storeId, LocalDateTime cursor, Integer size, User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         storeRepository.findById(storeId).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
-        List<Review> findReviews = reviewRepository.findAllByStoreId(storeId);
-        return findReviews.stream().map(ReviewConverter::toReviewStoreListResponseDTO).toList();
+        if(cursor==null){
+            cursor = first_cursor;
+        }
+        Pageable pageable = PageRequest.of(0,size);
+
+        Slice<Review> findReviews = reviewRepository.findAllByStoreId(storeId,cursor,pageable);
+        if(findReviews.isEmpty()){
+            throw new ReviewException(ReviewErrorCode.NOT_FOUND);
+        }
+        List<Review> reviews = findReviews.toList();
+        List<ReviewResponseDTO.ReviewStoreResponseDTO> reviewStoreListResponseDTOS = reviews.stream().map(ReviewConverter::toReviewStoreResponseDTO).toList();
+        LocalDateTime next_cursor = null;
+        if(!findReviews.isEmpty() && findReviews.hasNext()) {
+            next_cursor = reviews.getLast().getCreatedAt();
+        }
+
+        return ReviewConverter.toReviewStoreListResponseDTO(reviewStoreListResponseDTOS,findReviews.hasNext(),next_cursor);
     }
 
-    public List<ReviewResponseDTO.ReviewUserListResponseDTO> getReviewListByUser(User user) {
+    public ReviewResponseDTO.ReviewUserListResponseDTO getReviewListByUser(LocalDateTime cursor, Integer size,User user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
-        List<Review> findReviews = reviewRepository.findAllByUserId(user.getId());
-        return findReviews.stream().map(ReviewConverter::toReviewUserListResponseDTO).toList();
+        if(cursor==null){
+            cursor = first_cursor;
+        }
+        Pageable pageable = PageRequest.of(0,size);
+        Slice<Review> findReviews = reviewRepository.findAllByUserId(user.getId(),cursor,pageable);
+        if(findReviews.isEmpty()){
+            throw new ReviewException(ReviewErrorCode.NOT_FOUND);
+        }
+        List<Review> reviews = findReviews.toList();
+        List<ReviewResponseDTO.ReviewUserResponseDTO> reviewUserListResponseDTOS = reviews.stream().map(ReviewConverter::toReviewUserResponseDTO).toList();
+        LocalDateTime next_cursor = null;
+        if(!findReviews.isEmpty() && findReviews.hasNext()) {
+            next_cursor = reviews.getLast().getCreatedAt();
+        }
+        return ReviewConverter.toReviewUserListResponseDTO(reviewUserListResponseDTOS,findReviews.hasNext(),next_cursor);
     }
 }
