@@ -1,6 +1,6 @@
-package com.example.cloudfour.peopleofdelivery.domain.menu.service.query;
+package com.example.cloudfour.peopleofdelivery.unit.domain.menu.service.query;
 
-import com.example.cloudfour.peopleofdelivery.domain.TestFixtureFactory;
+import com.example.cloudfour.peopleofdelivery.unit.domain.TestFixtureFactory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;

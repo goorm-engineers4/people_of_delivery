@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.domain;
+package com.example.cloudfour.peopleofdelivery.unit.domain;
 
 import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.entity.CartItem;
