@@ -115,10 +115,8 @@ public class Store extends BaseEntity {
         region.getStores().add(this);
     }
 
-    public void update(String name, String address, float rating, int reviewCount) {
+    public void update(String name, String address) {
         if (name != null) this.name = name;
         if (address != null) this.address = address;
-        if (rating >= 0) this.rating = rating;
-        if (reviewCount >= 0) this.reviewCount = reviewCount;
     }
 }
