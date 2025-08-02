@@ -38,13 +38,6 @@ public class StoreResponseDTO {
         private UUID storeId;
         private String name;
         private String address;
-        private String storePicture;
-        private String phone;
-        private String content;
-        private Integer minPrice;
-        private Integer deliveryTip;
-        private String operationHours;
-        private String closedDays;
         private String category;
         private LocalDateTime updatedAt;
 
@@ -53,13 +46,6 @@ public class StoreResponseDTO {
                     .storeId(store.getId())
                     .name(store.getName())
                     .address(store.getAddress())
-                    .storePicture(store.getStorePicture())
-                    .phone(store.getPhone())
-                    .content(store.getContent())
-                    .minPrice(store.getMinPrice())
-                    .deliveryTip(store.getDeliveryTip())
-                    .operationHours(store.getOperationHours())
-                    .closedDays(store.getClosedDays())
                     .category(store.getStoreCategory().getCategory())
                     .updatedAt(store.getUpdatedAt())
                     .build();
