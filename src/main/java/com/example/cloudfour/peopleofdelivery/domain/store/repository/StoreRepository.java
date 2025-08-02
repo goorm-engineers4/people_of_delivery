@@ -19,6 +19,8 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
     boolean existsByName(String name);
 
+    Optional<Store> findByIdAndIsDeletedFalse(UUID storeId);
+
     @Query("select count(s) > 0 from Store s where s.user.id = :userId and s.id = :storeId and s.user.isDeleted = false")
     boolean existsByStoreAndUser(@Param("storeId") UUID storeId, @Param("userId") UUID userId);
 
