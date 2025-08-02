@@ -67,7 +67,9 @@ public class StoreCommandService {
                 !storeRepository.existsByStoreAndUser(storeId, user.getId())) {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
-
+        if (storeRepository.existsByName(dto.getName())) {
+            throw new StoreException(StoreErrorCode.ALREADY_ADD);
+        }
         StoreCategory category = storeCategoryRepository
                 .findByCategory(dto.getCategory())
                 .orElseGet(() -> storeCategoryRepository.save(
