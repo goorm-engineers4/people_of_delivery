@@ -9,8 +9,11 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCod
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,10 +31,11 @@ public class MenuCommandServiceImpl {
     private final StoreRepository storeRepository;
     private final MenuCategoryRepository menuCategoryRepository;
 
-    public MenuResponseDTO.MenuDetailResponseDTO createMenu(MenuRequestDTO.MenuCreateRequestDTO requestDTO, User user) {
-        Store store = storeRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
-
+    public MenuResponseDTO.MenuDetailResponseDTO createMenu(MenuRequestDTO.MenuCreateRequestDTO requestDTO, UUID storeId,CustomUserDetails userDetails) {
+        Store store = storeRepository.findByIdAndIsDeletedFalse(storeId).orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
+        if (!(userDetails.getRole() == Role.MASTER || userDetails.getRole() == Role.OWNER)) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
         MenuCategory menuCategory = menuCategoryRepository.findByCategory(requestDTO.getCategory())
                 .orElseGet(() -> {
                     MenuCategory newCategory = MenuCategory.builder()
@@ -72,36 +76,25 @@ public class MenuCommandServiceImpl {
                 .build();
     }
 
-    public MenuResponseDTO.MenuDetailResponseDTO updateMenu(UUID menuId, MenuRequestDTO.MenuUpdateRequestDTO requestDTO, User user) {
+    public MenuResponseDTO.MenuDetailResponseDTO updateMenu(UUID menuId, MenuRequestDTO.MenuUpdateRequestDTO requestDTO, CustomUserDetails userDetails) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
 
-        if (!menu.getStore().getUser().getId().equals(user.getId())) {
+        if (!menu.getStore().getUser().getId().equals(userDetails.getId())) {
             throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        if (requestDTO.getName() != null || requestDTO.getContent() != null ||
-            requestDTO.getPrice() != null || requestDTO.getMenuPicture() != null) {
-
-            if (requestDTO.getName() != null && !menu.getName().equals(requestDTO.getName()) &&
-                menuRepository.existsByNameAndStoreId(requestDTO.getName(), menu.getStore().getId())) {
-                throw new MenuException(MenuErrorCode.ALREADY_ADD);
-            }
-
-            menu.updateMenuInfo(
-                requestDTO.getName() != null ? requestDTO.getName() : menu.getName(),
-                requestDTO.getContent() != null ? requestDTO.getContent() : menu.getContent(),
-                requestDTO.getPrice() != null ? requestDTO.getPrice() : menu.getPrice(),
-                requestDTO.getMenuPicture() != null ? requestDTO.getMenuPicture() : menu.getMenuPicture()
-            );
-        }
-
-        if (requestDTO.getStatus() != null) {
-            menu.updateStatus(requestDTO.getStatus());
-        }
-
+        MenuCategory menuCategory = menuCategoryRepository.findByCategory(requestDTO.getCategory())
+                .orElseGet(() -> {
+                    MenuCategory newCategory = MenuCategory.builder()
+                            .category(requestDTO.getCategory())
+                            .build();
+                    return menuCategoryRepository.save(newCategory);
+                });
+        menu.updateMenuInfo(requestDTO.getName(),requestDTO.getContent(),
+                requestDTO.getPrice(),requestDTO.getMenuPicture(),requestDTO.getStatus());
+        menu.setMenuCategory(menuCategory);
         Menu updatedMenu = menuRepository.save(menu);
-
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(updatedMenu.getId())
                 .name(updatedMenu.getName())
@@ -117,11 +110,11 @@ public class MenuCommandServiceImpl {
                 .build();
     }
 
-    public void deleteMenu(UUID menuId, User user) {
+    public void deleteMenu(UUID menuId, CustomUserDetails userDetails) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
 
-        if (!menu.getStore().getUser().getId().equals(user.getId())) {
+        if (!menu.getStore().getUser().getId().equals(userDetails.getId())) {
             throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
         }
 
