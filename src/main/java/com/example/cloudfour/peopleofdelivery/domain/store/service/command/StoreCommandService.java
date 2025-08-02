@@ -63,8 +63,7 @@ public class StoreCommandService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
         User user = userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
-        if (!(user.getRole() == Role.MASTER || user.getRole() == Role.OWNER) ||
-                !storeRepository.existsByStoreAndUser(storeId, user.getId())) {
+        if (storeRepository.existsByStoreAndUser(storeId, user.getId())) {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
         if (storeRepository.existsByName(dto.getName())) {
@@ -91,8 +90,7 @@ public class StoreCommandService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
         User user = userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
-        if (!(user.getRole() == Role.MASTER || user.getRole() == Role.OWNER) ||
-                !storeRepository.existsByStoreAndUser(storeId, user.getId())) {
+        if (storeRepository.existsByStoreAndUser(storeId, user.getId())) {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
         store.softDelete();
