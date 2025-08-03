@@ -58,7 +58,6 @@ public class User extends BaseEntity {
     private boolean emailVerified = false; // 현재 email의 인증 여부
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
-    @Builder.Default
     private List<UserAddress> addresses = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)

@@ -1,4 +1,4 @@
-package com.example.cloudfour.peopleofdelivery.unit.domain.cart.service.command.command;
+package com.example.cloudfour.peopleofdelivery.unit.domain.cart.service.command;
 
 import com.example.cloudfour.peopleofdelivery.domain.cart.dto.CartRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.cart.dto.CartResponseDTO;
