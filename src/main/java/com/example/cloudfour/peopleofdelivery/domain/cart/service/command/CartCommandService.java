@@ -18,6 +18,10 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuReposit
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
+import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,20 +36,21 @@ public class CartCommandService {
     private final CartRepository cartRepository;
     private final StoreRepository storeRepository;
     private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
     private final CartItemCommandService cartItemCommandService;
 
-    public CartResponseDTO.CartCreateResponseDTO createCart(CartRequestDTO.CartCreateRequestDTO cartCreateRequestDTO, User user) {
+    public CartResponseDTO.CartCreateResponseDTO createCart(CartRequestDTO.CartCreateRequestDTO cartCreateRequestDTO, CustomUserDetails user) {
         Store store = storeRepository.findById(cartCreateRequestDTO.getStoreId())
                 .orElseThrow(() -> new CartException(CartErrorCode.NOT_FOUND));
-
+        User finduser = userRepository.findById(user.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         boolean exists = cartRepository.existsByUserAndStore(user.getId(), store.getId());
         if (exists) {
             throw new CartException(CartErrorCode.ALREADY_ADD);
         }
-
+        log.info("권한 확인");
         Cart cart = Cart.builder()
                 .build();
-        cart.setUser(user);
+        cart.setUser(finduser);
         cart.setStore(store);
         Cart savedCart = cartRepository.save(cart);
         log.info("장바구니 생성 완료, cartId={}", savedCart.getId());
@@ -57,7 +62,7 @@ public class CartCommandService {
 
     }
 
-    public void deleteCart(UUID cartId, User user) {
+    public void deleteCart(UUID cartId, CustomUserDetails user) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new CartException(CartErrorCode.NOT_FOUND));
 
