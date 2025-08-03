@@ -33,8 +33,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class StoreQueryServiceTest {
@@ -43,7 +47,7 @@ class StoreQueryServiceTest {
     @Mock private UserRepository userRepository;
     @InjectMocks private StoreQueryService storeQueryService;
 
-        @Test
+    @Test
     @DisplayName("키워드로 전체 가게 조회 성공 (nextCursor 반환)")
     void getAllStores_success() {
                 User user = Factory.createMockUserWithRole(Role.MASTER);
@@ -68,11 +72,12 @@ class StoreQueryServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(storeRepository.findAllByKeyWord(anyString(), any(), any(Pageable.class))).thenReturn(storeSlice);
 
-                StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getAllStores(
-                null, 2, "김밥", userDetails);
+        StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getAllStores(
+        null, 2, "김밥", userDetails);
 
-                assertThat(response.getStoreList()).hasSize(2);
-        assertThat(response.getNextCursor()).isEqualTo(store2.getCreatedAt());     }
+        assertThat(response.getStoreList()).hasSize(2);
+        assertThat(response.getNextCursor()).isEqualTo(store2.getCreatedAt());
+    }
 
     @Test
     @DisplayName("키워드로 전체 가게 조회 - store가 없으면 nextCursor=null")
@@ -84,10 +89,10 @@ class StoreQueryServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(storeRepository.findAllByKeyWord(anyString(), any(), any(Pageable.class))).thenReturn(storeSlice);
 
-                StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getAllStores(
-                null, 2, "없는가게", userDetails);
+        StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getAllStores(
+        null, 2, "없는가게", userDetails);
 
-                assertThat(response.getStoreList()).isEmpty();
+        assertThat(response.getStoreList()).isEmpty();
         assertThat(response.getNextCursor()).isNull();
     }
 
@@ -102,7 +107,8 @@ class StoreQueryServiceTest {
                 .hasMessage(UserErrorCode.NOT_FOUND.getMessage());
     }
 
-        @Test
+
+    @Test
     @DisplayName("카테고리별 가게 조회 성공")
     void getStoresByCategory_success() {
                 User user = Factory.createMockUserWithRole(Role.OWNER);
@@ -123,10 +129,10 @@ class StoreQueryServiceTest {
         when(storeRepository.findAllByCategoryAndCursor(eq(categoryId), any(), any(Pageable.class)))
                 .thenReturn(storeSlice);
 
-                StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getStoresByCategory(
-                categoryId, null, 1, userDetails);
+        StoreResponseDTO.StoreCursorListResponseDTO response = storeQueryService.getStoresByCategory(
+        categoryId, null, 1, userDetails);
 
-                assertThat(response.getStoreList()).hasSize(1);
+        assertThat(response.getStoreList()).hasSize(1);
         assertThat(response.getNextCursor()).isNull();     }
 
     @Test
@@ -143,24 +149,27 @@ class StoreQueryServiceTest {
                 .hasMessage(UserErrorCode.NOT_FOUND.getMessage());
     }
 
-        @Test
+    @Test
     @DisplayName("단일 가게 상세조회 성공")
-    void getStoreById_success() throws Exception {          User user = Factory.createMockUserWithRole(Role.OWNER);
+    void getStoreById_success() throws Exception {
+        User user = Factory.createMockUserWithRole(Role.OWNER);
         CustomUserDetails userDetails = new CustomUserDetails(user);
         UUID storeId = UUID.randomUUID();
 
-                StoreCategory category = StoreCategory.builder()
-                .category("일식")
-                .build();
+        StoreCategory category = StoreCategory.builder()
+            .category("일식")
+            .build();
 
-                java.lang.reflect.Field idField = StoreCategory.class.getDeclaredField("id");
+        java.lang.reflect.Field idField = StoreCategory.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(category, UUID.randomUUID());
 
         Store store = Store.builder()
-                .id(storeId)
-                .name("스시천국")
-                .storeCategory(category)                  .build();
+            .id(storeId)
+            .name("스시천국")
+            .storeCategory(category)
+            .build();
+
         Field createdAtField = BaseEntity.class.getDeclaredField("createdAt");
         createdAtField.setAccessible(true);
         createdAtField.set(store, LocalDateTime.now());
@@ -180,7 +189,7 @@ class StoreQueryServiceTest {
     @DisplayName("단일 가게 상세조회 실패 - 유저 없음")
     void getStoreById_userNotFound() {
         CustomUserDetails userDetails =
-                CustomUserDetails.of(UUID.randomUUID(), "email", Role.OWNER, LoginType.LOCAL);
+            CustomUserDetails.of(UUID.randomUUID(), "email", Role.OWNER, LoginType.LOCAL);
 
         when(userRepository.findById(any())).thenReturn(Optional.empty());
 
