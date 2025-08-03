@@ -62,4 +62,9 @@ public class MenuOption {
         this.menu = menu;
         menu.getMenuOptions().add(this);
     }
+
+    public void updateOptionInfo(String optionName, Integer additionalPrice) {
+        this.optionName = optionName;
+        this.additionalPrice = additionalPrice;
+    }
 }
