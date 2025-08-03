@@ -32,7 +32,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,7 +74,7 @@ class CartCommandServiceTest {
                 .menuOptionId(UUID.randomUUID())
                 .build();
 
-        CartItemResponseDTO.CartItemAddResponseDTO mockCartItemResponse = 
+        CartItemResponseDTO.CartItemAddResponseDTO mockCartItemResponse =
                 CartItemResponseDTO.CartItemAddResponseDTO.builder()
                         .cartItemId(cartItemId)
                         .build();
@@ -127,7 +126,7 @@ class CartCommandServiceTest {
         UUID storeId = UUID.randomUUID();
         UUID menuId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        
+
         User mockUser = createMockUser(userId);
         Store mockStore = createMockStore(storeId);
 
@@ -183,6 +182,61 @@ class CartCommandServiceTest {
         verify(cartItemCommandService, never()).AddCartItem(any(), any(), any());
     }
 
+    @Test
+    @DisplayName("장바구니 삭제 성공")
+    void deleteCart_success() {
+        UUID cartId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User mockUser = createMockUser(userId);
+        Cart mockCart = createMockCart(cartId, mockUser, createMockStore(UUID.randomUUID()));
+
+        when(cartRepository.findById(cartId)).thenReturn(Optional.of(mockCart));
+        doNothing().when(cartRepository).delete(mockCart);
+
+        cartCommandService.deleteCart(cartId, mockUser);
+
+        verify(cartRepository).findById(cartId);
+        verify(cartRepository).delete(mockCart);
+    }
+
+    @Test
+    @DisplayName("장바구니 삭제 실패 - 존재하지 않는 장바구니")
+    void deleteCart_fail_cart_not_found() {
+        UUID cartId = UUID.randomUUID();
+        User mockUser = createMockUser(UUID.randomUUID());
+
+        when(cartRepository.findById(cartId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> cartCommandService.deleteCart(cartId, mockUser))
+                .isInstanceOf(CartException.class)
+                .hasFieldOrPropertyWithValue("code", CartErrorCode.NOT_FOUND);
+
+        verify(cartRepository).findById(cartId);
+        verify(cartRepository, never()).delete(any(Cart.class));
+    }
+
+    @Test
+    @DisplayName("장바구니 삭제 실패 - 권한 없는 사용자")
+    void deleteCart_fail_unauthorized() {
+        UUID cartId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+
+        User ownerUser = createMockUser(ownerId);
+        User requesterUser = createMockUser(requesterId);
+        Cart mockCart = createMockCart(cartId, ownerUser, createMockStore(UUID.randomUUID()));
+
+        when(cartRepository.findById(cartId)).thenReturn(Optional.of(mockCart));
+
+        assertThatThrownBy(() -> cartCommandService.deleteCart(cartId, requesterUser))
+                .isInstanceOf(CartException.class)
+                .hasFieldOrPropertyWithValue("code", CartErrorCode.UNAUTHORIZED_ACCESS);
+
+        verify(cartRepository).findById(cartId);
+        verify(cartRepository, never()).delete(any(Cart.class));
+    }
+
+
     private User createMockUser(UUID userId) {
         User user = mock(User.class);
         when(user.getId()).thenReturn(userId);
@@ -198,7 +252,7 @@ class CartCommandServiceTest {
     private Menu createMockMenu(UUID menuId, Integer price) {
         Menu menu = mock(Menu.class);
         when(menu.getId()).thenReturn(menuId);
-        lenient().when(menu.getPrice()).thenReturn(price); // lenient() 사용
+        lenient().when(menu.getPrice()).thenReturn(price);
         return menu;
     }
 
