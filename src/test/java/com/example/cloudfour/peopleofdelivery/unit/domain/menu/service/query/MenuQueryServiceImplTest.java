@@ -1,14 +1,16 @@
 package com.example.cloudfour.peopleofdelivery.unit.domain.menu.service.query;
 
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.service.query.MenuQueryServiceImpl;
-import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
@@ -62,6 +64,9 @@ class MenuQueryServiceImplTest {
     @Mock
     private StoreRepository storeRepository;
 
+    @Mock
+    private MenuOptionRepository menuOptionRepository;
+
     @InjectMocks
     private MenuQueryServiceImpl menuQueryService;
 
@@ -69,7 +74,7 @@ class MenuQueryServiceImplTest {
     private Store testStore;
     private MenuCategory testMenuCategory;
     private Menu testMenu;
-    private Region testRegion;
+    private MenuOption testMenuOption;
     private CustomUserDetails userDetails;
 
     @BeforeEach
@@ -78,7 +83,8 @@ class MenuQueryServiceImplTest {
         testStore = testOwnerUser.getStores().getFirst();
         testMenu = testStore.getMenus().getFirst();
         testMenuCategory = testMenu.getMenuCategory();
-        testRegion = testStore.getRegion();
+
+        testMenuOption = createMockMenuOption("곱배기", 1000, testMenu);
 
         userDetails = createCustomUserDetails(testOwnerUser);
     }
@@ -427,7 +433,7 @@ class MenuQueryServiceImplTest {
 
     @ParameterizedTest
     @EnumSource(Role.class)
-    @DisplayName("모든 Role 사용자의 메뉴 조회 성공 - Query는 모든 권한 허용")
+    @DisplayName("모든 Role 사용자의 메뉴 조회 테스트")
     void getMenusByStore_AllRoles_Success(Role role) {
         UUID storeId = testStore.getId();
         LocalDateTime cursor = LocalDateTime.now().plusDays(1);
@@ -461,6 +467,163 @@ class MenuQueryServiceImplTest {
         assertThat(result.getHasNext()).isFalse();
     }
 
+
+    @Test
+    @DisplayName("메뉴별 옵션 목록 조회 성공")
+    void getMenuOptionsByMenu_Success() {
+        UUID menuId = testMenu.getId();
+        List<MenuOption> mockOptions = Arrays.asList(
+                createMockMenuOption("매운맛", 0, testMenu),
+                createMockMenuOption("순살로 변경", 2000, testMenu),
+                createMockMenuOption("곱배기", 1000, testMenu)
+        );
+
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(testOwnerUser));
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+        given(menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId))
+                .willReturn(mockOptions);
+
+        MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO result =
+            menuQueryService.getMenuOptionsByMenu(menuId, userDetails);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMenuId()).isEqualTo(menuId);
+        assertThat(result.getMenuName()).isEqualTo(testMenu.getName());
+        assertThat(result.getOptions()).hasSize(3);
+
+        assertThat(result.getOptions())
+                .extracting(MenuOptionResponseDTO.MenuOptionSimpleResponseDTO::getOptionName)
+                .containsExactly("매운맛", "순살로 변경", "곱배기");
+
+        assertThat(result.getOptions())
+                .extracting(MenuOptionResponseDTO.MenuOptionSimpleResponseDTO::getAdditionalPrice)
+                .containsExactly(0, 2000, 1000);
+
+        verify(userRepository, times(1)).findById(userDetails.getId());
+        verify(menuRepository, times(1)).findById(menuId);
+        verify(menuOptionRepository, times(1)).findByMenuIdOrderByAdditionalPrice(menuId);
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 상세 조회 성공")
+    void getMenuOptionDetail_Success() {
+        UUID optionId = testMenuOption.getId();
+
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(testOwnerUser));
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+
+        MenuOptionResponseDTO.MenuOptionDetailResponseDTO result =
+            menuQueryService.getMenuOptionDetail(optionId, userDetails);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMenuOptionId()).isEqualTo(optionId);
+        assertThat(result.getMenuId()).isEqualTo(testMenu.getId());
+        assertThat(result.getMenuName()).isEqualTo(testMenu.getName());
+        assertThat(result.getStoreName()).isEqualTo(testStore.getName());
+        assertThat(result.getOptionName()).isEqualTo("곱배기");
+        assertThat(result.getAdditionalPrice()).isEqualTo(1000);
+
+        verify(userRepository, times(1)).findById(userDetails.getId());
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 메뉴의 옵션 조회 시 예외 발생")
+    void getMenuOptionsByMenu_MenuNotFound_ThrowsException() {
+        UUID nonExistentMenuId = UUID.randomUUID();
+
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(testOwnerUser));
+        given(menuRepository.findById(nonExistentMenuId))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> menuQueryService.getMenuOptionsByMenu(nonExistentMenuId, userDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(userRepository, times(1)).findById(userDetails.getId());
+        verify(menuRepository, times(1)).findById(nonExistentMenuId);
+        verify(menuOptionRepository, never()).findByMenuIdOrderByAdditionalPrice(any());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 메뉴 옵션 상세 조회 시 예외 발생")
+    void getMenuOptionDetail_OptionNotFound_ThrowsException() {
+        UUID nonExistentOptionId = UUID.randomUUID();
+
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(testOwnerUser));
+        given(menuOptionRepository.findByIdWithMenu(nonExistentOptionId))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> menuQueryService.getMenuOptionDetail(nonExistentOptionId, userDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(userRepository, times(1)).findById(userDetails.getId());
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(nonExistentOptionId);
+    }
+
+    @Test
+    @DisplayName("메뉴 상세 조회 시 메뉴 옵션도 함께 조회")
+    void getMenuDetail_WithMenuOptions_Success() {
+        UUID menuId = testMenu.getId();
+        List<MenuOption> mockOptions = Arrays.asList(
+                createMockMenuOption("매운맛", 0, testMenu),
+                createMockMenuOption("곱배기", 1000, testMenu)
+        );
+
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(testOwnerUser));
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+        given(menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId))
+                .willReturn(mockOptions);
+
+        MenuResponseDTO.MenuDetailResponseDTO result = menuQueryService.getMenuDetail(menuId, userDetails);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMenuOptions()).hasSize(2);
+        assertThat(result.getMenuOptions())
+                .extracting(MenuResponseDTO.MenuOptionDTO::getOptionName)
+                .containsExactly("매운맛", "곱배기");
+        assertThat(result.getMenuOptions())
+                .extracting(MenuResponseDTO.MenuOptionDTO::getAdditionalPrice)
+                .containsExactly(0, 1000);
+
+        verify(menuOptionRepository, times(1)).findByMenuIdOrderByAdditionalPrice(menuId);
+    }
+
+    @ParameterizedTest
+    @EnumSource(Role.class)
+    @DisplayName("모든 Role 사용자의 메뉴 옵션 조회 테스트")
+    void getMenuOptionsByMenu_AllRoles_Success(Role role) {
+        UUID menuId = testMenu.getId();
+        List<MenuOption> mockOptions = Arrays.asList(
+                createMockMenuOption("권한테스트옵션_" + role.name(), 500, testMenu)
+        );
+
+        User testUser = Factory.createMockUserWithRole(role);
+        CustomUserDetails testUserDetails = createCustomUserDetails(testUser);
+
+        given(userRepository.findById(testUserDetails.getId()))
+                .willReturn(Optional.of(testUser));
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+        given(menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId))
+                .willReturn(mockOptions);
+
+        MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO result =
+            menuQueryService.getMenuOptionsByMenu(menuId, testUserDetails);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getOptions()).hasSize(1);
+        assertThat(result.getOptions().get(0).getOptionName())
+                .isEqualTo("권한테스트옵션_" + role.name());
+    }
+
     private Menu createMockMenuWithFactory(String name, Integer price) {
         Menu menu = Menu.builder()
                 .name(name)
@@ -476,6 +639,18 @@ class MenuQueryServiceImplTest {
         setCreatedAtReflection(menu, LocalDateTime.now().minusHours(1));
 
         return menu;
+    }
+
+    private MenuOption createMockMenuOption(String optionName, Integer additionalPrice, Menu menu) {
+        MenuOption option = MenuOption.builder()
+                .optionName(optionName)
+                .additionalPrice(additionalPrice)
+                .build();
+
+        option.setMenu(menu);
+        setIdReflection(option, UUID.randomUUID());
+
+        return option;
     }
 
     private void setIdReflection(Object entity, UUID id) {

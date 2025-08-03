@@ -7,6 +7,7 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.service.command.MenuCommandServiceImpl;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
@@ -51,6 +52,9 @@ class MenuCommandServiceImplTest {
 
     @Mock
     private MenuCategoryRepository menuCategoryRepository;
+
+    @Mock
+    private MenuOptionRepository menuOptionRepository;
 
     @InjectMocks
     private MenuCommandServiceImpl menuCommandService;
@@ -427,5 +431,401 @@ class MenuCommandServiceImplTest {
                         .isInstanceOf(MenuException.class);
             }
         }
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 생성 성공 - MASTER 권한")
+    void createMenuOption_Master_Success() {
+        User masterUser = Factory.createMockUserWithRole(Role.MASTER);
+        CustomUserDetails masterUserDetails = createCustomUserDetails(masterUser);
+
+        UUID menuId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+
+        when(testMenu.getId()).thenReturn(menuId);
+        when(testMenu.getName()).thenReturn("후라이드치킨");
+        when(testMenu.getStore()).thenReturn(testStore);
+        when(testStore.getName()).thenReturn("맛있는치킨집");
+
+        MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO.builder()
+                        .menuId(menuId)
+                        .optionName("매운맛")
+                        .additionalPrice(0)
+                        .build();
+
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+        given(menuOptionRepository.existsByMenuIdAndOptionName(menuId, "매운맛"))
+                .willReturn(false);
+        given(menuOptionRepository.save(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        assertThatCode(() -> menuCommandService.createMenuOption(requestDTO, masterUserDetails))
+                .doesNotThrowAnyException();
+
+        verify(menuRepository, times(1)).findById(menuId);
+        verify(menuOptionRepository, times(1)).existsByMenuIdAndOptionName(menuId, "매운맛");
+        verify(menuOptionRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 생성 성공 - OWNER 권한 (본인 가게)")
+    void createMenuOption_Owner_Success() {
+        UUID menuId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+
+        when(testMenu.getId()).thenReturn(menuId);
+        when(testMenu.getName()).thenReturn("후라이드치킨");
+        when(testMenu.getStore()).thenReturn(testStore);
+        when(testStore.getUser()).thenReturn(testOwnerUser);
+        when(testStore.getName()).thenReturn("맛있는치킨집");
+
+        MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO.builder()
+                        .menuId(menuId)
+                        .optionName("순살로 변경")
+                        .additionalPrice(2000)
+                        .build();
+
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+        given(menuOptionRepository.existsByMenuIdAndOptionName(menuId, "순살로 변경"))
+                .willReturn(false);
+        given(menuOptionRepository.save(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        assertThatCode(() -> menuCommandService.createMenuOption(requestDTO, ownerUserDetails))
+                .doesNotThrowAnyException();
+
+        verify(menuRepository, times(1)).findById(menuId);
+        verify(menuOptionRepository, times(1)).existsByMenuIdAndOptionName(menuId, "순살로 변경");
+        verify(menuOptionRepository, times(1)).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"CUSTOMER", "RIDER"})
+    @DisplayName("메뉴 옵션 생성 권한이 없는 역할 테스트 (CUSTOMER, RIDER)")
+    void createMenuOption_UnauthorizedRoles_ThrowsException(Role role) {
+        User unauthorizedUser = Factory.createMockUserWithRole(role);
+        CustomUserDetails unauthorizedUserDetails = createCustomUserDetails(unauthorizedUser);
+
+        UUID menuId = UUID.randomUUID();
+        Menu testMenu = mock(Menu.class);
+
+        MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO.builder()
+                        .menuId(menuId)
+                        .optionName("권한없음옵션")
+                        .additionalPrice(1000)
+                        .build();
+
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+
+        assertThatThrownBy(() -> menuCommandService.createMenuOption(requestDTO, unauthorizedUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuRepository, times(1)).findById(menuId);
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 생성 - OWNER가 다른 가게 메뉴에 옵션 생성 시도 시 예외 발생")
+    void createMenuOption_OwnerUnauthorizedStore_ThrowsException() {
+        User otherOwner = Factory.createMockUserWithRole(Role.OWNER);
+        UUID menuId = UUID.randomUUID();
+        Store otherStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+
+        when(testMenu.getStore()).thenReturn(otherStore);
+        when(otherStore.getUser()).thenReturn(otherOwner);
+
+        MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO.builder()
+                        .menuId(menuId)
+                        .optionName("권한없음옵션")
+                        .additionalPrice(1000)
+                        .build();
+
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+
+        assertThatThrownBy(() -> menuCommandService.createMenuOption(requestDTO, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuRepository, times(1)).findById(menuId);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"OWNER", "MASTER"})
+    @DisplayName("메뉴 옵션 수정 권한이 있는 역할 테스트 (OWNER, MASTER)")
+    void updateMenuOption_AuthorizedRoles_Success(Role role) {
+        User authorizedUser = Factory.createMockUserWithRole(role);
+        CustomUserDetails authorizedUserDetails = createCustomUserDetails(authorizedUser);
+
+        UUID optionId = UUID.randomUUID();
+        UUID menuId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+        com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption testMenuOption =
+            mock(com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption.class);
+
+        when(testMenuOption.getId()).thenReturn(optionId);
+        when(testMenuOption.getOptionName()).thenReturn("기존옵션_" + role.name());
+        when(testMenuOption.getAdditionalPrice()).thenReturn(500);
+        when(testMenuOption.getMenu()).thenReturn(testMenu);
+        when(testMenu.getId()).thenReturn(menuId);
+        when(testMenu.getName()).thenReturn("후라이드치킨");
+        when(testMenu.getStore()).thenReturn(testStore);
+        when(testStore.getName()).thenReturn("맛있는치킨집");
+
+        if (role == Role.OWNER) {
+            when(testStore.getUser()).thenReturn(authorizedUser);
+        }
+
+        MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO.builder()
+                        .optionName("수정된옵션_" + role.name())
+                        .additionalPrice(role == Role.MASTER ? 1500 : 2000)
+                        .build();
+
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+        given(menuOptionRepository.existsByMenuIdAndOptionName(menuId, "수정된옵션_" + role.name()))
+                .willReturn(false);
+        given(menuOptionRepository.save(testMenuOption))
+                .willReturn(testMenuOption);
+
+        assertThatCode(() -> menuCommandService.updateMenuOption(optionId, requestDTO, authorizedUserDetails))
+                .doesNotThrowAnyException();
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+        verify(menuOptionRepository, times(1)).existsByMenuIdAndOptionName(menuId, "수정된옵션_" + role.name());
+        verify(testMenuOption, times(1)).updateOptionInfo("수정된옵션_" + role.name(), role == Role.MASTER ? 1500 : 2000);
+        verify(menuOptionRepository, times(1)).save(testMenuOption);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"OWNER", "MASTER"})
+    @DisplayName("메뉴 옵션 삭제 권한이 있는 역할 테스트 (OWNER, MASTER)")
+    void deleteMenuOption_AuthorizedRoles_Success(Role role) {
+        User authorizedUser = Factory.createMockUserWithRole(role);
+        CustomUserDetails authorizedUserDetails = createCustomUserDetails(authorizedUser);
+
+        UUID optionId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+        com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption testMenuOption =
+            mock(com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption.class);
+
+        when(testMenuOption.getMenu()).thenReturn(testMenu);
+        when(testMenu.getStore()).thenReturn(testStore);
+
+        // OWNER인 경우에만 가게 소유자 검증을 위한 설정
+        if (role == Role.OWNER) {
+            when(testStore.getUser()).thenReturn(authorizedUser);
+        }
+
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+
+        assertThatCode(() -> menuCommandService.deleteMenuOption(optionId, authorizedUserDetails))
+                .doesNotThrowAnyException();
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+        verify(menuOptionRepository, times(1)).delete(testMenuOption);
+    }
+
+
+    @Test
+    @DisplayName("메뉴 옵션 수정 - OWNER가 다른 가게 메뉴 옵션 수정 시도 시 예외 발생")
+    void updateMenuOption_OwnerUnauthorizedStore_ThrowsException() {
+        User otherOwner = Factory.createMockUserWithRole(Role.OWNER);
+        UUID optionId = UUID.randomUUID();
+        UUID menuId = UUID.randomUUID();
+        Store otherStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+        com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption testMenuOption =
+            mock(com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption.class);
+
+        when(testMenuOption.getMenu()).thenReturn(testMenu);
+        when(testMenu.getStore()).thenReturn(otherStore);
+        when(otherStore.getUser()).thenReturn(otherOwner);
+
+        MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO.builder()
+                        .optionName("권한없음수정")
+                        .additionalPrice(1000)
+                        .build();
+
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+
+        assertThatThrownBy(() -> menuCommandService.updateMenuOption(optionId, requestDTO, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 삭제 - OWNER가 다른 가게 메뉴 옵션 삭제 시도 시 예외 발생")
+    void deleteMenuOption_OwnerUnauthorizedStore_ThrowsException() {
+        User otherOwner = Factory.createMockUserWithRole(Role.OWNER);
+        UUID optionId = UUID.randomUUID();
+        Store otherStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+        com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption testMenuOption =
+            mock(com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption.class);
+
+        when(testMenuOption.getMenu()).thenReturn(testMenu);
+        when(testMenu.getStore()).thenReturn(otherStore);
+        when(otherStore.getUser()).thenReturn(otherOwner);
+
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+
+        assertThatThrownBy(() -> menuCommandService.deleteMenuOption(optionId, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 생성 - 중복 옵션명 시 예외 발생")
+    void createMenuOption_DuplicateOptionName_ThrowsException() {
+        UUID menuId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+
+        when(testMenu.getId()).thenReturn(menuId);
+        when(testMenu.getStore()).thenReturn(testStore);
+        when(testStore.getUser()).thenReturn(testOwnerUser);
+
+        MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO.builder()
+                        .menuId(menuId)
+                        .optionName("곱배기")
+                        .additionalPrice(1000)
+                        .build();
+
+        given(menuRepository.findById(menuId))
+                .willReturn(Optional.of(testMenu));
+        given(menuOptionRepository.existsByMenuIdAndOptionName(menuId, "곱배기"))
+                .willReturn(true);
+
+        assertThatThrownBy(() -> menuCommandService.createMenuOption(requestDTO, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuRepository, times(1)).findById(menuId);
+        verify(menuOptionRepository, times(1)).existsByMenuIdAndOptionName(menuId, "곱배기");
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 수정 - 중복 옵션명 시 예외 발생")
+    void updateMenuOption_DuplicateOptionName_ThrowsException() {
+        UUID optionId = UUID.randomUUID();
+        UUID menuId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+        com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption testMenuOption =
+            mock(com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption.class);
+
+        when(testMenuOption.getId()).thenReturn(optionId);
+        when(testMenuOption.getOptionName()).thenReturn("기존옵션");
+        when(testMenuOption.getMenu()).thenReturn(testMenu);
+        when(testMenu.getId()).thenReturn(menuId);
+        when(testMenu.getStore()).thenReturn(testStore);
+        when(testStore.getUser()).thenReturn(testOwnerUser);
+
+        MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO.builder()
+                        .optionName("중복옵션")
+                        .additionalPrice(1000)
+                        .build();
+
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+        given(menuOptionRepository.existsByMenuIdAndOptionName(menuId, "중복옵션"))
+                .willReturn(true);
+
+        assertThatThrownBy(() -> menuCommandService.updateMenuOption(optionId, requestDTO, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+        verify(menuOptionRepository, times(1)).existsByMenuIdAndOptionName(menuId, "중복옵션");
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 수정 - 존재하지 않는 옵션 시 예외 발생")
+    void updateMenuOption_OptionNotFound_ThrowsException() {
+        UUID nonExistentOptionId = UUID.randomUUID();
+
+        MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO.builder()
+                        .optionName("존재하지않는옵션")
+                        .additionalPrice(1000)
+                        .build();
+
+        given(menuOptionRepository.findByIdWithMenu(nonExistentOptionId))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> menuCommandService.updateMenuOption(nonExistentOptionId, requestDTO, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(nonExistentOptionId);
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 삭제 - 존재하지 않는 옵션 시 예외 발생")
+    void deleteMenuOption_OptionNotFound_ThrowsException() {
+        UUID nonExistentOptionId = UUID.randomUUID();
+
+        given(menuOptionRepository.findByIdWithMenu(nonExistentOptionId))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> menuCommandService.deleteMenuOption(nonExistentOptionId, ownerUserDetails))
+                .isInstanceOf(MenuException.class);
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(nonExistentOptionId);
+    }
+
+    @Test
+    @DisplayName("메뉴 옵션 수정 - 이름은 같지만 다른 옵션명으로 중복 체크 통과")
+    void updateMenuOption_SameNameNoConflict_Success() {
+        UUID optionId = UUID.randomUUID();
+        UUID menuId = UUID.randomUUID();
+        Store testStore = mock(Store.class);
+        Menu testMenu = mock(Menu.class);
+        com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption testMenuOption =
+            mock(com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption.class);
+
+        when(testMenuOption.getId()).thenReturn(optionId);
+        when(testMenuOption.getOptionName()).thenReturn("기존옵션");
+        when(testMenuOption.getMenu()).thenReturn(testMenu);
+        when(testMenu.getId()).thenReturn(menuId);
+        when(testMenu.getName()).thenReturn("후라이드치킨");
+        when(testMenu.getStore()).thenReturn(testStore);
+        when(testStore.getUser()).thenReturn(testOwnerUser);
+        when(testStore.getName()).thenReturn("맛있는치킨집");
+
+        MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO =
+                MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO.builder()
+                        .optionName("기존옵션")
+                        .additionalPrice(2000)
+                        .build();
+
+        given(menuOptionRepository.findByIdWithMenu(optionId))
+                .willReturn(Optional.of(testMenuOption));
+        given(menuOptionRepository.save(testMenuOption))
+                .willReturn(testMenuOption);
+
+        assertThatCode(() -> menuCommandService.updateMenuOption(optionId, requestDTO, ownerUserDetails))
+                .doesNotThrowAnyException();
+
+        verify(menuOptionRepository, times(1)).findByIdWithMenu(optionId);
+        verify(menuOptionRepository, never()).existsByMenuIdAndOptionName(any(), any());
+        verify(testMenuOption, times(1)).updateOptionInfo("기존옵션", 2000);
     }
 }
