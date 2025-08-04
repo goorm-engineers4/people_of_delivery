@@ -51,10 +51,6 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean deleted = false; // 소프트 삭제 여부
-
-    @Column(nullable = false)
-    @Builder.Default
     private boolean emailVerified = false; // 현재 email의 인증 여부
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
@@ -102,6 +98,4 @@ public class User extends BaseEntity {
     }
 
     public void markEmailVerified() { this.emailVerified = true; }
-    // 소프트 삭제
-    public void softDelete() { this.deleted = true; }
 }
