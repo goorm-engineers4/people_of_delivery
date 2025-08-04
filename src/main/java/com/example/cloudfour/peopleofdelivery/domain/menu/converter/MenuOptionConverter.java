@@ -11,4 +11,12 @@ public class MenuOptionConverter {
                 .additionalPrice(option.getAdditionalPrice())
                 .build();
     }
+
+    public static MenuOptionResponseDTO.MenuOptionSimpleResponseDTO toMenuOptionSimpleResponseDTO(MenuOption option) {
+        return MenuOptionResponseDTO.MenuOptionSimpleResponseDTO.builder()
+                .menuOptionId(option.getId())
+                .optionName(option.getOptionName())
+                .additionalPrice(option.getAdditionalPrice())
+                .build();
+    }
 }
