@@ -4,8 +4,8 @@ import com.example.cloudfour.peopleofdelivery.domain.order.dto.OrderRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.order.dto.OrderResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.order.service.command.OrderCommandServiceImpl;
 import com.example.cloudfour.peopleofdelivery.domain.order.service.query.OrderQueryServiceImpl;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +36,7 @@ public class OrderController {
     public CustomResponse<OrderResponseDTO.OrderCreateResponseDTO> createOrder(
             @PathVariable("cartId") UUID cartId,
             @RequestBody OrderRequestDTO.OrderCreateRequestDTO orderCreateRequestDTO,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ){
         OrderResponseDTO.OrderCreateResponseDTO order = orderCommandService.createOrder(orderCreateRequestDTO,cartId,user);
         return CustomResponse.onSuccess(HttpStatus.CREATED, order);
@@ -46,7 +46,7 @@ public class OrderController {
     @Operation(summary = "주문 상세 조회", description = "주문을 상세 조회합니다. 주문 상세 조회에 사용되는 API입니다.")
     public CustomResponse<OrderResponseDTO.OrderDetailResponseDTO> getOrder(
             @PathVariable("orderId") UUID orderId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ){
         OrderResponseDTO.OrderDetailResponseDTO order = orderQueryService.getOrderById(orderId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, order);
@@ -57,8 +57,9 @@ public class OrderController {
     @Parameter(name = "cursor", description = "데이터가 시작하는 부분을 표시합니다")
     @Parameter(name = "size", description = "size만큼 데이터를 가져옵니다.")
     public CustomResponse<OrderResponseDTO.OrderUserListResponseDTO> getMyOrder(
-            @AuthenticationPrincipal User user
-            , @RequestParam(name = "cursor") LocalDateTime cursor, @RequestParam(name = "size") Integer size
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam(name = "cursor", required = false) LocalDateTime cursor,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
     ){
         OrderResponseDTO.OrderUserListResponseDTO order = orderQueryService.getOrderListByUser(user,cursor,size);
         return CustomResponse.onSuccess(HttpStatus.OK, order);
@@ -70,8 +71,9 @@ public class OrderController {
     @Parameter(name = "size", description = "size만큼 데이터를 가져옵니다.")
     public CustomResponse<OrderResponseDTO.OrderStoreListResponseDTO> getStoreOrder(
             @PathVariable("storeId") UUID storeId,
-            @AuthenticationPrincipal User user
-            , @RequestParam(name = "cursor") LocalDateTime cursor, @RequestParam(name = "size") Integer size
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam(name = "cursor", required = false) LocalDateTime cursor,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
     ){
         OrderResponseDTO.OrderStoreListResponseDTO order = orderQueryService.getOrderListByStore(storeId,cursor,size,user);
         return CustomResponse.onSuccess(HttpStatus.OK, order);
@@ -82,7 +84,7 @@ public class OrderController {
     public CustomResponse<OrderResponseDTO.OrderUpdateResponseDTO>  updateOrderStatus(
             @RequestBody OrderRequestDTO.OrderUpdateRequestDTO orderUpdateRequestDTO,
             @PathVariable("orderId") UUID orderId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ){
         OrderResponseDTO.OrderUpdateResponseDTO order = orderCommandService.updateOrder(orderUpdateRequestDTO,orderId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, order);
@@ -92,7 +94,7 @@ public class OrderController {
     @Operation(summary = "주문 취소", description = "주문을 취소합니다. 주문 취소에 사용되는 API입니다.")
     public CustomResponse<String>  deleteOrder(
             @PathVariable("orderId") UUID orderId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ){
         orderCommandService.deleteOrder(orderId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, "주문 취소 완료.");

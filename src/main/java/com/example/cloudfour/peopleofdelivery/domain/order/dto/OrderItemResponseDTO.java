@@ -14,6 +14,6 @@ public class OrderItemResponseDTO {
         String menuName;
         Integer quantity;
         Integer price;
-        List<MenuOptionResponseDTO.MenuOptionListResponseDTO> optionList;
+        MenuOptionResponseDTO.MenuOptionSimpleResponseDTO option;
     }
 }

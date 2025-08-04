@@ -1,9 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.domain.order.service.query;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.converter.MenuOptionConverter;
-import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
-import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
-import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.order.converter.OrderConverter;
 import com.example.cloudfour.peopleofdelivery.domain.order.converter.OrderItemConverter;
 import com.example.cloudfour.peopleofdelivery.domain.order.dto.OrderItemResponseDTO;
@@ -14,10 +11,11 @@ import com.example.cloudfour.peopleofdelivery.domain.order.exception.OrderErrorC
 import com.example.cloudfour.peopleofdelivery.domain.order.exception.OrderException;
 import com.example.cloudfour.peopleofdelivery.domain.order.repository.OrderItemRepository;
 import com.example.cloudfour.peopleofdelivery.domain.order.repository.OrderRepository;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -36,23 +34,22 @@ public class OrderQueryServiceImpl {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final OrderItemRepository orderItemRepository;
-    private final MenuOptionRepository menuOptionRepository;
     private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
+    private final StoreRepository storeRepository;
 
-    public OrderResponseDTO.OrderDetailResponseDTO getOrderById(UUID orderId , User user) {
+    public OrderResponseDTO.OrderDetailResponseDTO getOrderById(UUID orderId , CustomUserDetails user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
+        Order order = orderRepository.findById(orderId).orElseThrow(()->new OrderException(OrderErrorCode.NOT_FOUND));
         if(!orderRepository.existsByOrderIdAndUserId(orderId, user.getId())) {
             throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
         }
-        Order order = orderRepository.findById(orderId).orElseThrow(()->new OrderException(OrderErrorCode.NOT_FOUND));
         List<OrderItem> orderItems =  orderItemRepository.findByOrderId(orderId);
-        List<MenuOption> menuOptions = menuOptionRepository.findByOrderId(orderId);
-        List<MenuOptionResponseDTO.MenuOptionListResponseDTO> menuOptionListResponseDTOS = menuOptions.stream().map(MenuOptionConverter::toMenuOptionListResponseDTO).toList();
-        List<OrderItemResponseDTO.OrderItemListResponseDTO> orderItemDTOS = orderItems.stream().map(orderItem -> OrderItemConverter.toOrderItemClassListDTO(orderItem,menuOptionListResponseDTOS)).toList();
+        List<OrderItemResponseDTO.OrderItemListResponseDTO> orderItemDTOS = orderItems.stream().map(orderItem ->
+                OrderItemConverter.toOrderItemClassListDTO(orderItem, MenuOptionConverter.toMenuOptionSimpleResponseDTO(orderItem.getMenuOption()))).toList();
         return OrderConverter.toOrderDetailResponseDTO(order,orderItemDTOS);
     }
 
-    public OrderResponseDTO.OrderUserListResponseDTO getOrderListByUser(User user, LocalDateTime cursor, Integer size) {
+    public OrderResponseDTO.OrderUserListResponseDTO getOrderListByUser(CustomUserDetails user, LocalDateTime cursor, Integer size) {
         userRepository.findById(user.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         if(cursor == null) {
             cursor = first_cursor;
@@ -71,9 +68,9 @@ public class OrderQueryServiceImpl {
         return OrderConverter.toOrderUserListResponseDTO(orderUserResponseDTOS,orders.hasNext(),next_cursor);
     }
 
-    public OrderResponseDTO.OrderStoreListResponseDTO getOrderListByStore(UUID storeId, LocalDateTime cursor, Integer size, User user) {
+    public OrderResponseDTO.OrderStoreListResponseDTO getOrderListByStore(UUID storeId, LocalDateTime cursor, Integer size, CustomUserDetails user) {
         userRepository.findById(user.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
-        if(!orderRepository.existsByStoreIdAndUserId(storeId, user.getId())) {
+        if(!storeRepository.existsByStoreAndUser(storeId, user.getId())) {
             throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
         }
         if(cursor == null) {

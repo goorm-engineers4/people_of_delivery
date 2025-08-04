@@ -6,6 +6,8 @@ import com.example.cloudfour.peopleofdelivery.domain.order.enums.ReceiptType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.UUID;
+
 public class OrderRequestDTO {
     @Getter
     @Builder
@@ -13,8 +15,8 @@ public class OrderRequestDTO {
         OrderType orderType;
         OrderStatus orderStatus;
         ReceiptType receiptType;
-        String address;
         String request;
+        UUID address;
     }
 
     @Getter

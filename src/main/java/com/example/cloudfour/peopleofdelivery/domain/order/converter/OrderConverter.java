@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderConverter {
-    public static Order toOrder(OrderRequestDTO.OrderCreateRequestDTO orderCreateRequestDTO,Integer totalPrice) {
+    public static Order toOrder(OrderRequestDTO.OrderCreateRequestDTO orderCreateRequestDTO,Integer totalPrice,String address) {
         return Order.builder()
                 .orderType(orderCreateRequestDTO.getOrderType())
                 .receiptType(orderCreateRequestDTO.getReceiptType())
                 .request(orderCreateRequestDTO.getRequest())
-                .address(orderCreateRequestDTO.getAddress())
+                .address(address)
                 .totalPrice(totalPrice)
                 .status(orderCreateRequestDTO.getOrderStatus())
                 .build();

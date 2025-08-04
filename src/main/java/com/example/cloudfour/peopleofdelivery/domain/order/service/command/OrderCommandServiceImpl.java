@@ -23,9 +23,14 @@ import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorC
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.entity.UserAddress;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserAddressErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserAddressException;
 import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
+import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserAddressRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,11 +50,21 @@ public class OrderCommandServiceImpl {
     private final StoreRepository storeRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final UserAddressRepository userAddressRepository;
 
-    public OrderResponseDTO.OrderCreateResponseDTO createOrder(OrderRequestDTO.OrderCreateRequestDTO orderCreateRequestDTO,UUID cartId, User user) {
-        userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
+    public OrderResponseDTO.OrderCreateResponseDTO createOrder(OrderRequestDTO.OrderCreateRequestDTO orderCreateRequestDTO,UUID cartId, CustomUserDetails user) {
+        User finduser = userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Cart cart = cartRepository.findById(cartId).orElseThrow(()->new CartException(CartErrorCode.NOT_FOUND));
-        Store findStore = storeRepository.findById(cart.getId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
+        if(!cartRepository.existsByUserAndCart(user.getId(), cartId)){
+            throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        UserAddress userAddress = userAddressRepository.findById(orderCreateRequestDTO.getAddress()).orElseThrow(()->new UserAddressException(UserAddressErrorCode.NOT_FOUND));
+        if(!userAddressRepository.existsByUserIdAndAddressId(user.getId(), userAddress.getId())){
+            throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        Store findStore = storeRepository.findById(cart.getStore().getId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
         List<CartItem> cartItems = cartItemRepository.findAllByCartId(cartId,user.getId());
         if(cartItems.isEmpty()) {
             throw new CartItemException(CartErrorCode.NOT_FOUND);
@@ -58,9 +73,9 @@ public class OrderCommandServiceImpl {
         for (CartItem cartItem : cartItems) {
             totalPrice += cartItem.getPrice();
         }
-        Order order = OrderConverter.toOrder(orderCreateRequestDTO,totalPrice);
+        Order order = OrderConverter.toOrder(orderCreateRequestDTO,totalPrice,userAddress.getAddress());
         order.setStore(findStore);
-        order.setUser(user);
+        order.setUser(finduser);
         orderRepository.save(order);
         List<OrderItem> orderItems = cartItems.stream().map(cartItem -> OrderItemConverter.CartItemtoOrderItem(cartItem, order)).toList();
         orderItemRepository.saveAll(orderItems);
@@ -68,7 +83,7 @@ public class OrderCommandServiceImpl {
         return OrderConverter.toOrderCreateResponseDTO(order);
     }
 
-    public OrderResponseDTO.OrderUpdateResponseDTO updateOrder(OrderRequestDTO.OrderUpdateRequestDTO orderUpdateRequestDTO, UUID orderId, User user) {
+    public OrderResponseDTO.OrderUpdateResponseDTO updateOrder(OrderRequestDTO.OrderUpdateRequestDTO orderUpdateRequestDTO, UUID orderId, CustomUserDetails user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         if(!orderRepository.existsByOrderIdAndUserId(orderId, user.getId())) {
             throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
@@ -80,7 +95,7 @@ public class OrderCommandServiceImpl {
         return OrderConverter.toOrderUpdateResponseDTO(order,prev_orderStatus);
     }
 
-    public void deleteOrder(UUID orderId, User user) {
+    public void deleteOrder(UUID orderId, CustomUserDetails user) {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         if(!orderRepository.existsByOrderIdAndUserId(orderId, user.getId())) {
             throw new OrderException(OrderErrorCode.UNAUTHORIZED_ACCESS);
