@@ -50,7 +50,7 @@ public class OrderCommandServiceImpl {
         userRepository.findById(user.getId()).orElseThrow(()->new UserException(UserErrorCode.NOT_FOUND));
         Cart cart = cartRepository.findById(cartId).orElseThrow(()->new CartException(CartErrorCode.NOT_FOUND));
         Store findStore = storeRepository.findById(cart.getId()).orElseThrow(()->new StoreException(StoreErrorCode.NOT_FOUND));
-        List<CartItem> cartItems = cartItemRepository.findAllByCartId(cartId);
+        List<CartItem> cartItems = cartItemRepository.findAllByCartId(cartId,user.getId());
         if(cartItems.isEmpty()) {
             throw new CartItemException(CartErrorCode.NOT_FOUND);
         }
