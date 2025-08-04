@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
@@ -31,16 +32,15 @@ public class JwtTokenProvider {
                 .claim("role", role.name())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtProperties.getExpiration()))
-                .signWith(SignatureAlgorithm.HS256, getSigningKey(jwtProperties.getSecret()))
+                .signWith(getSigningKey(jwtProperties.getSecret()), SignatureAlgorithm.HS256)
                 .compact();
 
         String refreshToken = Jwts.builder()
                 .setSubject(sub)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtProperties.getRefreshExpiration()))
-                .signWith(SignatureAlgorithm.HS256, getSigningKey(jwtProperties.getRefreshSecret()))
+                .signWith(getSigningKey(jwtProperties.getRefreshSecret()), SignatureAlgorithm.HS256)
                 .compact();
-
         return new TokenDto("Bearer", accessToken, refreshToken, jwtProperties.getExpiration());
     }
 
@@ -73,5 +73,10 @@ public class JwtTokenProvider {
 
     private Key getSigningKey(String secret) {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public Instant getExpirationInstant(String token, boolean isRefresh) {
+        Claims claims = getClaims(token, isRefresh);
+        return claims.getExpiration().toInstant();
     }
 }
