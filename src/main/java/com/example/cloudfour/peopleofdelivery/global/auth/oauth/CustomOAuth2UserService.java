@@ -19,10 +19,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final UserRepository userRepository;
 
-    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService(); // 주입 받음
-
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
+        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(request);
 
         Map<String, Object> attributes = oAuth2User.getAttributes();

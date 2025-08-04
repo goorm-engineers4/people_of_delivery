@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UUID userId = UUID.fromString(jwtTokenProvider.getIdFromToken(token, false));
                 if (userId != null) {
                     // soft-delete 고려한 쿼리 권장
-                    Optional<User> optUser = userRepository.findByIdAndDeletedFalse(userId);
+                    Optional<User> optUser = userRepository.findByIdAndIsDeletedFalse(userId);
                     if (optUser.isPresent()) {
                         User user = optUser.get();
 
