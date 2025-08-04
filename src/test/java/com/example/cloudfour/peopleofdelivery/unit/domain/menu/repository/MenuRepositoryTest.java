@@ -48,7 +48,7 @@ class MenuRepositoryTest {
         StoreCategory storeCategory = Factory.createMockStoreCategory();
         entityManager.persistAndFlush(storeCategory);
 
-        User user = Factory.createMockUserWithRole(Role.OWNER, region);
+        User user = Factory.createMockUserWithRoleAndRegion(Role.OWNER, region);
         entityManager.persistAndFlush(user);
 
         store = Store.builder()
