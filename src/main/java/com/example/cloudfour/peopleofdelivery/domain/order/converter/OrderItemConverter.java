@@ -6,12 +6,10 @@ import com.example.cloudfour.peopleofdelivery.domain.order.dto.OrderItemResponse
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 
-import java.util.List;
-
 public class OrderItemConverter {
-    public static OrderItemResponseDTO.OrderItemListResponseDTO toOrderItemClassListDTO(OrderItem orderItem, List<MenuOptionResponseDTO.MenuOptionListResponseDTO> menuOption) {
+    public static OrderItemResponseDTO.OrderItemListResponseDTO toOrderItemClassListDTO(OrderItem orderItem, MenuOptionResponseDTO.MenuOptionSimpleResponseDTO option) {
         return OrderItemResponseDTO.OrderItemListResponseDTO.builder()
-                .optionList(menuOption)
+                .option(option)
                 .price(orderItem.getPrice())
                 .quantity(orderItem.getQuantity())
                 .menuName(orderItem.getMenu().getName())
