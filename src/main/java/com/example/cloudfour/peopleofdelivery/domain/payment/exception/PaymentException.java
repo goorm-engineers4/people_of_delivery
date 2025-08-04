@@ -7,4 +7,7 @@ public class PaymentException extends CustomException {
     public PaymentException(BaseErrorCode errorCode) {
       super(errorCode);
     }
+    public PaymentException(BaseErrorCode errorCode, String message) {
+        super(errorCode, message);
+    }
 }

@@ -18,6 +18,9 @@ public class PaymentHistory extends BaseEntity {
     private UUID id;
 
     @Enumerated(EnumType.STRING)
+    private PaymentStatus previousStatus;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
 

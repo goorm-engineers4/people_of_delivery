@@ -11,18 +11,15 @@ public class PaymentRequestDTO {
     @Builder
     public static class PaymentCreateRequestDTO{
         UUID orderId;
-        String paymentMethod;
         Integer totalPrice;
     }
 
     @Getter
     @Builder
     public static class PaymentVerifyRequestDTO{
-        UUID orderId;
-        String pgToken;
+        String paymentKey;
+        String orderId; // tossOrderId
         Integer amount;
-        String method;
-        UUID createdBy;
     }
 
     @Getter
@@ -36,6 +33,7 @@ public class PaymentRequestDTO {
     @Getter
     @Builder
     public static class PaymentDeleteRequestDTO{
+        String cancelReason;
         UUID updatedBy;
     }
 

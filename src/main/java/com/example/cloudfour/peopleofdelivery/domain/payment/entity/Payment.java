@@ -18,14 +18,17 @@ public class Payment extends BaseEntity {
     @GeneratedValue
     private UUID id;
 
+    @Column(nullable = false, unique = true)
+    private String paymentKey;
+
+    @Column(nullable = false)
+    private String tossOrderId;
+
     @Column(nullable = false)
     private Integer totalPrice;
 
     @Column(nullable = false)
     private String paymentMethod;
-
-    @Column(nullable = false)
-    private Integer paymentKey;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -41,6 +44,10 @@ public class Payment extends BaseEntity {
     @JoinColumn(name ="orderId", nullable = false)
     private Order order;
 
+    public void setPaymentStatus(PaymentStatus paymentStatus) {this.paymentStatus = paymentStatus;}
+
+    public void setFailedReason(String s) { this.failedReason = s;}
+
     public static class PaymentBuilder{
         private PaymentBuilder id(UUID id){
             throw new UnsupportedOperationException("id 수동 생성 불가");
@@ -51,9 +58,22 @@ public class Payment extends BaseEntity {
         this.paymentHistory = paymentHistory;
     }
 
+    public PaymentHistory addHistory(PaymentStatus previousStatus, PaymentStatus currentStatus, String changeReason) {
+        PaymentHistory history = PaymentHistory.builder()
+                .previousStatus(previousStatus)
+                .paymentStatus(currentStatus)
+                .failedReason(this.getFailedReason()) // 필요시 복사
+                .build();
+
+        history.setPayment(this); // 양방향 연관관계 설정
+        this.setPaymentHistory(history); // 엔티티 내 필드에도 반영
+        return history;
+    }
+
     public void setOrder(Order order){
         this.order = order;
         order.setPayment(this);
     }
 }
+
 

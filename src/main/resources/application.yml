@@ -10,8 +10,8 @@ spring:
     password: ${LOCAL_DB_PASSWORD}
     
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
+    host: smtp.gmail.com
+    port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
@@ -20,6 +20,11 @@ spring:
           auth: true
           starttls:
             enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    auth-code-expiration-millis: 1800000
 
   jpa:
     hibernate.ddl-auto: create
@@ -53,3 +58,9 @@ jwt:
   refresh-secret: ${JWT_REFRESH_SECRET}
   refresh-expiration: 604800000
 
+
+toss:
+  secret-key: ${TOSS_SECRET}
+  client-key: ${TOSS_CLIENT}
+  base-url: https://api.tosspayments.com
+  confirm-endpoint: /confirm
