@@ -3,6 +3,10 @@ package com.example.cloudfour.peopleofdelivery.domain.store.service.query;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
+import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,17 +22,20 @@ import java.util.UUID;
 public class StoreQueryService {
 
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
-    public StoreResponseDTO.StoreCursorListResponseDTO getAllStores(LocalDateTime cursor, int size) {
+    public StoreResponseDTO.StoreCursorListResponseDTO getAllStores(LocalDateTime cursor, int size, String keyword, CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
         LocalDateTime baseTime = (cursor != null) ? cursor : LocalDateTime.now();
 
         Pageable pageable = PageRequest.of(0, size);
-        Slice<Store> storeSlice = storeRepository.findAllByCursor(baseTime, pageable);
+        Slice<Store> storeSlice = storeRepository.findAllByKeyWord(keyword,baseTime, pageable);
 
         List<StoreResponseDTO.StoreListResponseDTO> storeList = storeSlice.getContent().stream()
                 .map(StoreResponseDTO.StoreListResponseDTO::from)
                 .toList();
-        // 빈 리스트에서 꺼내는거 방지하기 위해 조건 추가
+
         LocalDateTime nextCursor = storeSlice.hasNext() && !storeList.isEmpty()
                 ? storeList.get(storeList.size() - 1).getCreatedAt()
                 : null;
@@ -36,7 +43,9 @@ public class StoreQueryService {
         return StoreResponseDTO.StoreCursorListResponseDTO.of(storeList, nextCursor);
     }
 
-    public StoreResponseDTO.StoreCursorListResponseDTO getStoresByCategory(UUID categoryId, LocalDateTime cursor, int size) {
+    public StoreResponseDTO.StoreCursorListResponseDTO getStoresByCategory(UUID categoryId, LocalDateTime cursor, int size,CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
         LocalDateTime baseTime = (cursor != null) ? cursor : LocalDateTime.now();
 
         Pageable pageable = PageRequest.of(0, size);
@@ -46,7 +55,6 @@ public class StoreQueryService {
                 .map(StoreResponseDTO.StoreListResponseDTO::from)
                 .toList();
 
-        // 빈 리스트에서 꺼내는거 방지하기 위해 조건 추가
         LocalDateTime nextCursor = storeSlice.hasNext() && !storeList.isEmpty()
                 ? storeList.get(storeList.size() - 1).getCreatedAt()
                 : null;
@@ -54,7 +62,8 @@ public class StoreQueryService {
         return StoreResponseDTO.StoreCursorListResponseDTO.of(storeList, nextCursor);
     }
 
-    public StoreResponseDTO.StoreDetailResponseDTO getStoreById(UUID storeId) {
+    public StoreResponseDTO.StoreDetailResponseDTO getStoreById(UUID storeId,CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다."));
         return StoreResponseDTO.StoreDetailResponseDTO.from(store);

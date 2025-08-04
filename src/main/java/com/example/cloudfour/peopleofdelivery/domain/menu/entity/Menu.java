@@ -6,8 +6,23 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCod
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
@@ -70,7 +85,6 @@ public class Menu {
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
-    // Builder에서 id 필드 제외
     public static class MenuBuilder {
         private MenuBuilder id(UUID id) {
             throw new MenuException(MenuErrorCode.CREATE_FAILED);
@@ -87,15 +101,11 @@ public class Menu {
         store.getMenus().add(this);
     }
 
-    // 메뉴 정보 수정을 위한 업데이트 메서드
-    public void updateMenuInfo(String name, String content, Integer price, String menuPicture) {
-        this.name = name;
-        this.content = content;
-        this.price = price;
-        this.menuPicture = menuPicture;
-    }
-
-    public void updateStatus(MenuStatus status) {
-        this.status = status;
+    public void updateMenuInfo(String name, String content, Integer price, String menuPicture, MenuStatus status) {
+        if (name != null) this.name = name;
+        if (content != null) this.content = content;
+        if (price != null) this.price = price;
+        if (menuPicture != null) this.menuPicture = menuPicture;
+        if (status != null) this.status = status;
     }
 }

@@ -1,7 +1,17 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -11,11 +21,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)  // Builder만 사용하도록 제한
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MenuCategory {
     @Id
     @GeneratedValue
-    private UUID id;  // 자동 생성되는 UUID
+    private UUID id;
 
     @Column(name = "category", nullable = false)
     private String category;

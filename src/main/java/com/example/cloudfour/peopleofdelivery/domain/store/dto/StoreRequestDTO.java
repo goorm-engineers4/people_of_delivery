@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class StoreRequestDTO {
@@ -20,12 +18,12 @@ public class StoreRequestDTO {
         private String storePicture;
         private String phone;
         private String content;
+        private String category;
         private Integer minPrice;
         private Integer deliveryTip;
         private String operationHours;
         private String closedDays;
         private UUID regionId;
-        private UUID storeCategoryId;
     }
 
     @Getter
@@ -34,9 +32,6 @@ public class StoreRequestDTO {
         private String name;
         private String address;
         private String category;
-        private int likeCount;
-        private float rating;
-        private int reviewCount;
     }
 }
 

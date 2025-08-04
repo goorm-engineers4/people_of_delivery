@@ -33,7 +33,6 @@ public class CartItemResponseDTO {
     public static class CartItemUpdateResponseDTO {
         UUID cartItemId;
         UUID cartId;
-        UUID menuId;
         UUID menuOptionId;
         Integer quantity;
         Integer price;

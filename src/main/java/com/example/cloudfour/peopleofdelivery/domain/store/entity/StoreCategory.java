@@ -1,7 +1,21 @@
 package com.example.cloudfour.peopleofdelivery.domain.store.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+
+
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreCategoryErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreCategoryException;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +33,16 @@ public class StoreCategory {
     @Column(nullable = false)
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, unique = true,length = 255)
     private String category;
 
-    // 🔽 양방향 관계 추가
     @OneToMany(mappedBy = "storeCategory", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Store> stores = new ArrayList<>();
 
     public static class StoreCategoryBuilder {
         private StoreCategoryBuilder id(UUID id){
-            throw new UnsupportedOperationException("id 생성 불가");
+            throw new StoreCategoryException(StoreCategoryErrorCode.CREATE_FAILED);
         }
     }
 }

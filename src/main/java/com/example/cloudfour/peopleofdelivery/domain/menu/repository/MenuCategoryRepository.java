@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface MenuCategoryRepository extends JpaRepository<MenuCategory, UUID> {
 
-    // 카테고리명으로 조회
     @Query("SELECT mc FROM MenuCategory mc WHERE mc.category = :category")
     Optional<MenuCategory> findByCategory(@Param("category") String category);
 }

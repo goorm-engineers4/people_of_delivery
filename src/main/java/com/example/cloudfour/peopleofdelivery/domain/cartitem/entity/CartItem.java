@@ -4,8 +4,19 @@ import com.example.cloudfour.peopleofdelivery.domain.cart.entity.Cart;
 import com.example.cloudfour.peopleofdelivery.domain.cartitem.dto.CartItemRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -59,8 +70,8 @@ public class CartItem {
         menuOption.getCartItems().add(this);
     }
 
-    public void update(CartItemRequestDTO.CartItemUpdateRequestDTO requestDTO){
-        this.quantity = requestDTO.getQuantity();
-        this.price = requestDTO.getPrice();
+    public void update(Integer quantity, Integer price){
+        if (quantity != null) this.quantity = quantity;
+        if(price != null) this.price = price;
     }
 }

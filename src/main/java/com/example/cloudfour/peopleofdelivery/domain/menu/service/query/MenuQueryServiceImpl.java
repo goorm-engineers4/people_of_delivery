@@ -1,10 +1,23 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.service.query;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuCategoryErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuCategoryException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
+import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
+import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -18,17 +31,23 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service // 서비스 레이어 어노테이션
-@Slf4j // 로그 찍기 기능
-@RequiredArgsConstructor // 생성자 주입을 위한 어노테이션
-@Transactional(readOnly = true) // 트랜잭션 관리 어노테이션
+@Service
+@Slf4j
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MenuQueryServiceImpl {
 
     private final MenuRepository menuRepository;
+    private final MenuCategoryRepository menuCategoryRepository;
+    private final UserRepository userRepository;
     private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
+    private final StoreRepository storeRepository;
+    private final MenuOptionRepository menuOptionRepository;
 
-    // 커서 기반 페이지네이션을 사용한 가게별 메뉴 조회
-    public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size) {
+    public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size, CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+        storeRepository.findByIdAndIsDeletedFalse(storeId).orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
+
         if (cursor == null) {
             cursor = first_cursor;
         }
@@ -49,6 +68,7 @@ public class MenuQueryServiceImpl {
                         .menuPicture(menu.getMenuPicture())
                         .status(menu.getStatus())
                         .category(menu.getMenuCategory().getCategory())
+                        .createdAt(menu.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
 
@@ -64,8 +84,51 @@ public class MenuQueryServiceImpl {
                 .build();
     }
 
-    // 전체 인기 메뉴 TOP20 조회
-    public List<MenuResponseDTO.MenuTopResponseDTO> getTopMenus() {
+    public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCategory(UUID storeId, UUID categoryId,
+                                                                                LocalDateTime cursor, Integer size, CustomUserDetails userDetails){
+
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+        storeRepository.findByIdAndIsDeletedFalse(storeId).orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
+        menuCategoryRepository.findById(categoryId).orElseThrow(() -> new MenuCategoryException(MenuCategoryErrorCode.NOT_FOUND));
+
+        if (cursor == null) {
+            cursor = first_cursor;
+        }
+
+        Pageable pageable = PageRequest.of(0, size);
+        Slice<Menu> menuSlice = menuRepository.findByStoreIdAndMenuCategoryIdAndDeletedFalseAndCreatedAtBefore(storeId, categoryId,cursor, pageable);
+
+        if (menuSlice.isEmpty()) {
+            throw new MenuException(MenuErrorCode.NOT_FOUND);
+        }
+
+        List<Menu> menuList = menuSlice.getContent();
+        List<MenuResponseDTO.MenuListResponseDTO> menuDTOS = menuList.stream()
+                .map(menu -> MenuResponseDTO.MenuListResponseDTO.builder()
+                        .menuId(menu.getId())
+                        .name(menu.getName())
+                        .price(menu.getPrice())
+                        .menuPicture(menu.getMenuPicture())
+                        .status(menu.getStatus())
+                        .category(menu.getMenuCategory().getCategory())
+                        .createdAt(menu.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        LocalDateTime next_cursor = null;
+        if (!menuList.isEmpty() && menuSlice.hasNext()) {
+            next_cursor = menuList.getLast().getCreatedAt();
+        }
+
+        return MenuResponseDTO.MenuStoreListResponseDTO.builder()
+                .menus(menuDTOS)
+                .hasNext(menuSlice.hasNext())
+                .nextCursor(next_cursor)
+                .build();
+    }
+
+    public List<MenuResponseDTO.MenuTopResponseDTO> getTopMenus(CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         List<Menu> topMenus = menuRepository.findTopMenusByOrderCount(PageRequest.of(0, 20));
 
         return topMenus.stream()
@@ -74,14 +137,15 @@ public class MenuQueryServiceImpl {
                         .name(menu.getName())
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
-                        .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
+                        .storeName(menu.getStore().getName())
                         .build())
                 .collect(Collectors.toList());
     }
 
-    // 시간대별 인기 메뉴 TOP20 조회
-    public List<MenuResponseDTO.MenuTimeTopResponseDTO> getTimeTopMenus() {
-        LocalDateTime startTime = LocalDateTime.now().minusHours(24); // 최근 24시간
+    public List<MenuResponseDTO.MenuTimeTopResponseDTO> getTimeTopMenus(CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
+        LocalDateTime startTime = LocalDateTime.now().minusHours(24);
         LocalDateTime endTime = LocalDateTime.now();
 
         List<Menu> timeTopMenus = menuRepository.findTopMenusByTimeRange(
@@ -93,14 +157,14 @@ public class MenuQueryServiceImpl {
                         .name(menu.getName())
                         .price(menu.getPrice())
                         .menuPicture(menu.getMenuPicture())
-                        .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
+                        .storeName(menu.getStore().getName())
                         .orderCount(menu.getOrderItems().size())
                         .build())
                 .collect(Collectors.toList());
     }
 
-    // 지역별 인기 메뉴 TOP20 조회
-    public List<MenuResponseDTO.MenuRegionTopResponseDTO> getRegionTopMenus(String si, String gu) {
+    public List<MenuResponseDTO.MenuRegionTopResponseDTO> getRegionTopMenus(String si, String gu,CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         List<Menu> regionTopMenus = menuRepository.findTopMenusByRegion(si, gu, PageRequest.of(0, 20));
 
         return regionTopMenus.stream()
@@ -117,10 +181,20 @@ public class MenuQueryServiceImpl {
                 .collect(Collectors.toList());
     }
 
-    // 메뉴 상세 조회
-    public MenuResponseDTO.MenuDetailResponseDTO getMenuDetail(UUID menuId) {
+    public MenuResponseDTO.MenuDetailResponseDTO getMenuDetail(UUID menuId,CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        List<MenuOption> menuOptions = menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId);
+
+        List<MenuResponseDTO.MenuOptionDTO> menuOptionDTOs = menuOptions.stream()
+                .map(option -> MenuResponseDTO.MenuOptionDTO.builder()
+                        .menuOptionId(option.getId())
+                        .optionName(option.getOptionName())
+                        .additionalPrice(option.getAdditionalPrice())
+                        .build())
+                .collect(Collectors.toList());
 
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(menu.getId())
@@ -130,10 +204,52 @@ public class MenuQueryServiceImpl {
                 .menuPicture(menu.getMenuPicture())
                 .status(menu.getStatus())
                 .storeId(menu.getStore().getId())
-                .storeName(menu.getStore().getName()) // Store의 getName() 메서드 사용
+                .storeName(menu.getStore().getName())
                 .category(menu.getMenuCategory().getCategory())
                 .createdAt(menu.getCreatedAt())
                 .updatedAt(menu.getUpdatedAt())
+                .menuOptions(menuOptionDTOs)
+                .build();
+    }
+
+    public MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO getMenuOptionsByMenu(UUID menuId, CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        List<MenuOption> menuOptions = menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId);
+
+        List<MenuOptionResponseDTO.MenuOptionSimpleResponseDTO> optionDTOs = menuOptions.stream()
+                .map(option -> MenuOptionResponseDTO.MenuOptionSimpleResponseDTO.builder()
+                        .menuOptionId(option.getId())
+                        .optionName(option.getOptionName())
+                        .additionalPrice(option.getAdditionalPrice())
+                        .build())
+                .collect(Collectors.toList());
+
+        return MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO.builder()
+                .menuId(menu.getId())
+                .menuName(menu.getName())
+                .options(optionDTOs)
+                .build();
+    }
+
+    public MenuOptionResponseDTO.MenuOptionDetailResponseDTO getMenuOptionDetail(UUID optionId, CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
+        MenuOption menuOption = menuOptionRepository.findByIdWithMenu(optionId)
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        return MenuOptionResponseDTO.MenuOptionDetailResponseDTO.builder()
+                .menuOptionId(menuOption.getId())
+                .menuId(menuOption.getMenu().getId())
+                .menuName(menuOption.getMenu().getName())
+                .storeName(menuOption.getMenu().getStore().getName())
+                .optionName(menuOption.getOptionName())
+                .additionalPrice(menuOption.getAdditionalPrice())
+                .createdAt(menuOption.getMenu().getCreatedAt())
+                .updatedAt(menuOption.getMenu().getUpdatedAt())
                 .build();
     }
 }

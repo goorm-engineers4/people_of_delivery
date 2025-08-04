@@ -1,5 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.domain.order.dto;
 
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,8 +14,6 @@ public class OrderItemResponseDTO {
         String menuName;
         Integer quantity;
         Integer price;
-
-        //TODO MenuOptionDTO로 변경하기
-        List<MenuOption> optionList;
+        List<MenuOptionResponseDTO.MenuOptionListResponseDTO> optionList;
     }
 }

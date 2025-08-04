@@ -14,4 +14,7 @@ public interface CartRepository extends JpaRepository<Cart, UUID> {
 
     @Query("select count(c) > 0 from Cart c where c.user.id = :userId and c.store.id = :storeId and c.user.isDeleted = false")
     boolean existsByUserAndStore(@Param("userId") UUID userId, @Param("storeId") UUID storeId);
+
+    @Query("select count(c) > 0 from Cart c where c.id =:cartId and c.user.id =:userId and c.user.isDeleted = false")
+    boolean existsByUserAndCart(@Param("userId") UUID userId, @Param("cartId") UUID cartId);
 }

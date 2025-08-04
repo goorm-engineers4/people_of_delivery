@@ -7,8 +7,22 @@ import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
 import com.example.cloudfour.peopleofdelivery.domain.review.entity.Review;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +40,7 @@ public class Store extends BaseEntity {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 255, unique = true)
     private String name;
 
     @Column(nullable = false, length = 255)
@@ -101,11 +115,8 @@ public class Store extends BaseEntity {
         region.getStores().add(this);
     }
 
-    //@Setter제거하고 도메인 메서드 추가
-    public void update(String name, String address, float rating, int reviewCount) {
+    public void update(String name, String address) {
         if (name != null) this.name = name;
         if (address != null) this.address = address;
-        if (rating >= 0) this.rating = rating;
-        if (reviewCount >= 0) this.reviewCount = reviewCount;
     }
 }

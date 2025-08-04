@@ -17,10 +17,15 @@ public class CartItemRequestDTO {
 
     @Getter
     @Builder
-    public static class CartItemUpdateRequestDTO {
+    public static class CartItemCreateRequestDTO {
         private UUID menuId;
         private UUID menuOptionId;
+    }
+
+    @Getter
+    @Builder
+    public static class CartItemUpdateRequestDTO {
+        private UUID menuOptionId;
         private Integer quantity;
-        private Integer price;
     }
 }

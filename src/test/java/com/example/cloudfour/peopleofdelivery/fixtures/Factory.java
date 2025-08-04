@@ -7,7 +7,6 @@ import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import com.example.cloudfour.peopleofdelivery.domain.menu.enums.MenuStatus;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
-import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderHistory;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.OrderItem;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
@@ -119,8 +118,8 @@ public class Factory {
                 .store(store)
                 .build();
 
-        user.getCarts().add(cart);
-        store.getCarts().add(cart);
+        cart.setUser(user);
+        cart.setStore(store);
 
         CartItem cartItem = CartItem.builder()
                 .quantity(1)
@@ -154,12 +153,6 @@ public class Factory {
         order.getOrderItems().add(orderItem);
         menu.getOrderItems().add(orderItem);
 
-        OrderHistory orderHistory = OrderHistory.builder()
-                .order(order)
-                .orderStatus(OrderStatus.조리중)
-                .build();
-
-        order.setOrderHistory(orderHistory);
 
         Payment payment = Payment.builder()
                 .order(order)
@@ -192,6 +185,33 @@ public class Factory {
                 .question("치킨 추천해줘")
                 .result("후라이드치킨")
                 .build();
+
+        return user;
+    }
+
+
+
+    public static User createMockUserWithRole(Role role) {
+        Region region = createMockRegion();
+
+        User user = User.builder()
+                .email("test@example.com")
+                .nickname("mockUser")
+                .password("encoded")
+                .number("010-1111-2222")
+                .role(role)
+                .providerId("google-oauth2|1234567890")
+                .loginType(LoginType.GOOGLE)
+                .build();
+
+        UserAddress address = UserAddress.builder()
+                .address("서울 종로구 청운동 100-1")
+                .user(user)
+                .region(region)
+                .build();
+
+        user.getAddresses().add(address);
+        region.getAddresses().add(address);
 
         return user;
     }

@@ -12,18 +12,24 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// StoreRepository
 public interface StoreRepository extends JpaRepository<Store, UUID> {
 
-    // 사용자 ID로 가게 조회 (soft delete된 유저 제외)
     @Query("SELECT s FROM Store s WHERE s.user.id = :userId AND s.user.isDeleted = false")
     Optional<Store> findByUserId(@Param("userId") UUID userId);
 
     boolean existsByName(String name);
 
-    @Query("SELECT s FROM Store s WHERE s.isDeleted = false AND s.createdAt < :cursor ORDER BY s.createdAt DESC")
-    Slice<Store> findAllByCursor(@Param("cursor") LocalDateTime cursor, Pageable pageable);
+    Optional<Store> findByIdAndIsDeletedFalse(UUID storeId);
+
+    @Query("select count(s) > 0 from Store s where s.user.id = :userId and s.id = :storeId and s.user.isDeleted = false")
+    boolean existsByStoreAndUser(@Param("storeId") UUID storeId, @Param("userId") UUID userId);
 
     @Query("SELECT s FROM Store s WHERE s.isDeleted = false AND s.storeCategory.id = :categoryId AND s.createdAt < :cursor ORDER BY s.createdAt DESC")
     Slice<Store> findAllByCategoryAndCursor(@Param("categoryId") UUID categoryId, @Param("cursor") LocalDateTime cursor, Pageable pageable);
+
+    @Query("select s from Store s where s.isDeleted = false " +
+            "and (s.name ilike concat('%', :keyword, '%')" +
+            "or s.storeCategory.category ilike concat('%', :keyword, '%'))" +
+            "and s.createdAt < :cursor ORDER BY s.createdAt DESC")
+    Slice<Store> findAllByKeyWord(@Param("keyword") String keyword, LocalDateTime cursor, Pageable pageable);
 }
