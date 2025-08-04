@@ -2,8 +2,11 @@ package com.example.cloudfour.peopleofdelivery.domain.order.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
+import com.example.cloudfour.peopleofdelivery.domain.order.exception.OrderItemErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.order.exception.OrderItemException;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.UUID;
 
 @Entity
@@ -30,12 +33,12 @@ public class OrderItem {
     private Menu menu;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menuOptionId", nullable = false)
+    @JoinColumn(name = "menuOptionId", nullable = true)
     private MenuOption menuOption;
 
     public static class OrderItemBuilder{
         private OrderItemBuilder id(UUID id){
-            throw new UnsupportedOperationException("id 수정 불가");
+            throw new OrderItemException(OrderItemErrorCode.CREATE_FAILED);
         }
     }
 
@@ -50,7 +53,9 @@ public class OrderItem {
     }
 
     public void setMenuOption(MenuOption menuOption){
-        this.menuOption = menuOption;
-        menuOption.getOrderItems().add(this);
+        if (menuOption != null) {
+            this.menuOption = menuOption;
+            menuOption.getOrderItems().add(this);
+        }
     }
 }

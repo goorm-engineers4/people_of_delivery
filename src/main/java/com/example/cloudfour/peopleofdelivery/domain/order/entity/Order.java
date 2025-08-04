@@ -3,6 +3,8 @@ package com.example.cloudfour.peopleofdelivery.domain.order.entity;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderStatus;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.OrderType;
 import com.example.cloudfour.peopleofdelivery.domain.order.enums.ReceiptType;
+import com.example.cloudfour.peopleofdelivery.domain.order.exception.OrderErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.order.exception.OrderException;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
@@ -56,13 +58,13 @@ public class Order extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Payment payment;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public static class OrderBuilder{
-        private OrderBuilder id(UUID id){
-            throw new UnsupportedOperationException("id 수동 생성 불가");
+        private OrderBuilder id(UUID id) {
+            throw new OrderException(OrderErrorCode.CREATE_FAILED);
         }
     }
 
