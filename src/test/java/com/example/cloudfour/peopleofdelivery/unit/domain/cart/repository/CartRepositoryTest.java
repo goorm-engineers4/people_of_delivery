@@ -53,7 +53,6 @@ class CartRepositoryTest {
                 .number("01087654321")
                 .role(Role.CUSTOMER)
                 .loginType(LoginType.LOCAL)
-                .deleted(true)
                 .build();
         entityManager.persist(deletedUser);
 

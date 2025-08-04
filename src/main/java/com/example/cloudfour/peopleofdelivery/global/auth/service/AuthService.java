@@ -49,7 +49,6 @@ public class AuthService {
                 .role(Role.CUSTOMER)           // 초기 기본권한
                 .loginType(LoginType.LOCAL)
                 .emailVerified(false)
-                .deleted(false)
                 .build();
 
         userRepository.save(user);
@@ -73,7 +72,7 @@ public class AuthService {
             if (user.getLoginType() != LoginType.LOCAL) {
                 throw new IllegalArgumentException("소셜 계정은 로컬 로그인 불가");
             }
-            if (user.isDeleted()) {
+            if (user.getIsDeleted()) {
                 throw new IllegalArgumentException("이미 탈퇴한 계정입니다.");
             }
             if (!user.isEmailVerified()) {
