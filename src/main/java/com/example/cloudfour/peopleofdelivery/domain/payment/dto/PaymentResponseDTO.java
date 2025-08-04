@@ -5,98 +5,62 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class PaymentResponseDTO {
-    @Getter
-    @Builder
-    public static class PaymentCreateResponseDTO{
-        UUID payId;
-        UUID orderId;
-        Integer totalPrice;
-        String orderName;
-        PaymentStatus paymentStatus;
-        String paymentMethod;
+
+    @Getter @Builder
+    public static class PaymentCreateResponseDTO {
+        private String paymentUrl; // 프론트에서 결제할 수 있도록 리다이렉트 URL 제공 시
     }
 
-    @Getter
-    @Builder
-    public static class PaymentVerifyResponseDTO{
-        UUID paymentId;
-        UUID orderId;
-        PaymentStatus paymentStatus;
-        Integer amount;
-        String method;
-        LocalDateTime createdAt;
-        UUID createdBy;
+    @Getter @Builder
+    public static class PaymentVerifyResponseDTO {
+        private String paymentKey;
+        private String orderId;
+        private Integer amount;
+        private String paymentMethod;
+        private PaymentStatus paymentStatus;
     }
 
-    @Getter
-    @Builder
-    public static class PaymentUpdateResponseDTO{
-        UUID paymentHistoryId;
-        PaymentStatus paymentStatus;
-        UUID updatedBy;
+    @Getter @Builder
+    public static class PaymentUpdateResponseDTO {
+        private UUID paymentId;
+        private PaymentStatus updatedStatus;
     }
 
-    @Getter
-    @Builder
-    public static class PaymentDetailResponseDTO{
-        UUID payId;
-        UUID orderId;
-        Integer totalPrice;
-        String paymentMethod;
-        PaymentStatus paymentStatus;
-        LocalDateTime createdAt;
-        UUID createdBy;
-        LocalDateTime updatedAt;
-        UUID updatedBy;
+    @Getter @Builder
+    public static class PaymentDeleteResponseDTO {
+        private UUID paymentId;
+        private PaymentStatus status;
+        private String cancelReason;
     }
 
-    @Getter
-    @Builder
-    public static class PaymentDeleteResponseDTO{
-        UUID orderId;
-        PaymentStatus paymentStatus;
-        LocalDateTime updatedAt;
-        UUID updatedBy;
+    @Getter @Builder
+    public static class PaymentDetailResponseDTO {
+        private String paymentKey;
+        private String orderId;
+        private Integer amount;
+        private String paymentMethod;
+        private PaymentStatus paymentStatus;
+        private String failReason;
     }
 
-    @Getter
-    @Builder
-    public static class PaymentUserListResponseDTO{
-        UUID paymentId;
-        UUID orderId;
-        UUID storeId;
-        String storeName;
-        Integer amount;
-        String paymentMethod;
-        PaymentStatus paymentStatus;
-        LocalDateTime createdAt;
-        LocalDateTime updatedAt;
+    @Getter @Builder
+    public static class PaymentUserListResponseDTO {
+        private List<PaymentDetailResponseDTO> paymentList;
     }
 
-    @Getter
-    @Builder
-    public static class PaymentStoreListResponseDTO{
-        UUID paymentId;
-        UUID orderId;
-        Integer amount;
-        String paymentMethod;
-        PaymentStatus paymentStatus;
-        LocalDateTime createdAt;
-        LocalDateTime updatedAt;
-        UUID userid;
-        String username;
+    @Getter @Builder
+    public static class PaymentStoreListResponseDTO {
+        private List<PaymentDetailResponseDTO> paymentList;
     }
 
-    @Getter
-    @Builder
-    public static class PaymentStoreSummaryResponseDTO{
-        Integer totalPrice;
-        Integer refundPrice;
-        Integer paymentAmount;
-        Integer refundCount;
+    @Getter @Builder
+    public static class PaymentStoreSummaryResponseDTO {
+        private Integer totalSales;
+        private Integer totalCount;
     }
-
 }
+
