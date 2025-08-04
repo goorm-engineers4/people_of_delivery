@@ -102,10 +102,10 @@ public class Menu {
     }
 
     public void updateMenuInfo(String name, String content, Integer price, String menuPicture, MenuStatus status) {
-        this.name = name;
-        this.content = content;
-        this.price = price;
-        this.menuPicture = menuPicture;
-        this.status = status;
+        if (name != null) this.name = name;
+        if (content != null) this.content = content;
+        if (price != null) this.price = price;
+        if (menuPicture != null) this.menuPicture = menuPicture;
+        if (status != null) this.status = status;
     }
 }

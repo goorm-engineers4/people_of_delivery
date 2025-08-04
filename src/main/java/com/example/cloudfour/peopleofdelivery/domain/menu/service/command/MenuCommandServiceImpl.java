@@ -112,20 +112,6 @@ public class MenuCommandServiceImpl {
                 requestDTO.getPrice(),requestDTO.getMenuPicture(),requestDTO.getStatus());
         menu.setMenuCategory(menuCategory);
         Menu updatedMenu = menuRepository.save(menu);
-
-        List<MenuOption> existingOptions = menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId);
-        menuOptionRepository.deleteAll(existingOptions);
-
-        List<MenuOption> menuOptions = createMenuOptions(requestDTO.getMenuOptions(), updatedMenu);
-
-        List<MenuResponseDTO.MenuOptionDTO> menuOptionDTOs = menuOptions.stream()
-                .map(option -> MenuResponseDTO.MenuOptionDTO.builder()
-                        .menuOptionId(option.getId())
-                        .optionName(option.getOptionName())
-                        .additionalPrice(option.getAdditionalPrice())
-                        .build())
-                .collect(Collectors.toList());
-
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(updatedMenu.getId())
                 .name(updatedMenu.getName())

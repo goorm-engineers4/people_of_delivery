@@ -85,6 +85,7 @@ public class MenuQueryServiceImpl {
 
     public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCategory(UUID storeId, UUID categoryId,
                                                                                 LocalDateTime cursor, Integer size, CustomUserDetails userDetails){
+
         userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         storeRepository.findByIdAndIsDeletedFalse(storeId).orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
         menuCategoryRepository.findById(categoryId).orElseThrow(() -> new MenuCategoryException(MenuCategoryErrorCode.NOT_FOUND));
