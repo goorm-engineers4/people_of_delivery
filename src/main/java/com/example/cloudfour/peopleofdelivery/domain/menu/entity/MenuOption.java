@@ -64,7 +64,7 @@ public class MenuOption {
     }
 
     public void updateOptionInfo(String optionName, Integer additionalPrice) {
-        this.optionName = optionName;
-        this.additionalPrice = additionalPrice;
+        if (optionName != null) this.optionName = optionName;
+        if (additionalPrice != null) this.additionalPrice = additionalPrice;
     }
 }
