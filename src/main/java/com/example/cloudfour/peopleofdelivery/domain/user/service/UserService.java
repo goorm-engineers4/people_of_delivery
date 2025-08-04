@@ -31,7 +31,7 @@ public class UserService {
 
     @Transactional
     public void updateProfile(UUID userId, String nickname, String number) {
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+        User u = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (nickname != null && !nickname.isBlank() && !nickname.equals(u.getNickname())) {
@@ -44,7 +44,7 @@ public class UserService {
 
     @Transactional
     public void deleteAccount(UUID userId) {
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+        User u = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         u.softDelete();
     }

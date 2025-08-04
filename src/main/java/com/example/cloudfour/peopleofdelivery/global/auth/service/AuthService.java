@@ -37,7 +37,7 @@ public class AuthService {
 
     public AuthResponseDTO.AuthRegisterResponseDTO register(AuthRequestDTO.RegisterRequestDto request){
         String email = request.email().toLowerCase();
-        if (userRepository.existsByEmailAndDeletedFalse(email)) {
+        if (userRepository.existsByEmailAndIsDeletedFalse(email)) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
 
@@ -61,28 +61,28 @@ public class AuthService {
     public TokenDto login(AuthRequestDTO.LoginRequestDto request) {
         String email = request.email().toLowerCase();
 
-        User user = userRepository.findByEmailAndDeletedFalse(email)
+        User user = userRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
-            // loginType 확인(LOCAL만 허용)
-            if (user.getLoginType() != LoginType.LOCAL) {
-                throw new IllegalArgumentException("소셜 계정은 로컬 로그인 불가");
-            }
-            if (user.getIsDeleted()) {
-                throw new IllegalArgumentException("이미 탈퇴한 계정입니다.");
-            }
-            if (!user.isEmailVerified()) {
-                throw new IllegalArgumentException("이메일 인증이 필요합니다.");
-            }
+        // loginType 확인(LOCAL만 허용)
+        if (user.getLoginType() != LoginType.LOCAL) {
+            throw new IllegalArgumentException("소셜 계정은 로컬 로그인 불가");
+        }
+        if (user.getIsDeleted()) {
+            throw new IllegalArgumentException("이미 탈퇴한 계정입니다.");
+        }
+        if (!user.isEmailVerified()) {
+            throw new IllegalArgumentException("이메일 인증이 필요합니다.");
+        }
 
-            return jwtTokenProvider.createToken(
-                    user.getId(), user.getRole()
-            );
-}
+        return jwtTokenProvider.createToken(
+                user.getId(), user.getRole()
+        );
+    }
 
     public void changePassword(UUID userId, AuthRequestDTO.PasswordChangeDto request) {
         User user = userRepository.findById(userId)
@@ -137,18 +137,18 @@ public class AuthService {
         verificationCodeRepository.delete(vc);
 
         // 이메일 인증 완료 반영
-        userRepository.findByEmailAndDeletedFalse(request.email())
+        userRepository.findByEmailAndIsDeletedFalse(request.email())
                 .ifPresent(User::markEmailVerified);
     }
 
     public void startEmailChange(UUID userId, String newEmail) {
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+        User u = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (u.getEmail().equalsIgnoreCase(newEmail)) {
             throw new IllegalArgumentException("기존 이메일과 동일합니다.");
         }
-        if (userRepository.existsByEmailAndDeletedFalse(newEmail)) {
+        if (userRepository.existsByEmailAndIsDeletedFalse(newEmail)) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
@@ -173,7 +173,7 @@ public class AuthService {
     }
 
     public void verifyEmailChange(UUID userId, String newEmail, String code) {
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+        User u = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (u.getPendingEmail() == null || !u.getPendingEmail().equalsIgnoreCase(newEmail)) {
@@ -189,7 +189,7 @@ public class AuthService {
             throw new IllegalArgumentException("인증 코드가 만료되었습니다.");
         }
 
-        if (userRepository.existsByEmailAndDeletedFalse(newEmail)) {
+        if (userRepository.existsByEmailAndIsDeletedFalse(newEmail)) {
             throw new IllegalStateException("확정 중 충돌: 이미 사용 중인 이메일입니다.");
         }
 
