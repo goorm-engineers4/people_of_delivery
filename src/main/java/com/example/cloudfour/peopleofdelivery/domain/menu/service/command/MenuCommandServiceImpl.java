@@ -66,17 +66,6 @@ public class MenuCommandServiceImpl {
         menu.setMenuCategory(menuCategory);
 
         Menu savedMenu = menuRepository.save(menu);
-
-        List<MenuOption> menuOptions = createMenuOptions(requestDTO.getMenuOptions(), savedMenu);
-
-        List<MenuResponseDTO.MenuOptionDTO> menuOptionDTOs = menuOptions.stream()
-                .map(option -> MenuResponseDTO.MenuOptionDTO.builder()
-                        .menuOptionId(option.getId())
-                        .optionName(option.getOptionName())
-                        .additionalPrice(option.getAdditionalPrice())
-                        .build())
-                .collect(Collectors.toList());
-
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(savedMenu.getId())
                 .name(savedMenu.getName())
@@ -89,7 +78,6 @@ public class MenuCommandServiceImpl {
                 .category(savedMenu.getMenuCategory().getCategory())
                 .createdAt(savedMenu.getCreatedAt())
                 .updatedAt(savedMenu.getUpdatedAt())
-                .menuOptions(menuOptionDTOs)
                 .build();
     }
 
@@ -124,7 +112,6 @@ public class MenuCommandServiceImpl {
                 .category(updatedMenu.getMenuCategory().getCategory())
                 .createdAt(updatedMenu.getCreatedAt())
                 .updatedAt(updatedMenu.getUpdatedAt())
-                .menuOptions(menuOptionDTOs)
                 .build();
     }
 
