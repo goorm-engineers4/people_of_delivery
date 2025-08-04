@@ -113,10 +113,14 @@ class CartRepositoryTest {
     @Test
     @DisplayName("findByIdAndUser: 삭제된 사용자로 조회 시 실패")
     void findByIdAndUser_fail_deletedUser() {
+        deletedUser.softDelete();
+        entityManager.merge(deletedUser);
+
         Cart deletedUserCart = Cart.builder().build();
         deletedUserCart.setUser(deletedUser);
         deletedUserCart.setStore(store);
-        entityManager.persistAndFlush(deletedUserCart);
+        entityManager.persist(deletedUserCart);
+        entityManager.flush();
 
         Optional<Cart> foundCart = cartRepository.findByIdAndUser(deletedUserCart.getId(), deletedUser.getId());
 
@@ -154,10 +158,14 @@ class CartRepositoryTest {
     @Test
     @DisplayName("existsByUserAndStore: 삭제된 사용자로 확인 시 false 반환")
     void existsByUserAndStore_false_deletedUser() {
+        deletedUser.softDelete();
+        entityManager.merge(deletedUser);
+
         Cart deletedUserCart = Cart.builder().build();
         deletedUserCart.setUser(deletedUser);
         deletedUserCart.setStore(store);
-        entityManager.persistAndFlush(deletedUserCart);
+        entityManager.persist(deletedUserCart);
+        entityManager.flush();
 
         boolean exists = cartRepository.existsByUserAndStore(deletedUser.getId(), store.getId());
 

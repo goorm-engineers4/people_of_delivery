@@ -8,6 +8,7 @@ import com.example.cloudfour.peopleofdelivery.domain.cart.repository.CartReposit
 import com.example.cloudfour.peopleofdelivery.domain.cart.service.query.CartQueryService;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,12 +43,13 @@ class CartQueryServiceTest {
         UUID storeId = UUID.randomUUID();
 
         User mockUser = createMockUser(userId);
+        CustomUserDetails mockUserDetails = createMockCustomUserDetails(userId);
         Store mockStore = createMockStore(storeId);
         Cart mockCart = createMockCart(cartId, mockUser, mockStore);
 
         when(cartRepository.findByIdAndUser(cartId, userId)).thenReturn(Optional.of(mockCart));
 
-        CartResponseDTO.CartDetailResponseDTO response = cartQueryService.getCartListById(cartId, mockUser);
+        CartResponseDTO.CartDetailResponseDTO response = cartQueryService.getCartListById(cartId, mockUserDetails);
 
         assertThat(response).isNotNull();
         assertThat(response.getCartId()).isEqualTo(cartId);
@@ -62,15 +64,21 @@ class CartQueryServiceTest {
     void getCartListById_fail_cartNotFound() {
         UUID cartId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        User mockUser = createMockUser(userId);
+        CustomUserDetails mockUserDetails = createMockCustomUserDetails(userId);
 
         when(cartRepository.findByIdAndUser(cartId, userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> cartQueryService.getCartListById(cartId, mockUser))
+        assertThatThrownBy(() -> cartQueryService.getCartListById(cartId, mockUserDetails))
                 .isInstanceOf(CartException.class)
                 .hasFieldOrPropertyWithValue("code", CartErrorCode.NOT_FOUND);
 
         verify(cartRepository).findByIdAndUser(cartId, userId);
+    }
+
+    private CustomUserDetails createMockCustomUserDetails(UUID userId) {
+        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+        when(userDetails.getId()).thenReturn(userId);
+        return userDetails;
     }
 
     private User createMockUser(UUID userId) {
