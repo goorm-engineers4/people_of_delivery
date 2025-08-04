@@ -4,8 +4,8 @@ import com.example.cloudfour.peopleofdelivery.domain.cart.dto.CartRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.cart.dto.CartResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.cart.service.command.CartCommandService;
 import com.example.cloudfour.peopleofdelivery.domain.cart.service.query.CartQueryService;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
+import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class CartController {
     @Operation(summary = "장바구니 생성", description = "장바구니를 생성합니다. 장바구니 생성에 사용되는 API입니다.")
     public CustomResponse<CartResponseDTO.CartCreateResponseDTO> createCart(
             @RequestBody CartRequestDTO.CartCreateRequestDTO cartCreateRequestDTO,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ){
         CartResponseDTO.CartCreateResponseDTO cart = cartCommandService.createCart(cartCreateRequestDTO,user);
         return CustomResponse.onSuccess(HttpStatus.CREATED, cart);
@@ -43,7 +43,7 @@ public class CartController {
     @Operation(summary = "장바구니 조회", description = "장바구니를 조회합니다. 장바구니 조회에 사용되는 API입니다.")
     public CustomResponse<CartResponseDTO.CartDetailResponseDTO> getCart(
             @PathVariable("cartId") UUID cartId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ){
         CartResponseDTO.CartDetailResponseDTO cart = cartQueryService.getCartListById(cartId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, cart);
@@ -53,7 +53,7 @@ public class CartController {
     @Operation(summary = "장바구니 삭제", description = "장바구니를 삭제합니다. 장바구니 삭제에 사용되는 API입니다.")
     public CustomResponse<String> deleteCart(
             @PathVariable("cartId") UUID cartId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
         cartCommandService.deleteCart(cartId, user);
         return CustomResponse.onSuccess(HttpStatus.OK, "장바구니 삭제 완료");

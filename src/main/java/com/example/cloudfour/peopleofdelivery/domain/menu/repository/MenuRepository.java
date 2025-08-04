@@ -18,6 +18,9 @@ public interface MenuRepository extends JpaRepository<Menu, UUID> {
     @Query("SELECT m FROM Menu m WHERE m.store.id = :storeId AND m.store.isDeleted = false AND m.store.user.isDeleted = false AND m.createdAt < :cursor ORDER BY m.createdAt DESC")
     Slice<Menu> findByStoreIdAndDeletedFalseAndCreatedAtBefore(@Param("storeId") UUID storeId, @Param("cursor") LocalDateTime cursor, Pageable pageable);
 
+    @Query("SELECT m FROM Menu m WHERE m.store.id = :storeId AND m.store.isDeleted = false AND m.store.user.isDeleted = false AND m.menuCategory.id =:menuCategoryId AND m.createdAt < :cursor ORDER BY m.createdAt DESC")
+    Slice<Menu> findByStoreIdAndMenuCategoryIdAndDeletedFalseAndCreatedAtBefore(@Param("storeId") UUID storeId, @Param("menuCategoryId") UUID menuCategoryId ,@Param("cursor") LocalDateTime cursor, Pageable pageable);
+
     @Query("SELECT COUNT(m) > 0 FROM Menu m WHERE m.name = :name AND m.store.id = :storeId AND m.store.isDeleted = false AND m.store.user.isDeleted = false")
     boolean existsByNameAndStoreId(@Param("name") String name, @Param("storeId") UUID storeId);
 

@@ -101,14 +101,11 @@ public class Menu {
         store.getMenus().add(this);
     }
 
-    public void updateMenuInfo(String name, String content, Integer price, String menuPicture) {
-        this.name = name;
-        this.content = content;
-        this.price = price;
-        this.menuPicture = menuPicture;
-    }
-
-    public void updateStatus(MenuStatus status) {
-        this.status = status;
+    public void updateMenuInfo(String name, String content, Integer price, String menuPicture, MenuStatus status) {
+        if (name != null) this.name = name;
+        if (content != null) this.content = content;
+        if (price != null) this.price = price;
+        if (menuPicture != null) this.menuPicture = menuPicture;
+        if (status != null) this.status = status;
     }
 }

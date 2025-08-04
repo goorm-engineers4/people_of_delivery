@@ -37,6 +37,7 @@ public class MenuConverter {
                 .menuPicture(menu.getMenuPicture())
                 .status(menu.getStatus())
                 .category(menu.getMenuCategory() != null ? menu.getMenuCategory().getCategory() : "미분류")
+                .createdAt(menu.getCreatedAt())
                 .build();
     }
 
