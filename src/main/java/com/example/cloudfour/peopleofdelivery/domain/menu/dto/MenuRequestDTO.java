@@ -22,7 +22,6 @@ public class MenuRequestDTO {
         private String menuPicture;
         private MenuStatus status;
         private String category;
-        private List<MenuOptionCreateRequestDTO> menuOptions;
     }
 
     @Getter
@@ -36,7 +35,6 @@ public class MenuRequestDTO {
         private String menuPicture;
         private MenuStatus status;
         private String category;
-        private List<MenuOptionCreateRequestDTO> menuOptions;
     }
 
     @Getter
