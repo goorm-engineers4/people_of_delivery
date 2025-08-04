@@ -244,4 +244,27 @@ public class Factory {
     public static User createMockUserWithId(UUID id) {
         return createMockUserWithRoleAndId(Role.CUSTOMER, id);
     }
+
+    public static User createMockUserWithRole(Role role, Region region) {
+        User user = User.builder()
+                .email("test@example.com")
+                .nickname("mockUser")
+                .password("encoded")
+                .number("010-1111-2222")
+                .role(role)
+                .providerId("google-oauth2|1234567890")
+                .loginType(LoginType.GOOGLE)
+                .build();
+
+        UserAddress address = UserAddress.builder()
+                .address("서울 종로구 청운동 100-1")
+                .user(user)
+                .region(region)
+                .build();
+
+        user.getAddresses().add(address);
+        region.getAddresses().add(address);
+
+        return user;
+    }
 }
