@@ -64,6 +64,7 @@ public class MenuQueryServiceImpl {
                         .menuPicture(menu.getMenuPicture())
                         .status(menu.getStatus())
                         .category(menu.getMenuCategory().getCategory())
+                        .createdAt(menu.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
 
@@ -105,6 +106,7 @@ public class MenuQueryServiceImpl {
                         .menuPicture(menu.getMenuPicture())
                         .status(menu.getStatus())
                         .category(menu.getMenuCategory().getCategory())
+                        .createdAt(menu.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
 

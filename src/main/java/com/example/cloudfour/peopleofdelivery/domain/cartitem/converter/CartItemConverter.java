@@ -19,14 +19,13 @@ public class CartItemConverter {
                 .build();
     }
 
-    public static CartItemResponseDTO.CartItemUpdateResponseDTO toCartItemUpdateResponseDTO(CartItem cartItem, UUID menuId, UUID menuOptionId) {
+    public static CartItemResponseDTO.CartItemUpdateResponseDTO toCartItemUpdateResponseDTO(CartItem cartItem) {
         return CartItemResponseDTO.CartItemUpdateResponseDTO.builder()
                 .cartItemId(cartItem.getId())
                 .cartId(cartItem.getCart().getId())
                 .quantity(cartItem.getQuantity())
                 .price(cartItem.getPrice())
-                .menuId(menuId)
-                .menuOptionId(menuOptionId)
+                .menuOptionId(cartItem.getMenuOption().getId())
                 .build();
 
     }

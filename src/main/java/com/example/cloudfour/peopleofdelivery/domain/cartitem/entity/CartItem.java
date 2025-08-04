@@ -70,8 +70,8 @@ public class CartItem {
         menuOption.getCartItems().add(this);
     }
 
-    public void update(CartItemRequestDTO.CartItemUpdateRequestDTO requestDTO){
-        this.quantity = requestDTO.getQuantity();
-        this.price = requestDTO.getPrice();
+    public void update(Integer quantity, Integer price){
+        if (quantity != null) this.quantity = quantity;
+        if(price != null) this.price = price;
     }
 }

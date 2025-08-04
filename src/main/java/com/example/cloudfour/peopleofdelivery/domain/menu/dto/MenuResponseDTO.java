@@ -33,6 +33,7 @@ public class MenuResponseDTO {
         private String menuPicture;
         private MenuStatus status;
         private String category;
+        private java.time.LocalDateTime createdAt;
     }
 
     @Getter
