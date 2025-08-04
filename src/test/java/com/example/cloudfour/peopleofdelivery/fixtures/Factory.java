@@ -22,6 +22,11 @@ import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.global.ai.entity.AiLog;
 
+import java.lang.reflect.Field;
+import java.util.UUID;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class Factory {
 
@@ -204,6 +209,14 @@ public class Factory {
                 .loginType(LoginType.GOOGLE)
                 .build();
 
+        try {
+            Field idField = User.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(user, UUID.randomUUID());
+        } catch (Exception e) {
+            return createMockUserWithRoleAndId(role, UUID.randomUUID());
+        }
+
         UserAddress address = UserAddress.builder()
                 .address("서울 종로구 청운동 100-1")
                 .user(user)
@@ -215,5 +228,20 @@ public class Factory {
 
         return user;
     }
-}
 
+    public static User createMockUserWithRoleAndId(Role role, UUID id) {
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(id);
+        when(mockUser.getRole()).thenReturn(role);
+        when(mockUser.getEmail()).thenReturn("test@example.com");
+        when(mockUser.getNickname()).thenReturn("mockUser");
+        when(mockUser.getNumber()).thenReturn("010-1111-2222");
+        when(mockUser.getProviderId()).thenReturn("google-oauth2|1234567890");
+        when(mockUser.getLoginType()).thenReturn(LoginType.GOOGLE);
+        return mockUser;
+    }
+
+    public static User createMockUserWithId(UUID id) {
+        return createMockUserWithRoleAndId(Role.CUSTOMER, id);
+    }
+}
