@@ -2,6 +2,8 @@ package com.example.cloudfour.peopleofdelivery.domain.store.service.query;
 
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
@@ -65,7 +67,7 @@ public class StoreQueryService {
     public StoreResponseDTO.StoreDetailResponseDTO getStoreById(UUID storeId,CustomUserDetails userDetails) {
         userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다."));
+                .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
         return StoreResponseDTO.StoreDetailResponseDTO.from(store);
     }
 }

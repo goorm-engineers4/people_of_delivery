@@ -3,6 +3,8 @@ package com.example.cloudfour.peopleofdelivery.unit.domain.store.service.query;
 import com.example.cloudfour.peopleofdelivery.domain.store.dto.StoreResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.StoreCategory;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
@@ -211,7 +213,7 @@ class StoreQueryServiceTest {
 
         assertThatThrownBy(() ->
                 storeQueryService.getStoreById(storeId, userDetails)
-        ).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 가게를 찾을 수 없습니다.");
+        ).isInstanceOf(StoreException.class)
+                .hasMessage(StoreErrorCode.NOT_FOUND.getMessage());
     }
 }
