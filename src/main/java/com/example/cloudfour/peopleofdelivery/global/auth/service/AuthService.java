@@ -11,6 +11,7 @@ import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserReposit
 import com.example.cloudfour.peopleofdelivery.global.auth.entity.VerificationCode;
 import com.example.cloudfour.peopleofdelivery.global.auth.jwt.JwtTokenProvider;
 import com.example.cloudfour.peopleofdelivery.global.auth.repository.VerificationCodeRepository;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,8 +53,6 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-
-        sendVerificationEmail(email);
 
         return new AuthResponseDTO.AuthRegisterResponseDTO(user.getId(), user.getEmail(), user.getNickname());
     }
@@ -99,7 +98,7 @@ public class AuthService {
         user.changePassword(passwordEncoder.encode(request.newPassword()));
     }
 
-    public void sendVerificationEmail(String email){
+    public void sendVerificationEmail(String email) {
         Objects.requireNonNull(email, "email must not be null");
 
         String code = generateCode(CODE_LEN); // 6자리 숫자
@@ -111,15 +110,25 @@ public class AuthService {
                         .email(email)
                         .code(code)
                         .expiryDate(expiry)
+                        .purpose(VerificationPurpose.EMAIL_VERIFY)
                         .build()
         );
 
-        emailService.sendSimpleMessage(
-                email,
-                "이메일 인증 코드",
-                "당신의 이메일 인증 코드 " + code +
-                        "\nT이 코드는 생성 후 " + CODE_EXP_MIN + " 분 후 만료됩니다."
-        );
+        String title = "이메일 인증 번호";
+        String content = "<html>"
+                + "<body>"
+                + "<h1> 인증 코드 : " + code + "</h1>"
+                + "<p>해당 코드를 홈페이지에 입력하세요.</p>"
+                + "<p> * 본 메일은 자동응답 메일이므로 본 메일에 회신하지 마시기 바랍니다.</p>"
+                +"</footer>"
+                + "</body>"
+                + "</html>";
+        try{
+            emailService.sendSimpleMessage(email, title, content);
+        }catch(RuntimeException | MessagingException e){
+            e.printStackTrace();
+            throw new RuntimeException("Unable to send email in sendEmail", e);
+        }
     }
 
     public void verifyEmailCode(AuthRequestDTO.EmailVerifyRequestDTO request) {
@@ -165,11 +174,22 @@ public class AuthService {
                         .expiryDate(LocalDateTime.now().plusMinutes(CODE_EXP_MIN))
                         .build()
         );
-        emailService.sendSimpleMessage(
-                newEmail,
-                "이메일 변경 인증 코드",
-                "인증 코드는 " + code + " 입니다. " + CODE_EXP_MIN + "분 내에 입력해 주세요."
-        );
+
+        String title = "이메일 인증 번호";
+        String content = "<html>"
+                + "<body>"
+                + "<h1> 인증 코드 : " + code + "</h1>"
+                + "<p>해당 코드를 홈페이지에 입력하세요.</p>"
+                + "<p> * 본 메일은 자동응답 메일이므로 본 메일에 회신하지 마시기 바랍니다.</p>"
+                +"</footer>"
+                + "</body>"
+                + "</html>";
+        try{
+            emailService.sendSimpleMessage(newEmail, title, content);
+        }catch(RuntimeException | MessagingException e){
+            e.printStackTrace();
+            throw new RuntimeException("Unable to send email in sendEmail", e);
+        }
     }
 
     public void verifyEmailChange(UUID userId, String newEmail, String code) {
