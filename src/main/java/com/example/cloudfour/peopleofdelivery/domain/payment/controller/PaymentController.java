@@ -2,6 +2,7 @@ package com.example.cloudfour.peopleofdelivery.domain.payment.controller;
 
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentResponseDTO;
+import com.example.cloudfour.peopleofdelivery.domain.payment.dto.TossWebhookPayload;
 import com.example.cloudfour.peopleofdelivery.domain.payment.service.command.PaymentCommandService;
 import com.example.cloudfour.peopleofdelivery.domain.payment.service.query.PaymentQueryService;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
@@ -43,6 +44,13 @@ public class PaymentController {
         return CustomResponse.onSuccess(HttpStatus.CREATED, payment);
     }
 
+    @PostMapping("/webhook")
+    @Operation(summary = "토스 결제 웹훅", description = "토스 결제 상태 변경에 대한 웹훅을 처리합니다.")
+    public CustomResponse<Void> receiveWebhook(@RequestBody TossWebhookPayload payload) {
+        paymentCommandService.updateStatusFromWebhook(payload);
+        return CustomResponse.onSuccess(HttpStatus.OK, null); // 혹은 message 반환도 가능
+    }
+
     @PatchMapping("/{orderId}/status")
     @Operation(summary = "결제 수정", description = "결제를 수정합니다. 결제 수정에 사용되는 API입니다.")
     public CustomResponse<PaymentResponseDTO.PaymentUpdateResponseDTO> updatePayment(
@@ -75,7 +83,7 @@ public class PaymentController {
         return CustomResponse.onSuccess(HttpStatus.OK, payment);
     }
 
-    @GetMapping("/{storeId}")
+    @GetMapping("store/{storeId}")
     @Operation(summary = "가게 결제 이력 조회", description = " 가게 결제 이력을 조회합니다. 가게 결제 이력 조회에 사용되는 API입니다.")
     public CustomResponse<PaymentResponseDTO.PaymentStoreListResponseDTO> getStorePayment(
             @PathVariable("storeId") UUID storeId,
@@ -94,7 +102,7 @@ public class PaymentController {
         return CustomResponse.onSuccess(HttpStatus.OK, payment);
     }
 
-    @GetMapping("/{storeId}/summary")
+    @GetMapping("store/{storeId}/summary")
     @Operation(summary = "가게 매출 요약", description = "가게 매출 요약을 조회합니다. 가게 매출 요약 조회에 사용되는 API입니다.")
     public CustomResponse<PaymentResponseDTO.PaymentStoreSummaryResponseDTO> verifyPayment(
             @PathVariable("storeId") UUID storeId,
