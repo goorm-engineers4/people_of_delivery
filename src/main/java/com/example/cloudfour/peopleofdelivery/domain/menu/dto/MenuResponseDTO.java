@@ -22,6 +22,15 @@ public class MenuResponseDTO {
         private String category;
         private java.time.LocalDateTime createdAt;
         private java.time.LocalDateTime updatedAt;
+        private java.util.List<MenuOptionDTO> menuOptions;
+    }
+
+    @Getter
+    @Builder
+    public static class MenuOptionDTO {
+        private UUID menuOptionId;
+        private String optionName;
+        private Integer additionalPrice;
     }
 
     @Getter

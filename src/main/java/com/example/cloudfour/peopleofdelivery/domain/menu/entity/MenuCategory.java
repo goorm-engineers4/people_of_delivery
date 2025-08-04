@@ -25,6 +25,7 @@ import java.util.UUID;
 public class MenuCategory {
     @Id
     @GeneratedValue
+    @Column(name = "menuCategories")
     private UUID id;
 
     @Column(name = "category", nullable = false)
