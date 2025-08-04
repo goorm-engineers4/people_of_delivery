@@ -2,12 +2,15 @@ package com.example.cloudfour.peopleofdelivery.domain.menu.service.command;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuCategory;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
@@ -19,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,6 +35,7 @@ public class MenuCommandServiceImpl {
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
     private final MenuCategoryRepository menuCategoryRepository;
+    private final MenuOptionRepository menuOptionRepository;
 
     public MenuResponseDTO.MenuDetailResponseDTO createMenu(MenuRequestDTO.MenuCreateRequestDTO requestDTO, UUID storeId,CustomUserDetails userDetails) {
         Store store = storeRepository.findByIdAndIsDeletedFalse(storeId).orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
@@ -61,6 +67,16 @@ public class MenuCommandServiceImpl {
 
         Menu savedMenu = menuRepository.save(menu);
 
+        List<MenuOption> menuOptions = createMenuOptions(requestDTO.getMenuOptions(), savedMenu);
+
+        List<MenuResponseDTO.MenuOptionDTO> menuOptionDTOs = menuOptions.stream()
+                .map(option -> MenuResponseDTO.MenuOptionDTO.builder()
+                        .menuOptionId(option.getId())
+                        .optionName(option.getOptionName())
+                        .additionalPrice(option.getAdditionalPrice())
+                        .build())
+                .collect(Collectors.toList());
+
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(savedMenu.getId())
                 .name(savedMenu.getName())
@@ -73,6 +89,7 @@ public class MenuCommandServiceImpl {
                 .category(savedMenu.getMenuCategory().getCategory())
                 .createdAt(savedMenu.getCreatedAt())
                 .updatedAt(savedMenu.getUpdatedAt())
+                .menuOptions(menuOptionDTOs)
                 .build();
     }
 
@@ -107,6 +124,7 @@ public class MenuCommandServiceImpl {
                 .category(updatedMenu.getMenuCategory().getCategory())
                 .createdAt(updatedMenu.getCreatedAt())
                 .updatedAt(updatedMenu.getUpdatedAt())
+                .menuOptions(menuOptionDTOs)
                 .build();
     }
 
@@ -120,5 +138,119 @@ public class MenuCommandServiceImpl {
 
         menuRepository.delete(menu);
         log.info("메뉴 ID: {}가 삭제되었습니다.", menuId);
+    }
+
+    private List<MenuOption> createMenuOptions(List<MenuRequestDTO.MenuOptionCreateRequestDTO> optionDTOs, Menu menu) {
+        if (optionDTOs == null || optionDTOs.isEmpty()) {
+            return List.of();
+        }
+
+        return optionDTOs.stream()
+                .map(optionDTO -> {
+                    if (menuOptionRepository.existsByMenuIdAndOptionName(menu.getId(), optionDTO.getOptionName())) {
+                        throw new MenuException(MenuErrorCode.ALREADY_ADD);
+                    }
+
+                    MenuOption menuOption = MenuOption.builder()
+                            .optionName(optionDTO.getOptionName())
+                            .additionalPrice(optionDTO.getAdditionalPrice())
+                            .build();
+
+                    menuOption.setMenu(menu);
+                    return menuOptionRepository.save(menuOption);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public MenuOptionResponseDTO.MenuOptionDetailResponseDTO createMenuOption(
+            MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO requestDTO, CustomUserDetails userDetails) {
+
+        Menu menu = menuRepository.findById(requestDTO.getMenuId())
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        if (!(userDetails.getRole() == Role.MASTER || userDetails.getRole() == Role.OWNER)) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (userDetails.getRole() == Role.OWNER &&
+            !menu.getStore().getUser().getId().equals(userDetails.getId())) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (menuOptionRepository.existsByMenuIdAndOptionName(menu.getId(), requestDTO.getOptionName())) {
+            throw new MenuException(MenuErrorCode.ALREADY_ADD);
+        }
+
+        MenuOption menuOption = MenuOption.builder()
+                .optionName(requestDTO.getOptionName())
+                .additionalPrice(requestDTO.getAdditionalPrice())
+                .build();
+
+        menuOption.setMenu(menu);
+        MenuOption savedOption = menuOptionRepository.save(menuOption);
+
+        return MenuOptionResponseDTO.MenuOptionDetailResponseDTO.builder()
+                .menuOptionId(savedOption.getId())
+                .menuId(menu.getId())
+                .menuName(menu.getName())
+                .storeName(menu.getStore().getName())
+                .optionName(savedOption.getOptionName())
+                .additionalPrice(savedOption.getAdditionalPrice())
+                .createdAt(menu.getCreatedAt())
+                .updatedAt(menu.getUpdatedAt())
+                .build();
+    }
+
+    public MenuOptionResponseDTO.MenuOptionDetailResponseDTO updateMenuOption(
+            UUID optionId, MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO, CustomUserDetails userDetails) {
+
+        MenuOption menuOption = menuOptionRepository.findByIdWithMenu(optionId)
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        if (!(userDetails.getRole() == Role.MASTER || userDetails.getRole() == Role.OWNER)) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (userDetails.getRole() == Role.OWNER &&
+            !menuOption.getMenu().getStore().getUser().getId().equals(userDetails.getId())) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (!menuOption.getOptionName().equals(requestDTO.getOptionName()) &&
+            menuOptionRepository.existsByMenuIdAndOptionName(menuOption.getMenu().getId(), requestDTO.getOptionName())) {
+            throw new MenuException(MenuErrorCode.ALREADY_ADD);
+        }
+
+
+        menuOption.updateOptionInfo(requestDTO.getOptionName(), requestDTO.getAdditionalPrice());
+        MenuOption savedOption = menuOptionRepository.save(menuOption);
+
+        return MenuOptionResponseDTO.MenuOptionDetailResponseDTO.builder()
+                .menuOptionId(savedOption.getId())
+                .menuId(savedOption.getMenu().getId())
+                .menuName(savedOption.getMenu().getName())
+                .storeName(savedOption.getMenu().getStore().getName())
+                .optionName(savedOption.getOptionName())
+                .additionalPrice(savedOption.getAdditionalPrice())
+                .createdAt(savedOption.getMenu().getCreatedAt())
+                .updatedAt(savedOption.getMenu().getUpdatedAt())
+                .build();
+    }
+
+    public void deleteMenuOption(UUID optionId, CustomUserDetails userDetails) {
+        MenuOption menuOption = menuOptionRepository.findByIdWithMenu(optionId)
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        if (!(userDetails.getRole() == Role.MASTER || userDetails.getRole() == Role.OWNER)) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (userDetails.getRole() == Role.OWNER &&
+            !menuOption.getMenu().getStore().getUser().getId().equals(userDetails.getId())) {
+            throw new MenuException(MenuErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        menuOptionRepository.delete(menuOption);
+        log.info("메뉴 옵션 ID: {}가 삭제되었습니다.", optionId);
     }
 }

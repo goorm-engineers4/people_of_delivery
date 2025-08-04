@@ -25,29 +25,29 @@ public interface MenuRepository extends JpaRepository<Menu, UUID> {
     boolean existsByNameAndStoreId(@Param("name") String name, @Param("storeId") UUID storeId);
 
     @Query("SELECT m FROM Menu m " +
-           "LEFT JOIN OrderItem oi ON m.id = oi.menu.id " +
-           "WHERE m.store.isDeleted = false AND m.store.user.isDeleted = false " +
-           "GROUP BY m.id " +
-           "ORDER BY COUNT(oi.id) DESC, m.createdAt DESC")
+            "LEFT JOIN OrderItem oi ON m.id = oi.menu.id " +
+            "WHERE m.store.isDeleted = false AND m.store.user.isDeleted = false " +
+            "GROUP BY m.id " +
+            "ORDER BY COUNT(oi.id) DESC, m.createdAt DESC")
     List<Menu> findTopMenusByOrderCount(Pageable pageable);
 
     @Query("SELECT m FROM Menu m " +
-           "LEFT JOIN OrderItem oi ON m.id = oi.menu.id " +
-           "LEFT JOIN oi.order o " +
-           "WHERE m.store.isDeleted = false AND m.store.user.isDeleted = false " +
-           "AND o.createdAt BETWEEN :startTime AND :endTime " +
-           "GROUP BY m.id " +
-           "ORDER BY COUNT(oi.id) DESC, m.createdAt DESC")
+            "LEFT JOIN OrderItem oi ON m.id = oi.menu.id " +
+            "LEFT JOIN oi.order o " +
+            "WHERE m.store.isDeleted = false AND m.store.user.isDeleted = false " +
+            "AND o.createdAt BETWEEN :startTime AND :endTime " +
+            "GROUP BY m.id " +
+            "ORDER BY COUNT(oi.id) DESC, m.createdAt DESC")
     List<Menu> findTopMenusByTimeRange(@Param("startTime") LocalDateTime startTime,
                                        @Param("endTime") LocalDateTime endTime,
                                        Pageable pageable);
 
     @Query("SELECT m FROM Menu m " +
-           "LEFT JOIN OrderItem oi ON m.id = oi.menu.id " +
-           "WHERE m.store.isDeleted = false AND m.store.user.isDeleted = false " +
-           "AND m.store.region.si = :si " +
-           "AND m.store.region.gu = :gu " +
-           "GROUP BY m.id " +
-           "ORDER BY COUNT(oi.id) DESC, m.createdAt DESC")
+            "LEFT JOIN OrderItem oi ON m.id = oi.menu.id " +
+            "WHERE m.store.isDeleted = false AND m.store.user.isDeleted = false " +
+            "AND m.store.region.si = :si " +
+            "AND m.store.region.gu = :gu " +
+            "GROUP BY m.id " +
+            "ORDER BY COUNT(oi.id) DESC, m.createdAt DESC")
     List<Menu> findTopMenusByRegion(@Param("si") String si, @Param("gu") String gu, Pageable pageable);
 }

@@ -2,6 +2,7 @@ package com.example.cloudfour.peopleofdelivery.domain.menu.controller;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuRequestDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.service.command.MenuCommandServiceImpl;
 import com.example.cloudfour.peopleofdelivery.domain.menu.service.query.MenuQueryServiceImpl;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
@@ -125,5 +126,63 @@ public class MenuController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         menuCommandService.deleteMenu(menuId, userDetails);
         return CustomResponse.onSuccess(HttpStatus.OK, "메뉴 삭제 완료");
+    }
+
+    @PostMapping("/{menuId}/options")
+    @Operation(summary = "메뉴 옵션 생성", description = "특정 메뉴에 새로운 옵션을 추가합니다. 메뉴 옵션 생성에 사용되는 API입니다.")
+    public CustomResponse<MenuOptionResponseDTO.MenuOptionDetailResponseDTO> createMenuOption(
+            @PathVariable("menuId") UUID menuId,
+            @RequestBody MenuRequestDTO.MenuOptionCreateRequestDTO requestDTO,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO standaloneRequestDTO =
+            MenuRequestDTO.MenuOptionStandaloneCreateRequestDTO.builder()
+                .menuId(menuId)
+                .optionName(requestDTO.getOptionName())
+                .additionalPrice(requestDTO.getAdditionalPrice())
+                .build();
+
+        MenuOptionResponseDTO.MenuOptionDetailResponseDTO result =
+            menuCommandService.createMenuOption(standaloneRequestDTO, userDetails);
+        return CustomResponse.onSuccess(HttpStatus.CREATED, result);
+    }
+
+    @GetMapping("/{menuId}/options")
+    @Operation(summary = "메뉴별 옵션 목록 조회", description = "특정 메뉴의 모든 옵션을 조회합니다. 메뉴별 옵션 목록 조회에 사용되는 API입니다.")
+    public CustomResponse<MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO> getMenuOptions(
+            @PathVariable("menuId") UUID menuId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO result =
+            menuQueryService.getMenuOptionsByMenu(menuId, userDetails);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @GetMapping("/options/{optionId}/detail")
+    @Operation(summary = "메뉴 옵션 상세 조회", description = "메뉴 옵션의 상세 정보를 조회합니다. 메뉴 옵션 상세 조회에 사용되는 API입니다.")
+    public CustomResponse<MenuOptionResponseDTO.MenuOptionDetailResponseDTO> getMenuOptionDetail(
+            @PathVariable("optionId") UUID optionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MenuOptionResponseDTO.MenuOptionDetailResponseDTO result =
+            menuQueryService.getMenuOptionDetail(optionId, userDetails);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @PatchMapping("/options/{optionId}")
+    @Operation(summary = "메뉴 옵션 수정", description = "메뉴 옵션의 정보를 수정합니다. 메뉴 옵션 수정에 사용되는 API입니다.")
+    public CustomResponse<MenuOptionResponseDTO.MenuOptionDetailResponseDTO> updateMenuOption(
+            @PathVariable("optionId") UUID optionId,
+            @RequestBody MenuRequestDTO.MenuOptionStandaloneUpdateRequestDTO requestDTO,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MenuOptionResponseDTO.MenuOptionDetailResponseDTO result =
+            menuCommandService.updateMenuOption(optionId, requestDTO, userDetails);
+        return CustomResponse.onSuccess(HttpStatus.OK, result);
+    }
+
+    @DeleteMapping("/options/{optionId}/deleted")
+    @Operation(summary = "메뉴 옵션 삭제", description = "메뉴 옵션을 삭제합니다. 메뉴 옵션 삭제에 사용되는 API입니다.")
+    public CustomResponse<String> deleteMenuOption(
+            @PathVariable("optionId") UUID optionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        menuCommandService.deleteMenuOption(optionId, userDetails);
+        return CustomResponse.onSuccess(HttpStatus.OK, "메뉴 옵션 삭제 완료");
     }
 }

@@ -1,13 +1,16 @@
 package com.example.cloudfour.peopleofdelivery.domain.menu.service.query;
 
 import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuResponseDTO;
+import com.example.cloudfour.peopleofdelivery.domain.menu.dto.MenuOptionResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.menu.entity.Menu;
+import com.example.cloudfour.peopleofdelivery.domain.menu.entity.MenuOption;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuCategoryErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuCategoryException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuException;
 import com.example.cloudfour.peopleofdelivery.domain.menu.exception.MenuErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuCategoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuRepository;
+import com.example.cloudfour.peopleofdelivery.domain.menu.repository.MenuOptionRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
@@ -39,6 +42,7 @@ public class MenuQueryServiceImpl {
     private final UserRepository userRepository;
     private static final LocalDateTime first_cursor = LocalDateTime.now().plusDays(1);
     private final StoreRepository storeRepository;
+    private final MenuOptionRepository menuOptionRepository;
 
     public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCursor(UUID storeId, LocalDateTime cursor, Integer size, CustomUserDetails userDetails) {
         userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
@@ -81,7 +85,8 @@ public class MenuQueryServiceImpl {
     }
 
     public MenuResponseDTO.MenuStoreListResponseDTO getMenusByStoreWithCategory(UUID storeId, UUID categoryId,
-        LocalDateTime cursor, Integer size, CustomUserDetails userDetails){
+                                                                                LocalDateTime cursor, Integer size, CustomUserDetails userDetails){
+
         userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         storeRepository.findByIdAndIsDeletedFalse(storeId).orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
         menuCategoryRepository.findById(categoryId).orElseThrow(() -> new MenuCategoryException(MenuCategoryErrorCode.NOT_FOUND));
@@ -181,6 +186,16 @@ public class MenuQueryServiceImpl {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
 
+        List<MenuOption> menuOptions = menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId);
+
+        List<MenuResponseDTO.MenuOptionDTO> menuOptionDTOs = menuOptions.stream()
+                .map(option -> MenuResponseDTO.MenuOptionDTO.builder()
+                        .menuOptionId(option.getId())
+                        .optionName(option.getOptionName())
+                        .additionalPrice(option.getAdditionalPrice())
+                        .build())
+                .collect(Collectors.toList());
+
         return MenuResponseDTO.MenuDetailResponseDTO.builder()
                 .menuId(menu.getId())
                 .name(menu.getName())
@@ -193,6 +208,48 @@ public class MenuQueryServiceImpl {
                 .category(menu.getMenuCategory().getCategory())
                 .createdAt(menu.getCreatedAt())
                 .updatedAt(menu.getUpdatedAt())
+                .menuOptions(menuOptionDTOs)
+                .build();
+    }
+
+    public MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO getMenuOptionsByMenu(UUID menuId, CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        List<MenuOption> menuOptions = menuOptionRepository.findByMenuIdOrderByAdditionalPrice(menuId);
+
+        List<MenuOptionResponseDTO.MenuOptionSimpleResponseDTO> optionDTOs = menuOptions.stream()
+                .map(option -> MenuOptionResponseDTO.MenuOptionSimpleResponseDTO.builder()
+                        .menuOptionId(option.getId())
+                        .optionName(option.getOptionName())
+                        .additionalPrice(option.getAdditionalPrice())
+                        .build())
+                .collect(Collectors.toList());
+
+        return MenuOptionResponseDTO.MenuOptionsByMenuResponseDTO.builder()
+                .menuId(menu.getId())
+                .menuName(menu.getName())
+                .options(optionDTOs)
+                .build();
+    }
+
+    public MenuOptionResponseDTO.MenuOptionDetailResponseDTO getMenuOptionDetail(UUID optionId, CustomUserDetails userDetails) {
+        userRepository.findById(userDetails.getId()).orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
+
+        MenuOption menuOption = menuOptionRepository.findByIdWithMenu(optionId)
+                .orElseThrow(() -> new MenuException(MenuErrorCode.NOT_FOUND));
+
+        return MenuOptionResponseDTO.MenuOptionDetailResponseDTO.builder()
+                .menuOptionId(menuOption.getId())
+                .menuId(menuOption.getMenu().getId())
+                .menuName(menuOption.getMenu().getName())
+                .storeName(menuOption.getMenu().getStore().getName())
+                .optionName(menuOption.getOptionName())
+                .additionalPrice(menuOption.getAdditionalPrice())
+                .createdAt(menuOption.getMenu().getCreatedAt())
+                .updatedAt(menuOption.getMenu().getUpdatedAt())
                 .build();
     }
 }
