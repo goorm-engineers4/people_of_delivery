@@ -7,4 +7,8 @@ public class PaymentHistoryException extends CustomException {
     public PaymentHistoryException(BaseErrorCode errorCode) {
       super(errorCode);
     }
+
+    public PaymentHistoryException(BaseErrorCode errorCode, String message) {
+        super(errorCode, message);
+    }
 }
