@@ -29,18 +29,18 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
     private final StoreRepository storeRepository;
 
     @Override
-    public PaymentResponseDTO.PaymentDetailResponseDTO getDetailPayment(UUID orderId, User user) {
+    public PaymentResponseDTO.PaymentDetailResponseDTO getDetailPayment(UUID orderId, UUID userId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        validateUserAccess(payment.getOrder(), user);
+        validateUserAccess(payment.getOrder(), userId);
 
         return toDetailResponse(payment);
     }
 
     @Override
-    public PaymentResponseDTO.PaymentUserListResponseDTO getUserListPayment(User user) {
-        List<Payment> payments = paymentRepository.findAllByOrder_User_Id(user.getId());
+    public PaymentResponseDTO.PaymentUserListResponseDTO getUserListPayment(UUID userId) {
+        List<Payment> payments = paymentRepository.findAllByOrder_User_Id(userId);
 
         List<PaymentResponseDTO.PaymentDetailResponseDTO> list = payments.stream()
                 .map(this::toDetailResponse)
@@ -52,11 +52,11 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
     }
 
     @Override
-    public PaymentResponseDTO.PaymentStoreListResponseDTO getStoreListPayment(UUID storeId, User user) {
+    public PaymentResponseDTO.PaymentStoreListResponseDTO getStoreListPayment(UUID storeId, UUID userId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
 
-        if (!store.getUser().getId().equals(user.getId())) {
+        if (!store.getUser().getId().equals(userId)) {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -72,11 +72,11 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
     }
 
     @Override
-    public PaymentResponseDTO.PaymentStoreSummaryResponseDTO getStoreSummaryPayment(UUID storeId, User user) {
+    public PaymentResponseDTO.PaymentStoreSummaryResponseDTO getStoreSummaryPayment(UUID storeId, UUID userId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(StoreErrorCode.NOT_FOUND));
 
-        if (!store.getUser().getId().equals(user.getId())) {
+        if (!store.getUser().getId().equals(userId)) {
             throw new StoreException(StoreErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -97,8 +97,8 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
                 .build();
     }
 
-    private void validateUserAccess(Order order, User user) {
-        if (!order.getUser().getId().equals(user.getId()) && !order.getStore().getUser().getId().equals(user.getId())) {
+    private void validateUserAccess(Order order, UUID userId) {
+        if (!order.getUser().getId().equals(userId) && !order.getStore().getUser().getId().equals(userId)) {
             throw new CustomException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
     }
