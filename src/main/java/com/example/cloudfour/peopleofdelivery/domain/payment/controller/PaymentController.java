@@ -41,7 +41,7 @@ public class PaymentController {
             @AuthenticationPrincipal User user
     ){
         PaymentResponseDTO.PaymentVerifyResponseDTO payment = paymentCommandService.verifyPayment(paymentVerifyRequestDTO,user);
-        return CustomResponse.onSuccess(HttpStatus.CREATED, payment);
+        return CustomResponse.onSuccess(HttpStatus.OK, payment);
     }
 
     @PostMapping("/webhook")
@@ -63,13 +63,13 @@ public class PaymentController {
     }
 
     @PatchMapping("/{orderId}/canceled")
-    @Operation(summary = "결제 삭제", description = "결제를 삭제합니다. 결제 수정에 사용되는 API입니다.")
-    public CustomResponse<PaymentResponseDTO.PaymentDeleteResponseDTO> deletePayment(
-            @RequestBody PaymentRequestDTO.PaymentDeleteRequestDTO paymentDeleteRequestDTO,
+    @Operation(summary = "결제 취소", description = "결제를 취소합니다. 결제 취소에 사용되는 API입니다.")
+    public CustomResponse<PaymentResponseDTO.PaymentCancelResponseDTO> cancelPayment(
+            @RequestBody PaymentRequestDTO.PaymentCancelRequestDTO paymentCancelRequestDTO,
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal User user
     ){
-        PaymentResponseDTO.PaymentDeleteResponseDTO payment = paymentCommandService.deletePayment(paymentDeleteRequestDTO,orderId,user);
+        PaymentResponseDTO.PaymentCancelResponseDTO payment = paymentCommandService.cancelPayment(paymentCancelRequestDTO,orderId,user);
         return CustomResponse.onSuccess(HttpStatus.OK, payment);
     }
 
@@ -104,7 +104,7 @@ public class PaymentController {
 
     @GetMapping("store/{storeId}/summary")
     @Operation(summary = "가게 매출 요약", description = "가게 매출 요약을 조회합니다. 가게 매출 요약 조회에 사용되는 API입니다.")
-    public CustomResponse<PaymentResponseDTO.PaymentStoreSummaryResponseDTO> verifyPayment(
+    public CustomResponse<PaymentResponseDTO.PaymentStoreSummaryResponseDTO> getStoreSummaryPayment(
             @PathVariable("storeId") UUID storeId,
             @AuthenticationPrincipal User user
     ) {

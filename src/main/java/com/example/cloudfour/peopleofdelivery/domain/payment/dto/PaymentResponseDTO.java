@@ -4,7 +4,6 @@ import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +30,7 @@ public class PaymentResponseDTO {
     }
 
     @Getter @Builder
-    public static class PaymentDeleteResponseDTO {
+    public static class PaymentCancelResponseDTO {
         private UUID paymentId;
         private PaymentStatus status;
         private String cancelReason;

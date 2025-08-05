@@ -64,3 +64,5 @@ toss:
   client-key: ${TOSS_CLIENT}
   base-url: https://api.tosspayments.com
   confirm-endpoint: /confirm
+  success-url: http://localhost:8080/api/v1/payments/success
+  fail-url: http://localhost:8080/api/v1/payments/fail

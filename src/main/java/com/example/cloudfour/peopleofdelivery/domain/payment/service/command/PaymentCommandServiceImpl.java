@@ -17,6 +17,7 @@ import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,14 +33,20 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     private final OrderRepository orderRepository;
     private final TossApiClient tossApiClient;
 
+    @Value("${toss.success-url}")
+    private String successUrl;
+
+    @Value("${toss.fail-url}")
+    private String failUrl;
+
     @Override
     @Transactional
     public PaymentResponseDTO.PaymentCreateResponseDTO createPayment(PaymentRequestDTO.PaymentCreateRequestDTO request, User user) {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        // 서버에서 금액 직접 계산
-        int totalPrice = order.getTotalPrice(); // 실제 DB 기반 금액
+
+        int totalPrice = order.getTotalPrice();
 
         String paymentUrl = String.format(
                 "https://pay.toss.im/pay?amount=%d&orderId=%s&orderName=%s&customerName=%s&successUrl=%s&failUrl=%s",
@@ -47,8 +54,8 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
                 order.getId().toString(),
                 "주문결제",
                 user.getNickname(),
-                "https://your.frontend.site/payment/success",
-                "https://your.frontend.site/payment/fail"
+                successUrl,
+                failUrl
         );
 
         return PaymentResponseDTO.PaymentCreateResponseDTO.builder()
@@ -60,9 +67,9 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     @Transactional
     public PaymentResponseDTO.PaymentVerifyResponseDTO verifyPayment(PaymentRequestDTO.PaymentVerifyRequestDTO request, User user) {
 
-        // 중복 결제 방지
+
         if (paymentRepository.existsByPaymentKey(request.getPaymentKey())) {
-            throw new PaymentException(PaymentErrorCode.DUPLICATE_PAYMENT, "이미 승인된 결제입니다.");
+            throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_APPROVED, "이미 승인된 결제입니다.");
         }
 
         TossApproveResponse tossResponse = tossApiClient.approvePayment(
@@ -74,7 +81,6 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
         Order order = orderRepository.findById(UUID.fromString(request.getOrderId()))
                 .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        // ✅ 사용자 확인 (보안)
         if (!order.getUser().getId().equals(user.getId())) {
             throw new PaymentException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
@@ -104,7 +110,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     @Override
     @Transactional
     public PaymentResponseDTO.PaymentUpdateResponseDTO updatePayment(PaymentRequestDTO.PaymentUpdateRequestDTO request, UUID orderId, User user) {
-        Payment payment = paymentRepository.findByOrder_Id(orderId)
+        Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
         PaymentStatus previous = payment.getPaymentStatus();
@@ -120,9 +126,19 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
     @Override
     @Transactional
-    public PaymentResponseDTO.PaymentDeleteResponseDTO deletePayment(PaymentRequestDTO.PaymentDeleteRequestDTO request, UUID orderId, User user) {
-        Payment payment = paymentRepository.findByOrder_Id(orderId)
+    public PaymentResponseDTO.PaymentCancelResponseDTO cancelPayment(PaymentRequestDTO.PaymentCancelRequestDTO request, UUID orderId, User user) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+        if (!payment.getOrder().getUser().getId().equals(user.getId())) {
+            throw new PaymentException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
+        }
+
+        if (payment.getPaymentStatus() != PaymentStatus.APPROVED) {
+            throw new PaymentException(PaymentErrorCode.INVALID_PAYMENT_STATUS, "승인된 결제만 취소할 수 있습니다.");
+        }
+
+        tossApiClient.cancelPayment(payment.getPaymentKey(), request.getCancelReason());
 
         PaymentStatus previous = payment.getPaymentStatus();
         payment.setPaymentStatus(PaymentStatus.CANCELED);
@@ -130,7 +146,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
         var history = payment.addHistory(previous, PaymentStatus.CANCELED, request.getCancelReason());
         paymentHistoryRepository.save(history);
 
-        return PaymentResponseDTO.PaymentDeleteResponseDTO.builder()
+        return PaymentResponseDTO.PaymentCancelResponseDTO.builder()
                 .paymentId(payment.getId())
                 .status(payment.getPaymentStatus())
                 .cancelReason(request.getCancelReason())
@@ -168,8 +184,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
             case "DONE", "APPROVED" -> PaymentStatus.APPROVED;
             case "CANCELED" -> PaymentStatus.CANCELED;
             case "FAILED" -> PaymentStatus.FAILED;
-            default -> throw new PaymentException(PaymentErrorCode.TOSS_STATUS_UNKNOWN, "Unknown status: " + tossStatus); // 🔧 수정
+            default -> throw new PaymentException(PaymentErrorCode.TOSS_STATUS_UNKNOWN, "Unknown status: " + tossStatus);
         };
     }
 }
-
