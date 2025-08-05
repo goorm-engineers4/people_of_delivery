@@ -6,6 +6,7 @@ import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
 import com.example.cloudfour.peopleofdelivery.global.auth.service.AuthService;
 import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
+    @Operation(summary = "로컬 회원가입", description = "계정을 생성합니다.")
     public CustomResponse<AuthResponseDTO.AuthRegisterResponseDTO> register(
             @Valid @RequestBody AuthRequestDTO.RegisterRequestDto request) {
         var user = authService.register(request);
@@ -27,12 +29,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "로컬 로그인", description = "생성된 계정으로 로그인합니다.")
     public CustomResponse<TokenDto> login(@Valid @RequestBody AuthRequestDTO.LoginRequestDto request) {
         TokenDto token = authService.login(request);
         return CustomResponse.onSuccess(HttpStatus.OK, token);
     }
 
     @PostMapping("/password")
+    @Operation(summary = "비밀번호 재설정", description = "비밀번호를 재설정합니다.")
     public CustomResponse<Void> changePassword(
             @Valid @RequestBody AuthRequestDTO.PasswordChangeDto request,
             @AuthenticationPrincipal CustomUserDetails user) {
@@ -41,18 +45,21 @@ public class AuthController {
     }
 
     @PostMapping("/email/send")
+    @Operation(summary = "이메일 인증 전송", description = "입력된 계정으로 인증 이메일을 전송합니다.")
     public CustomResponse<Void> sendEmail(@Valid @RequestBody AuthRequestDTO.EmailVerifyRequestDTO request) {
         authService.sendVerificationEmail(request.email());
         return CustomResponse.onSuccess(null);
     }
 
     @PostMapping("/email/verify")
+    @Operation(summary = "이메일 인증 검증", description = "입력된 이메일의 인증 코드를 검증합니다.")
     public CustomResponse<Void> verifyEmail(@Valid @RequestBody AuthRequestDTO.EmailVerifyRequestDTO request) {
         authService.verifyEmailCode(request);
         return CustomResponse.onSuccess(null);
     }
 
     @PostMapping("/email/change/start")
+    @Operation(summary = "이메일 수정", description = "새로 입력된 이메일로 이메일을 수정합니다.")
     public CustomResponse<Void> startEmailChange(@AuthenticationPrincipal CustomUserDetails user,
                                                  @Valid @RequestBody AuthRequestDTO.EmailChangeStartRequest req) {
         authService.startEmailChange(user.getId(), req.newEmail());
@@ -60,6 +67,7 @@ public class AuthController {
     }
 
     @PostMapping("/email/change/verify")
+    @Operation(summary = "수정된 이메일 검증", description = "수정된 이메일의 인증 코드를 검증합니다.")
     public CustomResponse<Void> verifyEmailChange(@AuthenticationPrincipal CustomUserDetails user,
                                                   @Valid @RequestBody AuthRequestDTO.EmailChangeVerifyRequest req) {
         authService.verifyEmailChange(user.getId(), req.newEmail(), req.code());
