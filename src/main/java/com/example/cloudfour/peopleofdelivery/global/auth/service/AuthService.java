@@ -36,7 +36,7 @@ public class AuthService {
     private static final int CODE_LEN = 6;
     private static final int CODE_EXP_MIN = 10;
 
-    public AuthResponseDTO.AuthRegisterResponseDTO register(AuthRequestDTO.RegisterRequestDto request){
+    public AuthResponseDTO.AuthRegisterResponseDTO registercustomer(AuthRequestDTO.RegisterRequestDto request){
         String email = request.email().toLowerCase();
         if (userRepository.existsByEmailAndIsDeletedFalse(email)) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
@@ -48,6 +48,27 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.password()))
                 .number(request.number())
                 .role(Role.CUSTOMER)
+                .loginType(LoginType.LOCAL)
+                .emailVerified(false)
+                .build();
+
+        userRepository.save(user);
+
+        return new AuthResponseDTO.AuthRegisterResponseDTO(user.getId(), user.getEmail(), user.getNickname());
+    }
+
+    public AuthResponseDTO.AuthRegisterResponseDTO registerowner(AuthRequestDTO.RegisterRequestDto request){
+        String email = request.email().toLowerCase();
+        if (userRepository.existsByEmailAndIsDeletedFalse(email)) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+
+        User user = User.builder()
+                .email(email)
+                .nickname(request.nickname())
+                .password(passwordEncoder.encode(request.password()))
+                .number(request.number())
+                .role(Role.OWNER)
                 .loginType(LoginType.LOCAL)
                 .emailVerified(false)
                 .build();

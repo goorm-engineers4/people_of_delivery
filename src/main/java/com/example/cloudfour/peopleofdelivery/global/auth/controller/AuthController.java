@@ -20,11 +20,19 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
-    @Operation(summary = "로컬 회원가입", description = "계정을 생성합니다.")
-    public CustomResponse<AuthResponseDTO.AuthRegisterResponseDTO> register(
+    @PostMapping("/register/customer")
+    @Operation(summary = "고객 로컬 회원가입", description = "고객 계정을 생성합니다.")
+    public CustomResponse<AuthResponseDTO.AuthRegisterResponseDTO> registercustomer(
             @Valid @RequestBody AuthRequestDTO.RegisterRequestDto request) {
-        var user = authService.register(request);
+        var user = authService.registercustomer(request);
+        return CustomResponse.onSuccess(HttpStatus.CREATED, user);
+    }
+
+    @PostMapping("/register/owner")
+    @Operation(summary = "점주 로컬 회원가입", description = "점주 계정을 생성합니다.")
+    public CustomResponse<AuthResponseDTO.AuthRegisterResponseDTO> registerowner(
+            @Valid @RequestBody AuthRequestDTO.RegisterRequestDto request) {
+        var user = authService.registerowner(request);
         return CustomResponse.onSuccess(HttpStatus.CREATED, user);
     }
 
