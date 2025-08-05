@@ -11,9 +11,9 @@ INSERT INTO p_storecategory (id, category) VALUES
   ('550e8400-e29b-41d4-a716-446655440005', '한식');
 
 -- 음식점 사장 사용자
+-- 음식점 사장 사용자 (password123의 BCrypt 해시값)
 INSERT INTO p_user (id, email, nickname, password, number, role, email_verified, login_type, created_at, updated_at, is_deleted) VALUES
-  ('550e8400-e29b-41d4-a716-446655440006', 'store.owner@test.com', '치킨집사장', '$2a$10$dummyHashedPassword', '010-0000-0000', 'OWNER', true, 'LOCAL', NOW(), NOW(), false);
-
+    ('550e8400-e29b-41d4-a716-446655440006', 'store.owner@test.com', '치킨집사장', '$2a$10$iZD2oXy6qKzKBCqQpl.Wke7h9DQPp3HDLK5BYqO/QGEHEzh8CBKW.', '010-0000-0000', 'OWNER', true, 'LOCAL', NOW(), NOW(), false);
 -- 음식점 데이터
 INSERT INTO p_store (id, name, address, phone, content, operation_hours, closed_days, min_price, delivery_tip, rating, like_count, review_count, store_picture, store_category_id, region_id, user_id, created_at, updated_at, is_deleted, created_by, updated_by) VALUES
   ('550e8400-e29b-41d4-a716-446655440007', '맛���는 치킨집', '서울시 강남구 치킨로 123', '02-1234-5678', '바삭한 치킨 전문점', '10:00-22:00', '일요일', 15000, 3000, 4.5, 100, 50, 'chicken-store.jpg', '550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440006', NOW(), NOW(), false, 1, 1),
