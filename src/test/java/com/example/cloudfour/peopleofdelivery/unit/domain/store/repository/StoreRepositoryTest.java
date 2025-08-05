@@ -44,11 +44,11 @@ class StoreRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        
+
         region = Factory.createMockRegion();
         entityManager.persistAndFlush(region);
 
-        
+
         koreanCategory = Factory.createMockStoreCategory();
         chineseCategory = StoreCategory.builder()
                 .category("중식")
@@ -56,11 +56,11 @@ class StoreRepositoryTest {
         entityManager.persistAndFlush(koreanCategory);
         entityManager.persistAndFlush(chineseCategory);
 
-        
-        ownerUser = Factory.createMockUserWithRole(Role.OWNER, region);
+
+        ownerUser = Factory.createMockUserWithRoleAndRegion(Role.OWNER, region);
         entityManager.persistAndFlush(ownerUser);
 
-        
+
         deletedUser = User.builder()
                 .email("deleted@example.com")
                 .nickname("삭제된사장")
@@ -72,14 +72,14 @@ class StoreRepositoryTest {
                 .build();
         entityManager.persistAndFlush(deletedUser);
 
-        
+
         entityManager.getEntityManager()
                 .createQuery("UPDATE User u SET u.isDeleted = true WHERE u.id = :id")
                 .setParameter("id", deletedUser.getId())
                 .executeUpdate();
         entityManager.flush();
 
-        
+
         mainStore = Store.builder()
                 .name("메인 한식집")
                 .address("서울시 강남구 역삼동")
@@ -95,7 +95,7 @@ class StoreRepositoryTest {
                 .build();
         entityManager.persistAndFlush(mainStore);
 
-        
+
         Store deletedUserStore = Store.builder()
                 .name("삭제된 가게")
                 .address("서울시 강남구 삼성동")
@@ -117,10 +117,10 @@ class StoreRepositoryTest {
     @Test
     @DisplayName("사용자 ID로 가게 조회 - 존재하는 경우")
     void findByUserId_ExistsSuccess() {
-        
+
         Optional<Store> result = storeRepository.findByUserId(ownerUser.getId());
 
-        
+
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("메인 한식집");
         assertThat(result.get().getUser().getId()).isEqualTo(ownerUser.getId());
@@ -129,50 +129,50 @@ class StoreRepositoryTest {
     @Test
     @DisplayName("사용자 ID로 가게 조회 - 존재하지 않는 경우")
     void findByUserId_NotExists() {
-        
+
         Optional<Store> result = storeRepository.findByUserId(java.util.UUID.randomUUID());
 
-        
+
         assertThat(result).isEmpty();
     }
 
     @Test
     @DisplayName("사용자 ID로 가게 조회 - 삭제된 사용자")
     void findByUserId_DeletedUser() {
-        
+
         Optional<Store> result = storeRepository.findByUserId(deletedUser.getId());
 
-        
+
         assertThat(result).isEmpty();
     }
 
     @Test
     @DisplayName("가게명 중복 확인 - 존재하는 경우")
     void existsByName_ExistsTrue() {
-        
+
         boolean exists = storeRepository.existsByName("메인 한식집");
 
-        
+
         assertThat(exists).isTrue();
     }
 
     @Test
     @DisplayName("가게명 중복 확인 - 존재하지 않는 경우")
     void existsByName_ExistsFalse() {
-        
+
         boolean exists = storeRepository.existsByName("존재하지않는가게");
 
-        
+
         assertThat(exists).isFalse();
     }
 
     @Test
     @DisplayName("ID로 삭제되지 않은 가게 조회 - 존재하는 경우")
     void findByIdAndIsDeletedFalse_ExistsSuccess() {
-        
+
         Optional<Store> result = storeRepository.findByIdAndIsDeletedFalse(mainStore.getId());
 
-        
+
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("메인 한식집");
     }
@@ -180,79 +180,79 @@ class StoreRepositoryTest {
     @Test
     @DisplayName("ID로 삭제되지 않은 가게 조회 - 존재하지 않는 경우")
     void findByIdAndIsDeletedFalse_NotExists() {
-        
+
         Optional<Store> result = storeRepository.findByIdAndIsDeletedFalse(java.util.UUID.randomUUID());
 
-        
+
         assertThat(result).isEmpty();
     }
 
     @Test
     @DisplayName("가게과 사용자 존재 확인 - 존재하는 경우")
     void existsByStoreAndUser_ExistsTrue() {
-        
+
         boolean exists = storeRepository.existsByStoreAndUser(mainStore.getId(), ownerUser.getId());
 
-        
+
         assertThat(exists).isTrue();
     }
 
     @Test
     @DisplayName("가게과 사용자 존재 확인 - 존재하지 않는 경우")
     void existsByStoreAndUser_ExistsFalse() {
-        
+
         boolean exists = storeRepository.existsByStoreAndUser(mainStore.getId(), java.util.UUID.randomUUID());
 
-        
+
         assertThat(exists).isFalse();
     }
 
     @Test
     @DisplayName("가게과 사용자 존재 확인 - 삭제된 사용자")
     void existsByStoreAndUser_DeletedUser() {
-        
+
         boolean exists = storeRepository.existsByStoreAndUser(mainStore.getId(), deletedUser.getId());
 
-        
+
         assertThat(exists).isFalse();
     }
 
     @Test
     @DisplayName("카테고리별 가게 페이징 조회")
     void findAllByCategoryAndCursor_Success() {
-        
+
         LocalDateTime cursor = LocalDateTime.now().plusMinutes(1);
         Pageable pageable = PageRequest.of(0, 10);
 
-        
+
         Slice<Store> storeSlice = storeRepository.findAllByCategoryAndCursor(
                 koreanCategory.getId(), cursor, pageable);
 
-        
-        assertThat(storeSlice.getContent()).hasSize(2); 
+
+        assertThat(storeSlice.getContent()).hasSize(2);
         assertThat(storeSlice.hasNext()).isFalse();
     }
 
     @Test
     @DisplayName("키워드로 가게 검색 - 가게명으로 검색")
     void findAllByKeyWord_SearchByStoreName() {
-        
+
         LocalDateTime cursor = LocalDateTime.now().plusMinutes(1);
         Pageable pageable = PageRequest.of(0, 10);
 
-        
+
         Slice<Store> storeSlice = storeRepository.findAllByKeyWord("한식", cursor, pageable);
 
-        
-        assertThat(storeSlice.getContent()).hasSize(1); 
+
+        assertThat(storeSlice.getContent()).hasSize(1);
         assertThat(storeSlice.getContent()).extracting("name").contains("메인 한식집");
     }
 
     @Test
     @DisplayName("키워드로 가게 검색 - 카테고리명으로 검색")
     void findAllByKeyWord_SearchByCategory() {
-        
-        
+
+
         Store chineseStore = Store.builder()
                 .name("중국집")
                 .address("서울시 강남구 논현동")
@@ -271,10 +271,10 @@ class StoreRepositoryTest {
         LocalDateTime cursor = LocalDateTime.now().plusMinutes(1);
         Pageable pageable = PageRequest.of(0, 10);
 
-        
+
         Slice<Store> storeSlice = storeRepository.findAllByKeyWord("중식", cursor, pageable);
 
-        
+
         assertThat(storeSlice.getContent()).hasSize(1);
         assertThat(storeSlice.getContent()).extracting("name").contains("중국집");
     }
@@ -282,21 +282,21 @@ class StoreRepositoryTest {
     @Test
     @DisplayName("키워드로 가게 검색 - 검색 결과 없음")
     void findAllByKeyWord_NoResults() {
-        
+
         LocalDateTime cursor = LocalDateTime.now().plusMinutes(1);
         Pageable pageable = PageRequest.of(0, 10);
 
-        
+
         Slice<Store> storeSlice = storeRepository.findAllByKeyWord("일식", cursor, pageable);
 
-        
+
         assertThat(storeSlice.getContent()).isEmpty();
     }
 
     @Test
     @DisplayName("가게 저장")
     void save_Success() {
-        
+
         Store newStore = Store.builder()
                 .name("새로운 가게")
                 .address("서울시 강남구 청담동")
@@ -311,14 +311,14 @@ class StoreRepositoryTest {
                 .region(region)
                 .build();
 
-        
+
         Store savedStore = storeRepository.save(newStore);
 
-        
+
         assertThat(savedStore.getId()).isNotNull();
         assertThat(savedStore.getName()).isEqualTo("새로운 가게");
 
-        
+
         Optional<Store> foundStore = storeRepository.findByIdAndIsDeletedFalse(savedStore.getId());
         assertThat(foundStore).isPresent();
         assertThat(foundStore.get().getName()).isEqualTo("새로운 가게");
@@ -327,13 +327,13 @@ class StoreRepositoryTest {
     @Test
     @DisplayName("가게 삭제")
     void delete_Success() {
-        
+
         long initialCount = storeRepository.count();
 
-        
+
         storeRepository.delete(mainStore);
 
-        
+
         long finalCount = storeRepository.count();
         assertThat(finalCount).isEqualTo(initialCount - 1);
 
