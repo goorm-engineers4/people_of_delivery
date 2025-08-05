@@ -162,15 +162,15 @@ public class Factory {
         Payment payment = Payment.builder()
                 .order(order)
                 .paymentMethod("card")
-                .paymentStatus(PaymentStatus.PAID)
+                .paymentStatus(PaymentStatus.APPROVED)
                 .totalPrice(menu.getPrice() + option.getAdditionalPrice())
-                .paymentKey(123456)
+                .paymentKey("123456")
                 .build();
 
         order.setPayment(payment);
 
         PaymentHistory paymentHistory = PaymentHistory.builder()
-                .paymentStatus(PaymentStatus.PAID)
+                .paymentStatus(PaymentStatus.APPROVED)
                 .payment(payment)
                 .build();
 
