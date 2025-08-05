@@ -32,7 +32,7 @@ public class PaymentRequestDTO {
 
     @Getter
     @Builder
-    public static class PaymentDeleteRequestDTO{
+    public static class PaymentCancelRequestDTO{
         String cancelReason;
         UUID updatedBy;
     }

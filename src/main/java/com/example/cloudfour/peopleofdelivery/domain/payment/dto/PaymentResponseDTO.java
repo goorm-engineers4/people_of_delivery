@@ -31,7 +31,7 @@ public class PaymentResponseDTO {
     }
 
     @Getter @Builder
-    public static class PaymentDeleteResponseDTO {
+    public static class PaymentCancelResponseDTO {
         private UUID paymentId;
         private PaymentStatus status;
         private String cancelReason;

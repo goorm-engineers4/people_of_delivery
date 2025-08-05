@@ -3,6 +3,8 @@ package com.example.cloudfour.peopleofdelivery.domain.payment.service.query;
 import com.example.cloudfour.peopleofdelivery.domain.order.entity.Order;
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
+import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
+import com.example.cloudfour.peopleofdelivery.domain.payment.exception.PaymentErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.payment.repository.PaymentRepository;
 import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorCode;
@@ -30,8 +32,8 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
 
     @Override
     public PaymentResponseDTO.PaymentDetailResponseDTO getDetailPayment(UUID orderId, User user) {
-        Payment payment = paymentRepository.findByOrder_Id(orderId)
-                .orElseThrow(() -> new CustomException(GeneralErrorCode.NOT_FOUND_404));
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
         validateUserAccess(payment.getOrder(), user);
 
@@ -83,12 +85,12 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
         List<Payment> payments = paymentRepository.findAllByOrder_Store_Id(storeId);
 
         int totalSales = payments.stream()
-                .filter(p -> p.getPaymentStatus().name().equals("APPROVED"))
+                .filter(p -> p.getPaymentStatus() == PaymentStatus.APPROVED)
                 .mapToInt(Payment::getTotalPrice)
                 .sum();
 
         int count = (int) payments.stream()
-                .filter(p -> p.getPaymentStatus().name().equals("APPROVED"))
+                .filter(p -> p.getPaymentStatus() == PaymentStatus.APPROVED)
                 .count();
 
         return PaymentResponseDTO.PaymentStoreSummaryResponseDTO.builder()
@@ -99,7 +101,7 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
 
     private void validateUserAccess(Order order, User user) {
         if (!order.getUser().getId().equals(user.getId()) && !order.getStore().getUser().getId().equals(user.getId())) {
-            throw new CustomException(GeneralErrorCode.FORBIDDEN_403);
+            throw new CustomException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
     }
 
