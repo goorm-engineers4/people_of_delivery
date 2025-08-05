@@ -1,7 +1,5 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.dto;
 
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
