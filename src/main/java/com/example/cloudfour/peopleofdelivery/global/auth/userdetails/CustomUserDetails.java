@@ -17,7 +17,7 @@ public class CustomUserDetails implements UserDetails {
 
     private final UUID id;
     private final String email;
-    private final String passwordHash;   // LOCAL만 사용(BCrypt 해시)
+    private final String passwordHash;
     private final Role role;
     private final LoginType loginType;
     private final String providerId;
@@ -59,7 +59,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        // 인증 식별자는 email
         return email;
     }
 

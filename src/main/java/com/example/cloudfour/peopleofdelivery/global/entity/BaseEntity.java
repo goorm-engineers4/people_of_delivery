@@ -38,7 +38,6 @@ public abstract class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    //soft delete 수행: 삭제 여부 true로 설정하고 삭제일시 기록
     public void softDelete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();

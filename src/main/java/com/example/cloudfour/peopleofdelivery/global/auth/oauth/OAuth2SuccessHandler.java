@@ -12,7 +12,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -33,7 +32,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         response.setContentType("application/json;charset=UTF-8");
 
         if (user == null) {
-            // 신규 - 추가 정보 입력 요청
             var body = Map.of(
                     "needSignup", true,
                     "providerId", oAuth2User.getProviderId(),
@@ -45,7 +43,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
-        // 기존 - JWT 발급
         TokenDto tokenDto = jwtTokenProvider.createToken(user.getId(), user.getRole());
 
         response.setStatus(HttpServletResponse.SC_OK);

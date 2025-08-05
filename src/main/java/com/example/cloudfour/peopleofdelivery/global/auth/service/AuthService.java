@@ -47,7 +47,7 @@ public class AuthService {
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
                 .number(request.number())
-                .role(Role.CUSTOMER)           // 초기 기본권한
+                .role(Role.CUSTOMER)
                 .loginType(LoginType.LOCAL)
                 .emailVerified(false)
                 .build();
@@ -67,7 +67,6 @@ public class AuthService {
             throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        // loginType 확인(LOCAL만 허용)
         if (user.getLoginType() != LoginType.LOCAL) {
             throw new IllegalArgumentException("소셜 계정은 로컬 로그인 불가");
         }
@@ -101,8 +100,8 @@ public class AuthService {
     public void sendVerificationEmail(String email) {
         Objects.requireNonNull(email, "email must not be null");
 
-        String code = generateCode(CODE_LEN); // 6자리 숫자
-        LocalDateTime expiry = LocalDateTime.now().plusMinutes(CODE_EXP_MIN); // 10분
+        String code = generateCode(CODE_LEN);
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(CODE_EXP_MIN);
 
         verificationCodeRepository.deleteByEmail(email);
         verificationCodeRepository.save(
@@ -145,7 +144,6 @@ public class AuthService {
         }
         verificationCodeRepository.delete(vc);
 
-        // 이메일 인증 완료 반영
         userRepository.findByEmailAndIsDeletedFalse(request.email())
                 .ifPresent(User::markEmailVerified);
     }

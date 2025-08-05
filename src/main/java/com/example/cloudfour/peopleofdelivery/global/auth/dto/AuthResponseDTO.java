@@ -16,7 +16,6 @@ public class AuthResponseDTO {
     public static class AuthRegisterResponseDTO {
         private UUID userId;
         private String email;
-        // 비밀번호는 보안상 응답에 포함하지 않음
         private String nickname;
     }
 }

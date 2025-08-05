@@ -1,12 +1,11 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.entity;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.VerificationPurpose;
-import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 @Entity
 @Getter
