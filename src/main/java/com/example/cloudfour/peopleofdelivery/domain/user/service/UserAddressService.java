@@ -57,16 +57,13 @@ public class UserAddressService {
 
         ua.changeAddress(req.address());
 
-        // 지역 변경 - 현재 region entity 수정 전 이후 추가 작업 예정
         if (!ua.getRegion().getId().equals(req.regionId())) {
             Region region = regionRepository.findById(req.regionId())
                     .orElseThrow(() -> new IllegalArgumentException("지역 정보를 찾을 수 없습니다."));
             ua.setRegion(region);
         }
-        // JPA dirty checking으로 업데이트 반영
     }
 
-    // soft delete
     public void deleteAddress(UUID userId, UUID addressId) {
         UserAddress ua = userAddressRepository.findByIdAndUser_Id(addressId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("주소를 찾을 수 없습니다."));
