@@ -2,7 +2,8 @@ package com.example.cloudfour.peopleofdelivery.global.auth.controller;
 
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthRequestDTO;
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthResponseDTO;
-import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.RefreshTokenRequestDTO;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenResponseDTO;
 import com.example.cloudfour.peopleofdelivery.global.auth.service.AuthService;
 import com.example.cloudfour.peopleofdelivery.global.auth.userdetails.CustomUserDetails;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,8 +44,22 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "로컬 로그인", description = "생성된 계정으로 로그인합니다.")
-    public CustomResponse<TokenDto> login(@Valid @RequestBody AuthRequestDTO.LoginRequestDto request) {
-        TokenDto token = authService.login(request);
+    public CustomResponse<TokenResponseDTO> login(@Valid @RequestBody AuthRequestDTO.LoginRequestDto request) {
+        TokenResponseDTO token = authService.login(request);
+        return CustomResponse.onSuccess(HttpStatus.OK, token);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "로그인된 계정을 로그아웃합니다.")
+    public CustomResponse<Void> logout(@RequestHeader("Authorization") String accessToken) {
+        authService.logout(accessToken);
+        return CustomResponse.onSuccess(null);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "refreshtoken 재발급", description = "토큰을 재발급합니다.")
+    public CustomResponse<TokenResponseDTO> refresh(@RequestBody RefreshTokenRequestDTO request) {
+        TokenResponseDTO token = authService.refreshAccessToken(request);
         return CustomResponse.onSuccess(HttpStatus.OK, token);
     }
 
