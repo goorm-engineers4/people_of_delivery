@@ -7,8 +7,24 @@ import com.example.cloudfour.peopleofdelivery.domain.store.entity.Store;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +42,15 @@ public class User extends BaseEntity {
     private UUID id;
 
     @Column(nullable = false, unique = true)
-    private String email; // 확정 이메일
+    private String email;
 
     @Column(unique = false)
-    private String pendingEmail; // 검증 대기 중인 새 이메일
+    private String pendingEmail;
 
     @Column(nullable = false)
     private String nickname;
 
-    private String password; // 자체 로그인(LOCAL)만 사용
+    private String password;
 
     @Column(nullable = false)
     private String number;
@@ -47,11 +63,11 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private LoginType loginType;
 
-    private String providerId; // 소셜 로그인 고유 식별자 (sub ..)
+    private String providerId;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean emailVerified = false; // 현재 email의 인증 여부
+    private boolean emailVerified = false;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
@@ -86,15 +102,13 @@ public class User extends BaseEntity {
     public void changeNickname(String nickname) { this.nickname = nickname; }
     public void changeNumber(String number) { this.number = number; }
 
-    // 새 이메일로 변경 요청 — 실제 email 교체는 아님
     public void requestEmailChange(String newEmail) { this.pendingEmail = newEmail; }
 
-    // 새 이메일 인증 성공 시에만 확정
     public void confirmEmailChange() {
         if (this.pendingEmail == null) return;
         this.email = this.pendingEmail;
         this.pendingEmail = null;
-        this.emailVerified = true; // 새 이메일을 인증
+        this.emailVerified = true;
     }
 
     public void markEmailVerified() { this.emailVerified = true; }

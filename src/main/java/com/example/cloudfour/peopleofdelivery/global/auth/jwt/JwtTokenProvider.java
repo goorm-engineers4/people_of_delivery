@@ -20,7 +20,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    // Jwt Access, refresh 정보 가져오기
     private final JwtProperties jwtProperties;
 
     public TokenDto createToken(UUID userId, Role role) {

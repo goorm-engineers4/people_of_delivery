@@ -22,7 +22,6 @@ public class JpaUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new UsernameNotFoundException("No user: " + email));
 
-        // 비밀번호 기반 인증은 LOCAL만 허용
         if (user.getLoginType() != LoginType.LOCAL) {
             throw new DisabledException("Password login not allowed for " + user.getLoginType());
         }

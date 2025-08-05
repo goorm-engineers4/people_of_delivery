@@ -24,13 +24,12 @@ public class AuthRequestDTO {
             @NotBlank @Size(min = 8, max = 64) String newPassword
     ) {}
 
-    // 기존 이메일 인증
+
     public record EmailVerifyRequestDTO(
             @Email @NotBlank String email,
             @NotBlank @Size(min=6, max=6) String code
     ) {}
 
-    // 이메일 변경 단계용(선택)
     public record EmailChangeStartRequest(
             @Email @NotBlank String newEmail
     ) {}

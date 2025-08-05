@@ -1,11 +1,9 @@
 package com.example.cloudfour.peopleofdelivery.domain.user.dto;
 
-import com.example.cloudfour.peopleofdelivery.domain.region.entity.Region;
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.LoginType;
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
-import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Getter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 

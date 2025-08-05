@@ -6,13 +6,20 @@ import com.example.cloudfour.peopleofdelivery.domain.user.dto.UserResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.service.UserAddressService;
 import com.example.cloudfour.peopleofdelivery.domain.user.service.UserService;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.CustomResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -26,11 +33,13 @@ public class UserController {
     private final UserAddressService addressService;
 
     @GetMapping("/me")
+    @Operation(summary = "내 정보 조회", description = "내 계정의 상세 정보를 조회합니다.")
     public CustomResponse<UserResponseDTO.MeResponseDTO> getMyInfo(@AuthenticationPrincipal CustomUserDetails user) {
         return CustomResponse.onSuccess(userService.getMyInfo(user.getId()));
     }
 
     @PatchMapping("/me")
+    @Operation(summary = "내 정보 수정", description = "내 계정의 상세 정보를 수정합니다.")
     public CustomResponse<Void> updateMyInfo(@AuthenticationPrincipal CustomUserDetails user,
                                              @Valid @RequestBody UserRequestDTO.UserUpdateRequestDTO request) {
         userService.updateProfile(user.getId(), request.nickname(), request.number());
@@ -38,19 +47,22 @@ public class UserController {
     }
 
     @PatchMapping("/deleted")
+    @Operation(summary = "내 계정 삭제", description = "내 계정을 삭제합니다.")
     public CustomResponse<Void> deleteAccount(@AuthenticationPrincipal CustomUserDetails user) {
         userService.deleteAccount(user.getId());
         return CustomResponse.onSuccess(null);
     }
 
     @PostMapping("/addresses")
+    @Operation(summary = "내 주소 등록", description = "내 주소를 등록합니다.")
     public CustomResponse<Void> addAddress(@Valid @RequestBody UserRequestDTO.AddressRequestDTO request,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         addressService.addAddress(userDetails.getId(), request);
-        return CustomResponse.onSuccess(HttpStatus.CREATED, null); // 201
+        return CustomResponse.onSuccess(HttpStatus.CREATED, null);
     }
 
     @GetMapping("/addresses")
+    @Operation(summary = "내 주소 조회", description = "내 주소를 조회합니다.")
     public CustomResponse<List<UserResponseDTO.AddressResponseDTO>> getAddressList(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<UserResponseDTO.AddressResponseDTO> list = addressService.getAddresses(userDetails.getId());
@@ -58,6 +70,7 @@ public class UserController {
     }
 
     @PatchMapping("/addresses/{addressId}")
+    @Operation(summary = "내 주소 수정", description = "내 주소를 수정합니다.")
     public CustomResponse<Void> updateAddress(@PathVariable UUID addressId,
                                               @Valid @RequestBody UserRequestDTO.AddressRequestDTO request,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -66,29 +79,10 @@ public class UserController {
     }
 
     @PatchMapping("/addresses/delete/{addressId}")
+    @Operation(summary = "내 주소 삭제", description = "내 주소를 삭제합니다.")
     public CustomResponse<Void> deleteAddress(@PathVariable UUID addressId,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         addressService.deleteAddress(userDetails.getId(), addressId);
         return CustomResponse.onSuccess(null);
     }
-//
-//    @GetMapping("/me/cart")
-//    public CustomResponse<List<CartDto>> getMyCarts(@AuthenticationPrincipal CustomUserDetails userDetails) {
-//        if (!userDetails.isCustomer()) {
-//            throw new UnauthorizedAccessException("고객만 장바구니를 조회할 수 있습니다.");
-//        }
-//
-//        List<CartDto> carts = cartService.getCartsForUser(userDetails.getUser().getId());
-//        return CustomResponse.onSuccess(carts);
-//    }
-//
-//    @GetMapping("/me/stores")
-//    public CustomResponse<List<StoreDto>> getMyStores(@AuthenticationPrincipal CustomUserDetails userDetails) {
-//        if (!userDetails.isOwner()) {
-//            throw new UnauthorizedAccessException("점주만 가게를 조회할 수 있습니다.");
-//        }
-//
-//        List<StoreDto> stores = storeService.getStoresForOwner(userDetails.getUser().getId());
-//        return CustomResponse.onSuccess(stores);
-//    }
 }

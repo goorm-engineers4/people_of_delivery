@@ -1,6 +1,8 @@
 package com.example.cloudfour.peopleofdelivery.global.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
@@ -38,7 +40,6 @@ public abstract class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    //soft delete 수행: 삭제 여부 true로 설정하고 삭제일시 기록
     public void softDelete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
