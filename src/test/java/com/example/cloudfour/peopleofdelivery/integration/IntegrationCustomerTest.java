@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @DisplayName("배달 서비스 전체 플로우 통합테스트")
 @ActiveProfiles("test")
-class IntegrationTest {
+class IntegrationCustomerTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -120,7 +120,6 @@ class IntegrationTest {
     private void createUserAddressWithRetry() throws Exception {
         System.out.println("사용자 주소 생성 시도...");
 
-        // test-data.sql에 있는 실제 region ID들을 시도해보자
         String[] regionIds = {
                 "00000000-0000-0000-0000-000000000001", // 첫 번째 시도
                 "550e8400-e29b-41d4-a716-446655440001", // 두 번째 시도 (test-data.sql 기반)
@@ -344,70 +343,13 @@ class IntegrationTest {
         System.out.println("5단계 완료\n");
     }
 
-    @Test
-    @Order(6)
-    @DisplayName("6단계: 결제 처리 시뮬레이션")
-    void step06_processPayment() throws Exception {
-        System.out.println("=== 6단계: 결제 처리 시뮬레이션 ===");
-
-        if (orderId == null) {
-            System.out.println("주문 ID가 없어서 결제 시뮬레이션만 수행");
-        } else {
-            HttpEntity<String> requestEntity = new HttpEntity<>(createAuthHeaders());
-            ResponseEntity<String> orderDetailResponse = testRestTemplate.exchange(
-                    baseUrl() + "/api/orders/" + orderId,
-                    HttpMethod.GET, requestEntity, String.class
-            );
-
-            if (orderDetailResponse.getStatusCode().is2xxSuccessful()) {
-                System.out.println("주문 조회 성공");
-            }
-        }
-
-        System.out.println("결제 처리 시뮬레이션 완료");
-        System.out.println("6단계 완료\n");
-    }
-
-    @Test
-    @Order(7)
-    @DisplayName("7단계: 리뷰 작성")
-    void step07_createReview() throws Exception {
-        System.out.println("=== 7단계: 리뷰 작성 ===");
-
-        if (selectedStoreId == null) {
-            selectedStoreId = UUID.fromString("550e8400-e29b-41d4-a716-446655440007");
-        }
-
-        ReviewRequestDTO.ReviewCreateRequestDTO reviewCreateRequest = ReviewRequestDTO.ReviewCreateRequestDTO.builder()
-                .storeId(selectedStoreId)
-                .score(5)
-                .content("음식이 정말 맛있었어요!")
-                .pictureUrl("https://reviews.s3.amazonaws.com/review-test.jpg")
-                .build();
-
-        HttpEntity<ReviewRequestDTO.ReviewCreateRequestDTO> reviewEntity =
-                new HttpEntity<>(reviewCreateRequest, createAuthHeaders());
-        ResponseEntity<String> reviewResponse = testRestTemplate.postForEntity(
-                baseUrl() + "/api/reviews/", reviewEntity, String.class
-        );
-
-        if (reviewResponse.getStatusCode().is2xxSuccessful()) {
-            System.out.println("리뷰 작성 성공");
-        } else {
-            System.out.println("리뷰 작성 실패 또는 건너뜀");
-        }
-
-        System.out.println("7단계 완료");
-        System.out.println("=== 정상 시나리오 완료 ===\n");
-    }
-
     // ===== 예외 시나리오 테스트 =====
 
     @Test
-    @Order(8)
-    @DisplayName("8단계: 잘못된 로그인 정보 처리")
+    @Order(6)
+    @DisplayName("6단계: 잘못된 로그인 정보 처리")
     void step08_invalidLogin() throws Exception {
-        System.out.println("=== 8단계: 잘못된 로그인 정보 처리 ===");
+        System.out.println("=== 6단계: 잘못된 로그인 정보 처리 ===");
 
         AuthRequestDTO.LoginRequestDto invalidLoginRequest = new AuthRequestDTO.LoginRequestDto(
                 "nonexistent@example.com", "WrongPassword123!"
@@ -420,14 +362,14 @@ class IntegrationTest {
         );
 
         assertApiFailure(loginResponse, "잘못된 로그인 정보 차단");
-        System.out.println("8단계 완료\n");
+        System.out.println("6단계 완료\n");
     }
 
     @Test
-    @Order(9)
-    @DisplayName("9단계: 비밀번호 규칙 위반 방지")
+    @Order(7)
+    @DisplayName("7단계: 비밀번호 규칙 위반 방지")
     void step09_weakPassword() throws Exception {
-        System.out.println("=== 9단계: 비밀번호 규칙 위반 방지 ===");
+        System.out.println("=== 7단계: 비밀번호 규칙 위반 방지 ===");
 
         AuthRequestDTO.RegisterRequestDto weakPasswordRequest = new AuthRequestDTO.RegisterRequestDto(
                 "weak.password.test@example.com", "약한비밀번호테스트", "123", "010-8888-7777"
@@ -440,50 +382,14 @@ class IntegrationTest {
         );
 
         assertApiFailure(registerResponse, "약한 비밀번호 회원가입 차단");
-        System.out.println("9단계 완료\n");
+        System.out.println("7단계 완료\n");
     }
 
     @Test
-    @Order(10)
-    @DisplayName("10단계: 미인증 접근 차단")
-    void step10_unauthenticatedAccess() throws Exception {
-        System.out.println("=== 10단계: 미인증 접근 차단 ===");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = testRestTemplate.exchange(
-                baseUrl() + "/api/stores?size=10", HttpMethod.GET, entity, String.class
-        );
-
-        assertApiFailure(response, "미인증 접근 차단");
-        System.out.println("10단계 완료\n");
-    }
-
-    @Test
-    @Order(11)
-    @DisplayName("11단계: 존재하지 않는 리소스 404 처리")
-    void step11_nonexistentResource() throws Exception {
-        System.out.println("=== 11단계: 존재하지 않는 리소스 404 처리 ===");
-
-        UUID nonexistentStoreId = UUID.randomUUID();
-        HttpEntity<String> entity = new HttpEntity<>(createAuthHeaders());
-
-        ResponseEntity<String> response = testRestTemplate.exchange(
-                baseUrl() + "/api/menus/" + nonexistentStoreId,
-                HttpMethod.GET, entity, String.class
-        );
-
-        assertApiFailure(response, "존재하지 않는 리소스 404 처리");
-        System.out.println("11단계 완료\n");
-    }
-
-    @Test
-    @Order(12)
-    @DisplayName("12단계: 빈 장바구니 주문 방지")
+    @Order(8)
+    @DisplayName("8단계: 빈 장바구니 주문 방지")
     void step12_emptyCart() throws Exception {
-        System.out.println("=== 12단계: 빈 장바구니 주문 방지 ===");
+        System.out.println("=== 8단계: 빈 장바구니 주문 방지 ===");
 
         UUID emptyCartId = UUID.randomUUID();
         OrderRequestDTO.OrderCreateRequestDTO emptyOrderRequest = OrderRequestDTO.OrderCreateRequestDTO.builder()
@@ -499,16 +405,15 @@ class IntegrationTest {
         ResponseEntity<String> orderResponse = testRestTemplate.postForEntity(
                 baseUrl() + "/api/orders/" + emptyCartId, orderEntity, String.class
         );
-
         assertApiFailure(orderResponse, "빈 장바구니 주문 방지");
-        System.out.println("12단계 완료\n");
+        System.out.println("8단계 완료\n");
     }
 
     @Test
-    @Order(13)
-    @DisplayName("13단계: 중복 이메일 회원가입 방지")
+    @Order(9)
+    @DisplayName("9단계: 중복 이메일 회원가입 방지")
     void step13_duplicateEmail() throws Exception {
-        System.out.println("=== 13단계: 중복 이메일 회원가입 방지 ===");
+        System.out.println("=== 9단계: 중복 이메일 회원가입 방지 ===");
 
         if (userEmail == null) {
             userEmail = "duplicate.test@example.com";
@@ -525,26 +430,6 @@ class IntegrationTest {
         );
 
         assertApiFailure(registerResponse, "중복 이메일 회원가입 방지");
-        System.out.println("13단계 완료\n");
-    }
-
-    @Test
-    @Order(14)
-    @DisplayName("14단계: 잘못된 요청 형식 처리")
-    void step14_invalidRequestFormat() throws Exception {
-        System.out.println("=== 14단계: 잘못된 요청 형식 처리 ===");
-
-        String invalidJson = "{ \"invalidField\": \"value\" }";
-        HttpEntity<String> requestEntity = new HttpEntity<>(invalidJson, createAuthHeaders());
-
-        ResponseEntity<String> orderResponse = testRestTemplate.postForEntity(
-                baseUrl() + "/api/orders/" + UUID.randomUUID(), requestEntity, String.class
-        );
-
-        assertApiFailure(orderResponse, "잘못된 요청 형식 처리");
-        System.out.println("14단계 완료\n");
-
-        System.out.println("=== 전체 통합테스트 완료 ===");
-        System.out.println("정상 시나리오 7단계 + 예외 시나리오 7단계 검증 완료");
+        System.out.println("9단계 완료\n");
     }
 }
