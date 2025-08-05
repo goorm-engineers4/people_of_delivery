@@ -45,8 +45,8 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        // 서버에서 금액 직접 계산
-        int totalPrice = order.getTotalPrice(); // 실제 DB 기반 금액
+
+        int totalPrice = order.getTotalPrice();
 
         String paymentUrl = String.format(
                 "https://pay.toss.im/pay?amount=%d&orderId=%s&orderName=%s&customerName=%s&successUrl=%s&failUrl=%s",
@@ -67,7 +67,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     @Transactional
     public PaymentResponseDTO.PaymentVerifyResponseDTO verifyPayment(PaymentRequestDTO.PaymentVerifyRequestDTO request, User user) {
 
-        // 중복 결제 방지
+
         if (paymentRepository.existsByPaymentKey(request.getPaymentKey())) {
             throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_APPROVED, "이미 승인된 결제입니다.");
         }
@@ -81,7 +81,6 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
         Order order = orderRepository.findById(UUID.fromString(request.getOrderId()))
                 .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        // 사용자 확인 (보안)
         if (!order.getUser().getId().equals(user.getId())) {
             throw new PaymentException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
@@ -131,17 +130,14 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        // 사용자 확인
         if (!payment.getOrder().getUser().getId().equals(user.getId())) {
             throw new PaymentException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
 
-        // 취소 가능한 상태인지 확인
         if (payment.getPaymentStatus() != PaymentStatus.APPROVED) {
             throw new PaymentException(PaymentErrorCode.INVALID_PAYMENT_STATUS, "승인된 결제만 취소할 수 있습니다.");
         }
 
-        // Toss Payments API를 통해 결제 취소 요청
         tossApiClient.cancelPayment(payment.getPaymentKey(), request.getCancelReason());
 
         PaymentStatus previous = payment.getPaymentStatus();

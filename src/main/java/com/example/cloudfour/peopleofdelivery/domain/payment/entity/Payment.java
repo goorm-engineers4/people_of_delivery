@@ -62,11 +62,11 @@ public class Payment extends BaseEntity {
         PaymentHistory history = PaymentHistory.builder()
                 .previousStatus(previousStatus)
                 .paymentStatus(currentStatus)
-                .failedReason(this.getFailedReason()) // 필요시 복사
+                .failedReason(this.getFailedReason())
                 .build();
 
-        history.setPayment(this); // 양방향 연관관계 설정
-        this.setPaymentHistory(history); // 엔티티 내 필드에도 반영
+        history.setPayment(this);
+        this.setPaymentHistory(history);
         return history;
     }
 
