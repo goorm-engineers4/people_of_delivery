@@ -18,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("select o from Order o where o.user.id=:userId and o.user.isDeleted = false and o.isDeleted = false and o.createdAt <:cursor order by o.createdAt desc")
     Slice<Order> findAllByUserId(@Param("userId")  UUID userId, LocalDateTime cursor, Pageable pageable);
 
-    @Query("select o from Order o where o.store.id=:StoreId and o.store.isDeleted = false and o.isDeleted = false and o.createdAt <:cursor order by o.createdAt desc")
+    @Query("select o from Order o where o.store.id=:StoreId and o.store.isDeleted = false and o.user.isDeleted = false and o.isDeleted = false and o.createdAt <:cursor order by o.createdAt desc")
     Slice<Order> findAllByStoreId(@Param("StoreId")  UUID storeId, LocalDateTime cursor, Pageable pageable);
 
     @Query("select count(o) > 0 from Order o where o.id =:OrderId and o.user.id =:UserId and o.user.isDeleted = false and o.isDeleted = false")

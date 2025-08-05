@@ -623,7 +623,6 @@ class MenuCommandServiceImplTest {
         when(testMenuOption.getMenu()).thenReturn(testMenu);
         when(testMenu.getStore()).thenReturn(testStore);
 
-        // OWNER인 경우에만 가게 소유자 검증을 위한 설정
         if (role == Role.OWNER) {
             when(testStore.getUser()).thenReturn(authorizedUser);
         }
