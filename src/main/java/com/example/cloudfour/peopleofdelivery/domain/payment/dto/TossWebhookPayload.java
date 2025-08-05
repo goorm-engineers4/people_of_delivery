@@ -6,10 +6,10 @@ import lombok.Getter;
 @Getter
 @Builder
 public class TossWebhookPayload {
-    private String eventType;   // PAYMENT_APPROVED, PAYMENT_CANCELED 등
+    private String eventType;
     private String paymentKey;
     private String orderId;
-    private String status;      // APPROVED, CANCELED 등
+    private String status;
     private Integer totalAmount;
     private String approvedAt;
 }

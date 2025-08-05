@@ -11,8 +11,6 @@ import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreErrorC
 import com.example.cloudfour.peopleofdelivery.domain.store.exception.StoreException;
 import com.example.cloudfour.peopleofdelivery.domain.store.repository.StoreRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
-import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
-import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.code.GeneralErrorCode;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
