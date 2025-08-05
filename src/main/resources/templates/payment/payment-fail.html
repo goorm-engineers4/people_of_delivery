@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 성공</title>
+</head>
+<body>
+<h1> 결제가 성공적으로 완료되었습니다!</h1>
+<p>주문번호: <strong th:text="${orderId}">[주문번호]</strong></p>
+<p>결제 금액: <strong th:text="${amount}">[금액]</strong>원</p>
+<p>결제 키: <strong th:text="${paymentKey}">[결제키]</strong></p>
+<a href="/">홈으로 돌아가기</a>
+</body>
+</html>
