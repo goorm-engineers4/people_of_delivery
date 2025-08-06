@@ -8,6 +8,7 @@ import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentResponse
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.TossApproveResponse;
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.TossWebhookPayload;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
+import com.example.cloudfour.peopleofdelivery.domain.payment.entity.PaymentHistory;
 import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
 import com.example.cloudfour.peopleofdelivery.domain.payment.exception.PaymentErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.payment.exception.PaymentException;
@@ -76,10 +77,15 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
             throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_APPROVED, "이미 승인된 결제입니다.");
         }
 
+        String idempotencyKey = UUID.nameUUIDFromBytes(
+                (request.getPaymentKey() + request.getOrderId()).getBytes()
+        ).toString();
+
         TossApproveResponse tossResponse = tossApiClient.approvePayment(
                 request.getPaymentKey(),
                 request.getOrderId(),
-                request.getAmount()
+                request.getAmount(),
+                idempotencyKey
         );
 
         Order order = orderRepository.findById(UUID.fromString(request.getOrderId()))
@@ -119,7 +125,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
         PaymentStatus previous = payment.getPaymentStatus();
         payment.setPaymentStatus(request.getPaymentStatus());
-        var history = payment.addHistory(previous, request.getPaymentStatus(), "관리자 상태 변경");
+        var history = payment.addHistory(previous, request.getPaymentStatus(), "점주 상태 변경");
         paymentHistoryRepository.save(history);
 
         return PaymentResponseDTO.PaymentUpdateResponseDTO.builder()
@@ -182,6 +188,23 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
         log.info("[Webhook] 결제 상태 업데이트 완료: {} → {}", previous, newStatus);
     }
+
+    @Override
+    public void recordPaymentFail(String orderId, String message) {
+        Payment payment = paymentRepository.findByOrderId(UUID.fromString(orderId))
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+        payment.markAsFailed(message);
+        paymentRepository.save(payment);
+
+        PaymentHistory history = PaymentHistory.builder()
+                .payment(payment)
+                .paymentStatus(PaymentStatus.FAILED)
+                .failedReason(message)
+                .build();
+        paymentHistoryRepository.save(history);
+    }
+
 
     private PaymentStatus convertTossStatus(String tossStatus) {
         return switch (tossStatus) {

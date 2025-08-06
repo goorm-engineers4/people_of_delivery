@@ -12,8 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -114,14 +112,4 @@ public class PaymentController {
         return CustomResponse.onSuccess(HttpStatus.OK, payment);
     }
 
-    @Controller
-    public static class PaymentPageController {
-        @GetMapping("/api/payments/sdk-test")
-        public String showPaymentPage(Model model) {
-            model.addAttribute("orderId", UUID.randomUUID().toString());
-            model.addAttribute("amount", 50000);
-            model.addAttribute("clientKey", "test_client_api_key");
-            return "payment";
-        }
-    }
 }

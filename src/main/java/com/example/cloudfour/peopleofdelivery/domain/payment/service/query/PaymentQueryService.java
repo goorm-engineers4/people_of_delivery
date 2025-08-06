@@ -1,7 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.domain.payment.service.query;
 
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentResponseDTO;
-import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 
 import java.util.UUID;
 

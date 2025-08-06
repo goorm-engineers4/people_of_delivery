@@ -1,9 +1,9 @@
 package com.example.cloudfour.peopleofdelivery.domain.payment.controller;
 
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentRequestDTO;
+import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.payment.service.command.PaymentCommandService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,16 +32,33 @@ public class PaymentRedirectController {
                 .amount(amount)
                 .build();
 
-        paymentCommandService.verifyPayment(verifyRequest, null);
-        return "payment/payment-success";
+        try {
+            PaymentResponseDTO.PaymentVerifyResponseDTO verified = paymentCommandService.verifyPayment(verifyRequest, null);
+
+            model.addAttribute("method", verified.getPaymentMethod());
+            model.addAttribute("status", verified.getPaymentStatus());
+
+            return "payment/payment-success";
+
+        } catch (Exception e) {
+            model.addAttribute("code", "VERIFY_FAILED");
+            model.addAttribute("message", e.getMessage());
+            return "payment/payment-fail";
+        }
     }
 
     @GetMapping("/fail")
     public String paymentFail(@RequestParam String code,
                               @RequestParam String message,
+                              @RequestParam String orderId,
                               Model model) {
+
         model.addAttribute("code", code);
         model.addAttribute("message", message);
+        model.addAttribute("orderId", orderId);
+
+        paymentCommandService.recordPaymentFail(orderId, message);
+
         return "payment/payment-fail";
     }
 }
