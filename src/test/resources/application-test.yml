@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: sample-project-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: SecurePassword123!@#
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true  # 변경: JPA가 테이블 생성 후 SQL 실행
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  sql:
+    init:
+      mode: always  # 변경: SQL 파일 항상 실행
+
+# JWT 설정
+jwt:
+  secret: test-jwt-secret-key-for-integration-testing-purposes-only-must-be-long-enough
+  expiration: 900000
+  refresh-secret: test-jwt-refresh-secret-key-for-integration-testing-purposes-only-must-be-long
+  refresh-expiration: 604800000
+
+# 테스트용 설정들...
