@@ -21,10 +21,16 @@ public class TossApiClient {
     @Value("${toss.secret-key}")
     private String secretKey;
 
-    public TossApproveResponse approvePayment(String paymentKey, String orderId, int amount) {
+    public TossApproveResponse approvePayment(String paymentKey, String orderId, int amount, String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            throw new IllegalArgumentException("Idempotency-Key는 null일 수 없습니다.");
+        }
+
         return restClient.post()
             .uri("/v1/payments/confirm")
-            .headers(h -> h.setBasicAuth(secretKey, ""))
+            .headers(h -> {
+                h.setBasicAuth(secretKey, "");
+                h.set("Idempotency-Key", idempotencyKey);})
             .body(Map.of("paymentKey", paymentKey, "orderId", orderId, "amount", amount))
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {

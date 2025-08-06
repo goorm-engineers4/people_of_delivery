@@ -8,12 +8,15 @@ import com.example.cloudfour.peopleofdelivery.domain.payment.dto.PaymentResponse
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.TossApproveResponse;
 import com.example.cloudfour.peopleofdelivery.domain.payment.dto.TossWebhookPayload;
 import com.example.cloudfour.peopleofdelivery.domain.payment.entity.Payment;
+import com.example.cloudfour.peopleofdelivery.domain.payment.entity.PaymentHistory;
 import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
 import com.example.cloudfour.peopleofdelivery.domain.payment.exception.PaymentErrorCode;
 import com.example.cloudfour.peopleofdelivery.domain.payment.exception.PaymentException;
 import com.example.cloudfour.peopleofdelivery.domain.payment.repository.PaymentHistoryRepository;
 import com.example.cloudfour.peopleofdelivery.domain.payment.repository.PaymentRepository;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
 import com.example.cloudfour.peopleofdelivery.global.apiPayLoad.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     private final PaymentRepository paymentRepository;
     private final PaymentHistoryRepository paymentHistoryRepository;
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
     private final TossApiClient tossApiClient;
 
     @Value("${toss.success-url}")
@@ -41,10 +45,12 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
     @Override
     @Transactional
-    public PaymentResponseDTO.PaymentCreateResponseDTO createPayment(PaymentRequestDTO.PaymentCreateRequestDTO request, User user) {
+    public PaymentResponseDTO.PaymentCreateResponseDTO createPayment(PaymentRequestDTO.PaymentCreateRequestDTO request, UUID userId) {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         int totalPrice = order.getTotalPrice();
 
@@ -65,23 +71,27 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
     @Override
     @Transactional
-    public PaymentResponseDTO.PaymentVerifyResponseDTO verifyPayment(PaymentRequestDTO.PaymentVerifyRequestDTO request, User user) {
-
+    public PaymentResponseDTO.PaymentVerifyResponseDTO verifyPayment(PaymentRequestDTO.PaymentVerifyRequestDTO request, UUID userId) {
 
         if (paymentRepository.existsByPaymentKey(request.getPaymentKey())) {
             throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_APPROVED, "이미 승인된 결제입니다.");
         }
 
+        String idempotencyKey = UUID.nameUUIDFromBytes(
+                (request.getPaymentKey() + request.getOrderId()).getBytes()
+        ).toString();
+
         TossApproveResponse tossResponse = tossApiClient.approvePayment(
                 request.getPaymentKey(),
                 request.getOrderId(),
-                request.getAmount()
+                request.getAmount(),
+                idempotencyKey
         );
 
         Order order = orderRepository.findById(UUID.fromString(request.getOrderId()))
                 .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        if (!order.getUser().getId().equals(user.getId())) {
+        if (!order.getUser().getId().equals(userId)) {
             throw new PaymentException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
 
@@ -109,13 +119,13 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
     @Override
     @Transactional
-    public PaymentResponseDTO.PaymentUpdateResponseDTO updatePayment(PaymentRequestDTO.PaymentUpdateRequestDTO request, UUID orderId, User user) {
+    public PaymentResponseDTO.PaymentUpdateResponseDTO updatePayment(PaymentRequestDTO.PaymentUpdateRequestDTO request, UUID orderId, UUID userId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
         PaymentStatus previous = payment.getPaymentStatus();
         payment.setPaymentStatus(request.getPaymentStatus());
-        var history = payment.addHistory(previous, request.getPaymentStatus(), "관리자 상태 변경");
+        var history = payment.addHistory(previous, request.getPaymentStatus(), "점주 상태 변경");
         paymentHistoryRepository.save(history);
 
         return PaymentResponseDTO.PaymentUpdateResponseDTO.builder()
@@ -126,11 +136,11 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
     @Override
     @Transactional
-    public PaymentResponseDTO.PaymentCancelResponseDTO cancelPayment(PaymentRequestDTO.PaymentCancelRequestDTO request, UUID orderId, User user) {
+    public PaymentResponseDTO.PaymentCancelResponseDTO cancelPayment(PaymentRequestDTO.PaymentCancelRequestDTO request, UUID orderId, UUID userId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
-        if (!payment.getOrder().getUser().getId().equals(user.getId())) {
+        if (!payment.getOrder().getUser().getId().equals(userId)) {
             throw new PaymentException(PaymentErrorCode.UNAUTHORIZED_PAYMENT_ACCESS);
         }
 
@@ -178,6 +188,23 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
 
         log.info("[Webhook] 결제 상태 업데이트 완료: {} → {}", previous, newStatus);
     }
+
+    @Override
+    public void recordPaymentFail(String orderId, String message) {
+        Payment payment = paymentRepository.findByOrderId(UUID.fromString(orderId))
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+        payment.markAsFailed(message);
+        paymentRepository.save(payment);
+
+        PaymentHistory history = PaymentHistory.builder()
+                .payment(payment)
+                .paymentStatus(PaymentStatus.FAILED)
+                .failedReason(message)
+                .build();
+        paymentHistoryRepository.save(history);
+    }
+
 
     private PaymentStatus convertTossStatus(String tossStatus) {
         return switch (tossStatus) {

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>토스 결제 테스트</title>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
+</head>
+<body>
+<h2>테스트 결제</h2>
+<button id="payment-button">결제하기</button>
+
+<script th:inline="javascript">
+    const tossPayments = TossPayments("test_ck_5OWRapdA8dvwjXPmlqRBVo1zEqZK");
+
+    const orderId = /*[[${orderId}]]*/ 'order-unknown';
+    const amount = /*[[${amount}]]*/ 0;
+
+    document.getElementById('payment-button').addEventListener('click', function () {
+        tossPayments.requestPayment('CARD', {
+            amount: amount,
+            orderId: orderId,
+            orderName: '배달 결제',
+            customerName: '홍길동',
+            customerEmail: 'hong@test.com',
+            successUrl: 'http://localhost:8080/api/payments/success',
+            failUrl: 'http://localhost:8080/api/payments/fail'
+        });
+    });
+</script>
+</body>
+</html>

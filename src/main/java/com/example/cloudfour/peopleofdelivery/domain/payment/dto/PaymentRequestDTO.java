@@ -18,7 +18,7 @@ public class PaymentRequestDTO {
     @Builder
     public static class PaymentVerifyRequestDTO{
         String paymentKey;
-        String orderId; // tossOrderId
+        String orderId;
         Integer amount;
     }
 

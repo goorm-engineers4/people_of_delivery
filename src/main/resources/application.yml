@@ -1,4 +1,9 @@
 spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    enabled: true
+
   application:
     name: sample-project
 
@@ -27,7 +32,7 @@ spring:
     auth-code-expiration-millis: 1800000
 
   jpa:
-    hibernate.ddl-auto: create
+    hibernate.ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -60,9 +65,9 @@ jwt:
 
 
 toss:
-  secret-key: ${TOSS_SECRET}
-  client-key: ${TOSS_CLIENT}
+  secret-key: test_sk_kYG57Eba3GKY16RGEwAL3pWDOxmA
+  client-key: test_ck_5OWRapdA8dvwjXPmlqRBVo1zEqZK
   base-url: https://api.tosspayments.com
   confirm-endpoint: /confirm
-  success-url: http://localhost:8080/api/v1/payments/success
-  fail-url: http://localhost:8080/api/v1/payments/fail
+  success-url: http://localhost:8080/api/payments/success
+  fail-url: http://localhost:8080/api/payments/fail
