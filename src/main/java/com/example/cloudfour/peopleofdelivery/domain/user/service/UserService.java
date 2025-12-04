@@ -2,6 +2,8 @@ package com.example.cloudfour.peopleofdelivery.domain.user.service;
 
 import com.example.cloudfour.peopleofdelivery.domain.user.dto.UserResponseDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserErrorCode;
+import com.example.cloudfour.peopleofdelivery.domain.user.exception.UserException;
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ public class UserService {
 
     public UserResponseDTO.MeResponseDTO getMyInfo(UUID userId) {
         User u = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         return UserResponseDTO.MeResponseDTO.builder()
                 .userId(u.getId())
                 .email(u.getEmail())
@@ -32,7 +34,7 @@ public class UserService {
     @Transactional
     public void updateProfile(UUID userId, String nickname, String number) {
         User u = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
 
         if (nickname != null && !nickname.isBlank() && !nickname.equals(u.getNickname())) {
             u.changeNickname(nickname);
@@ -45,9 +47,7 @@ public class UserService {
     @Transactional
     public void deleteAccount(UUID userId) {
         User u = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
         u.softDelete();
     }
 }
-
-

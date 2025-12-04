@@ -6,10 +6,14 @@ import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.VerificationPurpose;
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthRequestDTO;
 import com.example.cloudfour.peopleofdelivery.global.auth.dto.AuthResponseDTO;
-import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.RefreshTokenRequestDTO;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.repository.UserRepository;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenResponseDTO;
+import com.example.cloudfour.peopleofdelivery.global.auth.entity.RefreshToken;
 import com.example.cloudfour.peopleofdelivery.global.auth.entity.VerificationCode;
 import com.example.cloudfour.peopleofdelivery.global.auth.jwt.JwtTokenProvider;
+import com.example.cloudfour.peopleofdelivery.global.auth.repository.RefreshTokenRepository;
 import com.example.cloudfour.peopleofdelivery.global.auth.repository.VerificationCodeRepository;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
@@ -32,7 +36,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
-
+    private final RefreshTokenRepository refreshTokenRepository;
+    
     private static final int CODE_LEN = 6;
     private static final int CODE_EXP_MIN = 10;
 
@@ -78,7 +83,7 @@ public class AuthService {
         return new AuthResponseDTO.AuthRegisterResponseDTO(user.getId(), user.getEmail(), user.getNickname());
     }
 
-    public TokenDto login(AuthRequestDTO.LoginRequestDto request) {
+    public TokenResponseDTO login(AuthRequestDTO.LoginRequestDto request) {
         String email = request.email().toLowerCase();
 
         User user = userRepository.findByEmailAndIsDeletedFalse(email)
@@ -98,9 +103,61 @@ public class AuthService {
             throw new IllegalArgumentException("이메일 인증이 필요합니다.");
         }
 
-        return jwtTokenProvider.createToken(
+        TokenDTO tokenDTO = jwtTokenProvider.createToken(
                 user.getId(), user.getRole()
         );
+
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .email(email)
+                        .token(tokenDTO.getRefreshToken())
+                        .build());
+
+        return TokenResponseDTO.builder()
+                .accessToken(tokenDTO.getAccessToken())
+                .refreshToken(tokenDTO.getRefreshToken())
+                .build();
+    }
+
+    public void logout(String accessToken) {
+        String token = accessToken.substring(7);
+
+        UUID userId = UUID.fromString(jwtTokenProvider.getIdFromToken(token, false));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        refreshTokenRepository.deleteById(user.getEmail());
+    }
+
+    public TokenResponseDTO refreshAccessToken(RefreshTokenRequestDTO request) {
+        String email = request.getEmail();
+        String refreshToken = request.getRefreshToken();
+
+        if(!jwtTokenProvider.isValidToken(refreshToken, true)) {
+            throw new IllegalArgumentException("유효하지 않은 Refresh Token 입니다.");
+        }
+
+        User user = userRepository.findByEmailAndIsDeletedFalse(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+        RefreshToken savedToken  = refreshTokenRepository.findById(email)
+                .orElseThrow(() -> new IllegalArgumentException("저장된 Refresh Token이 없습니다."));
+
+        if(!savedToken .getToken().equals(refreshToken)) {
+            throw new IllegalArgumentException("Refresh Token이 불일치 합니다.");
+        }
+
+        TokenDTO tokenDTO = jwtTokenProvider.createToken(
+                user.getId(), user.getRole()
+        );
+
+        String newAccessToken = tokenDTO.getAccessToken();
+
+        return TokenResponseDTO.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public void changePassword(UUID userId, AuthRequestDTO.PasswordChangeDto request) {
@@ -232,10 +289,12 @@ public class AuthService {
             throw new IllegalStateException("확정 중 충돌: 이미 사용 중인 이메일입니다.");
         }
 
+
         u.confirmEmailChange();
         verificationCodeRepository.delete(vc);
 
-        // 리프레시 토큰/세션 무효화 정책 적용 ??
+        refreshTokenRepository.deleteById(u.getEmail());
+
     }
 
     private String generateCode(int len) {

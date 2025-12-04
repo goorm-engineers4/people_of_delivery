@@ -1,6 +1,6 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.oauth;
 
-import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDTO;
 import com.example.cloudfour.peopleofdelivery.global.auth.jwt.JwtTokenProvider;
 import com.example.cloudfour.peopleofdelivery.domain.user.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +43,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
-        TokenDto tokenDto = jwtTokenProvider.createToken(user.getId(), user.getRole());
+        TokenDTO tokenDto = jwtTokenProvider.createToken(user.getId(), user.getRole());
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().write(objectMapper.writeValueAsString(tokenDto));

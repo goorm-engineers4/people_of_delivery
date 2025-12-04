@@ -1,7 +1,7 @@
 package com.example.cloudfour.peopleofdelivery.global.auth.jwt;
 
 import com.example.cloudfour.peopleofdelivery.global.auth.config.JwtProperties;
-import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDto;
+import com.example.cloudfour.peopleofdelivery.global.auth.dto.TokenDTO;
 import com.example.cloudfour.peopleofdelivery.domain.user.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,7 +22,7 @@ public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
 
-    public TokenDto createToken(UUID userId, Role role) {
+    public TokenDTO createToken(UUID userId, Role role) {
         Date now = new Date();
         String sub = userId.toString();
 
@@ -40,8 +40,9 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now.getTime() + jwtProperties.getRefreshExpiration()))
                 .signWith(getSigningKey(jwtProperties.getRefreshSecret()), SignatureAlgorithm.HS256)
                 .compact();
-        return new TokenDto("Bearer", accessToken, refreshToken, jwtProperties.getExpiration());
+        return new TokenDTO("Bearer", accessToken, refreshToken, jwtProperties.getExpiration());
     }
+
 
     public String getIdFromToken(String token, boolean isRefresh) {
         return getClaims(token, isRefresh).getSubject();
@@ -59,6 +60,10 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String getEmail(String token){
+        return getClaims(token, false).getSubject();
     }
 
     private Claims getClaims(String token, boolean isRefresh) {
