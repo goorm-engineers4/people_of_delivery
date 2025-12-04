@@ -3,7 +3,11 @@ package com.example.cloudfour.peopleofdelivery.domain.payment.entity;
 import com.example.cloudfour.peopleofdelivery.domain.payment.enums.PaymentStatus;
 import com.example.cloudfour.peopleofdelivery.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity

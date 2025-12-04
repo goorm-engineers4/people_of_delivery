@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 실패</title>
+</head>
+<body>
+<h1> 결제에 실패했습니다.</h1>
+<p>실패 코드: <strong th:text="${code}">[실패 코드]</strong></p>
+<p>실패 메시지: <strong th:text="${message}">[실패 메시지]</strong></p>
+<a href="/">다시 시도하기</a>
+</body>
+</html>

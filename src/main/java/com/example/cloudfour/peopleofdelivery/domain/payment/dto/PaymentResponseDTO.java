@@ -11,7 +11,7 @@ public class PaymentResponseDTO {
 
     @Getter @Builder
     public static class PaymentCreateResponseDTO {
-        private String paymentUrl; // 프론트에서 결제할 수 있도록 리다이렉트 URL 제공 시
+        private String paymentUrl;
     }
 
     @Getter @Builder

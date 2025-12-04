@@ -70,6 +70,11 @@ public class Payment extends BaseEntity {
         return history;
     }
 
+    public void markAsFailed(String message) {
+        this.paymentStatus = PaymentStatus.FAILED;
+        this.failedReason = message;
+    }
+
     public void setOrder(Order order){
         this.order = order;
         order.setPayment(this);
